@@ -79,10 +79,18 @@ export type Contractor = {
   createdAt: string;
 };
 
+export type BillingSubscription = {
+  status: string;
+  priceId: string | null;
+  currentPeriodEnd: string | null;
+  cancelAtPeriodEnd: boolean;
+};
+
 export type Session = { role: "contractor"; contractorId: string } | { role: "admin" } | null;
 
 export type AppState = {
   contractors: Contractor[];
   leads: Lead[];
   session: Session;
+  subscription: BillingSubscription | null;
 };
