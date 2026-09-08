@@ -281,6 +281,8 @@ export type Database = {
           currency: string;
           status: string;
           created_at: string;
+          stripe_invoice_id: string | null;
+          subscription_id: number | null;
         };
         Insert: {
           id?: string;
@@ -290,6 +292,8 @@ export type Database = {
           currency?: string;
           status: string;
           created_at?: string;
+          stripe_invoice_id?: string | null;
+          subscription_id?: number | null;
         };
         Update: {
           id?: string;
@@ -299,36 +303,49 @@ export type Database = {
           currency?: string;
           status?: string;
           created_at?: string;
+          stripe_invoice_id?: string | null;
+          subscription_id?: number | null;
         };
-        Relationships: [];
+        Relationships: [
+          Relation<"payments_subscription_id_fkey", ["subscription_id"], "subscriptions", ["id"]>,
+        ];
       };
-      Subscriptions: {
+      subscriptions: {
         Row: {
-          id: number;
-          stripe_customer_id: string | null;
-          user_id: string;
-          stripe_subscription_id: string | null;
-          Status: string | null;
-          price_id: string | null;
+          cancel_at_period_end: boolean;
+          created_at: string;
           current_period_end: string | null;
+          id: number;
+          price_id: string | null;
+          status: string | null;
+          stripe_customer_id: string | null;
+          stripe_subscription_id: string | null;
+          updated_at: string;
+          user_id: string;
         };
         Insert: {
-          id?: number;
-          stripe_customer_id?: string | null;
-          user_id?: string;
-          stripe_subscription_id?: string | null;
-          Status?: string | null;
-          price_id?: string | null;
+          cancel_at_period_end?: boolean;
+          created_at?: string;
           current_period_end?: string | null;
+          id?: number;
+          price_id?: string | null;
+          status?: string | null;
+          stripe_customer_id?: string | null;
+          stripe_subscription_id?: string | null;
+          updated_at?: string;
+          user_id?: string;
         };
         Update: {
-          id?: number;
-          stripe_customer_id?: string | null;
-          user_id?: string;
-          stripe_subscription_id?: string | null;
-          Status?: string | null;
-          price_id?: string | null;
+          cancel_at_period_end?: boolean;
+          created_at?: string;
           current_period_end?: string | null;
+          id?: number;
+          price_id?: string | null;
+          status?: string | null;
+          stripe_customer_id?: string | null;
+          stripe_subscription_id?: string | null;
+          updated_at?: string;
+          user_id?: string;
         };
         Relationships: [];
       };
