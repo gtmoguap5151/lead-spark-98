@@ -91,8 +91,7 @@ export function AppShell({
               size="icon"
               aria-label="Sign out"
               onClick={() => {
-                logout();
-                navigate({ to: "/" });
+                void logout().finally(() => navigate({ to: "/" }));
               }}
             >
               <LogOut className="size-4" />
@@ -105,9 +104,7 @@ export function AppShell({
         <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
           <div>
             <h1 className="font-display text-3xl font-bold uppercase leading-none">{title}</h1>
-            {subtitle ? (
-              <p className="mt-1.5 text-sm text-muted-foreground">{subtitle}</p>
-            ) : null}
+            {subtitle ? <p className="mt-1.5 text-sm text-muted-foreground">{subtitle}</p> : null}
           </div>
           {actions}
         </div>
