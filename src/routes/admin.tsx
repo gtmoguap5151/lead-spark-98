@@ -5,7 +5,6 @@ import { Building2, DollarSign, Inbox, Users, Power, Wrench } from "lucide-react
 import { AppShell } from "@/components/AppShell";
 import { MetricCard } from "@/components/MetricCard";
 import { StatusBadge } from "@/components/StatusBadge";
-import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import {
   Select,
@@ -40,7 +39,7 @@ export const Route = createFileRoute("/admin")({
 const money = (n: number) => `$${n.toLocaleString("en-US")}`;
 
 function AdminPage() {
-  const { state, updateContractor, assignLead, resetDemo } = useApp();
+  const { state, updateContractor, assignLead, busy } = useApp();
   const { contractors, leads } = state;
 
   const [tab, setTab] = useState<"overview" | "contractors" | "leads">("overview");
@@ -69,23 +68,7 @@ function AdminPage() {
   }, [leads]);
 
   return (
-    <AppShell
-      title="Admin Console"
-      subtitle="Platform overview & controls"
-      requireRole="admin"
-      actions={
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => {
-            resetDemo();
-            toast.success("Demo data reset");
-          }}
-        >
-          Reset demo data
-        </Button>
-      }
-    >
+    <AppShell title="Admin Console" subtitle="Platform overview & controls" requireRole="admin">
       <div className="flex gap-2 border-b border-border pb-px">
         {(["overview", "contractors", "leads"] as const).map((t) => (
           <button
@@ -197,9 +180,7 @@ function AdminPage() {
                           </div>
                         </td>
                         <td className="px-4 py-3">
-                          <p className="text-xs">
-                            {c.territoryZips.length} ZIPs
-                          </p>
+                          <p className="text-xs">{c.territoryZips.length} ZIPs</p>
                           <p className="max-w-32 truncate text-xs text-muted-foreground">
                             {c.territoryZips.join(", ")}
                           </p>
@@ -211,15 +192,25 @@ function AdminPage() {
                           <div className="flex items-center gap-2">
                             <Switch
                               checked={c.active}
-                              onCheckedChange={(v) => {
-                                updateContractor(c.id, { active: v });
+                              disabled={busy}
+                              onCheckedChange={async (v) => {
+                                const result = await updateContractor(c.id, { active: v });
+                                if (!result.ok) {
+                                  toast.error(result.error);
+                                  return;
+                                }
                                 toast.success(
                                   v ? `${c.companyName} activated` : `${c.companyName} paused`,
                                 );
                               }}
                               aria-label="Toggle contractor active"
                             />
-                            <Power className={cn("size-4", c.active ? "text-success" : "text-muted-foreground")} />
+                            <Power
+                              className={cn(
+                                "size-4",
+                                c.active ? "text-success" : "text-muted-foreground",
+                              )}
+                            />
                           </div>
                         </td>
                       </tr>
@@ -265,9 +256,14 @@ function AdminPage() {
                         <td className="px-4 py-3">
                           <Select
                             value={l.contractorId ?? "unassigned"}
-                            onValueChange={(v) => {
+                            disabled={busy}
+                            onValueChange={async (v) => {
                               const id = v === "unassigned" ? null : v;
-                              assignLead(l.id, id);
+                              const result = await assignLead(l.id, id);
+                              if (!result.ok) {
+                                toast.error(result.error);
+                                return;
+                              }
                               toast.success(
                                 id
                                   ? `Lead assigned to ${contractors.find((c) => c.id === id)?.companyName}`
