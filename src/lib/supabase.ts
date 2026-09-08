@@ -2,14 +2,15 @@ import { createClient } from "@supabase/supabase-js";
 
 import type { Database } from "./database.types";
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabasePublishableKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+const configuredUrl = import.meta.env.VITE_SUPABASE_URL;
+const configuredKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
-if (!supabaseUrl || !supabasePublishableKey) {
-  throw new Error(
-    "Missing VITE_SUPABASE_URL or VITE_SUPABASE_PUBLISHABLE_KEY. Copy .env.example to .env.local and add the project values.",
-  );
-}
+export const isSupabaseConfigured = Boolean(configuredUrl && configuredKey);
+
+// Keep builds and the public landing page renderable before deployment secrets
+// are configured. Data operations still return a clear configuration error.
+const supabaseUrl = configuredUrl || "http://127.0.0.1:54321";
+const supabasePublishableKey = configuredKey || "missing-publishable-key";
 
 /** Browser-safe client. Authorization is enforced by Postgres row-level security. */
 export const supabase = createClient<Database>(supabaseUrl, supabasePublishableKey, {
