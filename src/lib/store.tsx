@@ -48,7 +48,7 @@ type Store = {
   refresh: () => Promise<void>;
 };
 
-const EMPTY_STATE: AppState = { contractors: [], leads: [], session: null };
+const EMPTY_STATE: AppState = { contractors: [], leads: [], session: null, subscription: null };
 const StoreContext = createContext<Store | null>(null);
 
 const errorMessage = (error: unknown) =>
@@ -77,14 +77,25 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     if (profileResult.error) throw profileResult.error;
 
     const role = profileResult.data?.role === "admin" ? "admin" : "contractor";
-    const [contractorsResult, servicesResult, territoriesResult, leadsResult, assignmentsResult] =
-      await Promise.all([
-        supabase.from("contractors").select("*").order("created_at"),
-        supabase.from("contractor_services").select("*"),
-        supabase.from("contractor_territories").select("*"),
-        supabase.from("leads").select("*").order("created_at", { ascending: false }),
-        supabase.from("lead_assignments").select("*"),
-      ]);
+    const [
+      contractorsResult,
+      servicesResult,
+      territoriesResult,
+      leadsResult,
+      assignmentsResult,
+      subscriptionResult,
+    ] = await Promise.all([
+      supabase.from("contractors").select("*").order("created_at"),
+      supabase.from("contractor_services").select("*"),
+      supabase.from("contractor_territories").select("*"),
+      supabase.from("leads").select("*").order("created_at", { ascending: false }),
+      supabase.from("lead_assignments").select("*"),
+      supabase
+        .from("subscriptions")
+        .select("status, price_id, current_period_end, cancel_at_period_end")
+        .eq("user_id", user.id)
+        .maybeSingle(),
+    ]);
 
     const firstError = [
       contractorsResult.error,
@@ -92,6 +103,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       territoriesResult.error,
       leadsResult.error,
       assignmentsResult.error,
+      subscriptionResult.error,
     ].find(Boolean);
     if (firstError) throw firstError;
 
@@ -143,6 +155,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setState({
       contractors,
       leads,
+      subscription: subscriptionResult.data
+        ? {
+            status: subscriptionResult.data.status ?? "inactive",
+            priceId: subscriptionResult.data.price_id,
+            currentPeriodEnd: subscriptionResult.data.current_period_end,
+            cancelAtPeriodEnd: subscriptionResult.data.cancel_at_period_end,
+          }
+        : null,
       session:
         role === "admin"
           ? { role: "admin" }
