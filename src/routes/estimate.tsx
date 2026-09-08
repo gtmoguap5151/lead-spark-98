@@ -47,7 +47,10 @@ const schema = z.object({
     .max(20)
     .regex(/^[\d\s()+-.]+$/, "Please enter a valid phone number"),
   email: z.string().trim().email("Please enter a valid email").max(255),
-  zip: z.string().trim().regex(/^\d{5}$/, "Enter a 5-digit ZIP code"),
+  zip: z
+    .string()
+    .trim()
+    .regex(/^\d{5}$/, "Enter a 5-digit ZIP code"),
   serviceType: z.enum(SERVICE_TYPES, { message: "Select the service you need" }),
   timeline: z.enum(TIMELINES, { message: "Select your timeline" }),
   budget: z.string().trim().max(60).optional(),
@@ -72,7 +75,7 @@ const BUDGETS = [
 type Errors = Partial<Record<string, string>>;
 
 function EstimatePage() {
-  const { submitLead } = useApp();
+  const { submitLead, busy } = useApp();
   const [errors, setErrors] = useState<Errors>({});
   const [submitted, setSubmitted] = useState(false);
   const [form, setForm] = useState({
@@ -91,7 +94,7 @@ function EstimatePage() {
   const set = <K extends keyof typeof form>(key: K, value: (typeof form)[K]) =>
     setForm((f) => ({ ...f, [key]: value }));
 
-  function onSubmit(e: React.FormEvent) {
+  async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     const parsed = schema.safeParse(form);
     if (!parsed.success) {
@@ -102,10 +105,14 @@ function EstimatePage() {
       return;
     }
     setErrors({});
-    submitLead({
+    const result = await submitLead({
       ...parsed.data,
       budget: parsed.data.budget || undefined,
     });
+    if (!result.ok) {
+      toast.error(result.error);
+      return;
+    }
     setSubmitted(true);
     toast.success("Request received — a local pro will reach out shortly.");
   }
@@ -270,8 +277,13 @@ function EstimatePage() {
             />
           </div>
 
-          <Button type="submit" size="lg" className="h-12 w-full text-base font-semibold">
-            Request an Estimate
+          <Button
+            type="submit"
+            size="lg"
+            className="h-12 w-full text-base font-semibold"
+            disabled={busy}
+          >
+            {busy ? "Sending request…" : "Request an Estimate"}
           </Button>
           <p className="text-center text-xs text-muted-foreground">
             Your details go to one matched contractor. We never resell your information.
