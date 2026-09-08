@@ -1,176 +1,371 @@
-/**
- * Local demo persistence layer.
- *
- * Everything the app reads/writes goes through this store. When Supabase is
- * added, replace the internals of the action functions with async calls and
- * keep the same hook surface (useApp / useCurrentContractor).
- */
+/* eslint-disable react-refresh/only-export-components */
+import type { User } from "@supabase/supabase-js";
 import {
   createContext,
   useCallback,
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
-import { INITIAL_STATE } from "./demo-data";
-import type { AppState, Contractor, Lead, LeadStatus, Session } from "./types";
 
-const STORAGE_KEY = "cle_state_v1";
+import { parseLeadNotes } from "./models";
+import { isSupabaseConfigured, supabase } from "./supabase";
+import {
+  SERVICE_TYPES,
+  type AppState,
+  type Contractor,
+  type Lead,
+  type LeadStatus,
+  type ServiceType,
+} from "./types";
 
 type NewLeadInput = Omit<Lead, "id" | "status" | "contractorId" | "createdAt" | "notes">;
+type SignupInput = Omit<Contractor, "id" | "createdAt" | "active"> & { password: string };
+type ActionResult = { ok: true } | { ok: false; error: string };
+type LoginResult = { ok: true; role: "contractor" | "admin" } | { ok: false; error: string };
+type SignupResult = { ok: true; requiresEmailConfirmation: boolean } | { ok: false; error: string };
 
 type Store = {
   state: AppState;
   hydrated: boolean;
-  signup: (
-    input: Omit<Contractor, "id" | "createdAt" | "active">,
-  ) => { ok: true; contractor: Contractor } | { ok: false; error: string };
-  login: (email: string, password: string) => { ok: boolean; error?: string };
-  loginAsAdmin: () => void;
-  loginDemo: () => void;
-  logout: () => void;
-  submitLead: (input: NewLeadInput) => Lead;
-  updateLeadStatus: (id: string, status: LeadStatus, extra?: Partial<Lead>) => void;
-  addNote: (id: string, body: string) => void;
-  assignLead: (id: string, contractorId: string | null) => void;
-  updateContractor: (id: string, patch: Partial<Contractor>) => void;
-  resetDemo: () => void;
+  busy: boolean;
+  error: string | null;
+  signup: (input: SignupInput) => Promise<SignupResult>;
+  login: (email: string, password: string) => Promise<LoginResult>;
+  logout: () => Promise<void>;
+  submitLead: (input: NewLeadInput) => Promise<ActionResult>;
+  updateLeadStatus: (
+    id: string,
+    status: LeadStatus,
+    extra?: Partial<Lead>,
+  ) => Promise<ActionResult>;
+  addNote: (id: string, body: string) => Promise<ActionResult>;
+  assignLead: (id: string, contractorId: string | null) => Promise<ActionResult>;
+  updateContractor: (id: string, patch: Partial<Contractor>) => Promise<ActionResult>;
+  refresh: () => Promise<void>;
 };
 
+const EMPTY_STATE: AppState = { contractors: [], leads: [], session: null };
 const StoreContext = createContext<Store | null>(null);
 
-const uid = (prefix: string) => `${prefix}-${Math.random().toString(36).slice(2, 9)}`;
+const errorMessage = (error: unknown) =>
+  error instanceof Error ? error.message : "Something went wrong. Please try again.";
 
-/** Route a fresh lead to the first active contractor covering ZIP + service. */
-function matchContractor(lead: Omit<Lead, "contractorId">, contractors: Contractor[]) {
-  const match = contractors.find(
-    (c) =>
-      c.active &&
-      c.serviceTypes.includes(lead.serviceType) &&
-      c.territoryZips.includes(lead.zip),
-  );
-  return match?.id ?? null;
-}
+const isServiceType = (value: string): value is ServiceType =>
+  SERVICE_TYPES.includes(value as ServiceType);
 
 export function StoreProvider({ children }: { children: ReactNode }) {
-  const [state, setState] = useState<AppState>(INITIAL_STATE);
+  const [state, setState] = useState<AppState>(EMPTY_STATE);
   const [hydrated, setHydrated] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const loadSequence = useRef(0);
 
-  useEffect(() => {
-    try {
-      const raw = window.localStorage.getItem(STORAGE_KEY);
-      if (raw) setState({ ...INITIAL_STATE, ...(JSON.parse(raw) as AppState) });
-    } catch {
-      /* ignore corrupt storage */
-    }
-    setHydrated(true);
+  const loadData = useCallback(async (user: User) => {
+    const sequence = ++loadSequence.current;
+    setBusy(true);
+    setError(null);
+
+    const profileResult = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .maybeSingle();
+    if (profileResult.error) throw profileResult.error;
+
+    const role = profileResult.data?.role === "admin" ? "admin" : "contractor";
+    const [contractorsResult, servicesResult, territoriesResult, leadsResult, assignmentsResult] =
+      await Promise.all([
+        supabase.from("contractors").select("*").order("created_at"),
+        supabase.from("contractor_services").select("*"),
+        supabase.from("contractor_territories").select("*"),
+        supabase.from("leads").select("*").order("created_at", { ascending: false }),
+        supabase.from("lead_assignments").select("*"),
+      ]);
+
+    const firstError = [
+      contractorsResult.error,
+      servicesResult.error,
+      territoriesResult.error,
+      leadsResult.error,
+      assignmentsResult.error,
+    ].find(Boolean);
+    if (firstError) throw firstError;
+
+    const contractorRows = contractorsResult.data ?? [];
+    const services = servicesResult.data ?? [];
+    const territories = territoriesResult.data ?? [];
+    const assignments = assignmentsResult.data ?? [];
+    const contractors: Contractor[] = contractorRows.map((row) => ({
+      id: row.id,
+      companyName: row.company_name,
+      contactName: row.contact_name,
+      email: row.email,
+      phone: row.phone ?? "",
+      city: row.city ?? "",
+      active: row.active,
+      createdAt: row.created_at,
+      serviceTypes: services
+        .filter((item) => item.contractor_id === row.id)
+        .map((item) => item.service_type)
+        .filter(isServiceType),
+      territoryZips: territories
+        .filter((item) => item.contractor_id === row.id)
+        .map((item) => item.zip),
+    }));
+
+    const leads: Lead[] = (leadsResult.data ?? []).map((row) => ({
+      id: row.id,
+      name: row.name,
+      phone: row.phone,
+      email: row.email,
+      zip: row.zip,
+      serviceType: isServiceType(row.service_type) ? row.service_type : "Roofing",
+      projectDetails: row.project_details,
+      timeline: (row.timeline ?? "3+ months / researching") as Lead["timeline"],
+      budget: row.budget ?? undefined,
+      isHomeowner: row.is_homeowner,
+      isDecisionMaker: row.is_decision_maker,
+      status: row.status as LeadStatus,
+      contractorId:
+        assignments.find((assignment) => assignment.lead_id === row.id)?.contractor_id ?? null,
+      createdAt: row.created_at,
+      appointmentAt: row.appointment_at,
+      jobValue: row.job_value,
+      notes: parseLeadNotes(row.notes),
+    }));
+
+    const ownRow = contractorRows.find((row) => row.user_id === user.id);
+    if (sequence !== loadSequence.current) return role;
+    setState({
+      contractors,
+      leads,
+      session:
+        role === "admin"
+          ? { role: "admin" }
+          : ownRow
+            ? { role: "contractor", contractorId: ownRow.id }
+            : null,
+    });
+    return role;
   }, []);
 
-  useEffect(() => {
-    if (!hydrated) return;
-    try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    } catch {
-      /* storage full or unavailable */
+  const refresh = useCallback(async () => {
+    if (!isSupabaseConfigured) {
+      setError("Supabase is not configured for this deployment.");
+      return;
     }
-  }, [state, hydrated]);
+    const { data, error: userError } = await supabase.auth.getUser();
+    if (userError) throw userError;
+    if (data.user) await loadData(data.user);
+  }, [loadData]);
 
-  const setSession = useCallback((session: Session) => {
-    setState((s) => ({ ...s, session }));
+  useEffect(() => {
+    let active = true;
+
+    async function initialize() {
+      if (!isSupabaseConfigured) {
+        setError("Supabase is not configured for this deployment.");
+        setHydrated(true);
+        return;
+      }
+      try {
+        const { data, error: userError } = await supabase.auth.getUser();
+        if (userError && userError.name !== "AuthSessionMissingError") throw userError;
+        if (data.user) await loadData(data.user);
+      } catch (loadError) {
+        if (active) setError(errorMessage(loadError));
+      } finally {
+        if (active) {
+          setBusy(false);
+          setHydrated(true);
+        }
+      }
+    }
+
+    void initialize();
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!active) return;
+      if (!session?.user) {
+        loadSequence.current += 1;
+        setState(EMPTY_STATE);
+        return;
+      }
+      window.setTimeout(() => {
+        void loadData(session.user)
+          .catch((loadError) => setError(errorMessage(loadError)))
+          .finally(() => setBusy(false));
+      }, 0);
+    });
+
+    return () => {
+      active = false;
+      listener.subscription.unsubscribe();
+    };
+  }, [loadData]);
+
+  const run = useCallback(async (operation: () => Promise<void>): Promise<ActionResult> => {
+    if (!isSupabaseConfigured) return { ok: false, error: "Supabase is not configured." };
+    setBusy(true);
+    setError(null);
+    try {
+      await operation();
+      return { ok: true };
+    } catch (operationError) {
+      const detail = errorMessage(operationError);
+      setError(detail);
+      return { ok: false, error: detail };
+    } finally {
+      setBusy(false);
+    }
   }, []);
 
   const value = useMemo<Store>(
     () => ({
       state,
       hydrated,
-      signup: (input) => {
-        const exists = state.contractors.some(
-          (c) => c.email.toLowerCase() === input.email.toLowerCase(),
-        );
-        if (exists) return { ok: false, error: "An account with that email already exists." };
-        const contractor: Contractor = {
-          ...input,
-          id: uid("c"),
-          active: true,
-          createdAt: new Date().toISOString(),
-        };
-        setState((s) => ({
-          ...s,
-          contractors: [...s.contractors, contractor],
-          session: { role: "contractor", contractorId: contractor.id },
-        }));
-        return { ok: true, contractor };
+      busy,
+      error,
+      signup: async (input) => {
+        if (!isSupabaseConfigured) return { ok: false, error: "Supabase is not configured." };
+        setBusy(true);
+        setError(null);
+        try {
+          const { data, error: signupError } = await supabase.auth.signUp({
+            email: input.email.trim(),
+            password: input.password,
+            options: {
+              data: {
+                full_name: input.contactName,
+                company_name: input.companyName,
+                contact_name: input.contactName,
+                phone: input.phone,
+                city: input.city,
+                service_types: input.serviceTypes,
+                territory_zips: input.territoryZips,
+              },
+            },
+          });
+          if (signupError) throw signupError;
+          if (data.session && data.user) await loadData(data.user);
+          return { ok: true, requiresEmailConfirmation: !data.session };
+        } catch (signupError) {
+          const detail = errorMessage(signupError);
+          setError(detail);
+          return { ok: false, error: detail };
+        } finally {
+          setBusy(false);
+        }
       },
-      login: (email, password) => {
-        const found = state.contractors.find(
-          (c) => c.email.toLowerCase() === email.trim().toLowerCase() && c.password === password,
-        );
-        if (!found) return { ok: false, error: "Invalid email or password." };
-        setSession({ role: "contractor", contractorId: found.id });
-        return { ok: true };
+      login: async (email, password) => {
+        if (!isSupabaseConfigured) return { ok: false, error: "Supabase is not configured." };
+        setBusy(true);
+        setError(null);
+        try {
+          const { data, error: loginError } = await supabase.auth.signInWithPassword({
+            email: email.trim(),
+            password,
+          });
+          if (loginError) throw loginError;
+          const role = await loadData(data.user);
+          return { ok: true, role };
+        } catch (loginError) {
+          const detail = errorMessage(loginError);
+          setError(detail);
+          return { ok: false, error: detail };
+        } finally {
+          setBusy(false);
+        }
       },
-      loginAsAdmin: () => setSession({ role: "admin" }),
-      loginDemo: () => setSession({ role: "contractor", contractorId: "c-1" }),
-      logout: () => setSession(null),
-      submitLead: (input) => {
-        const base = {
-          ...input,
-          id: uid("l"),
-          status: "new" as LeadStatus,
-          createdAt: new Date().toISOString(),
-          notes: [],
-        };
-        const lead: Lead = { ...base, contractorId: matchContractor(base, state.contractors) };
-        setState((s) => ({ ...s, leads: [lead, ...s.leads] }));
-        return lead;
+      logout: async () => {
+        await supabase.auth.signOut();
+        loadSequence.current += 1;
+        setState(EMPTY_STATE);
       },
+      submitLead: (input) =>
+        run(async () => {
+          const { error: insertError } = await supabase.from("leads").insert({
+            name: input.name,
+            phone: input.phone,
+            email: input.email,
+            zip: input.zip,
+            service_type: input.serviceType,
+            project_details: input.projectDetails,
+            timeline: input.timeline,
+            budget: input.budget ?? null,
+            is_homeowner: input.isHomeowner,
+            is_decision_maker: input.isDecisionMaker,
+          });
+          if (insertError) throw insertError;
+        }),
       updateLeadStatus: (id, status, extra) =>
-        setState((s) => ({
-          ...s,
-          leads: s.leads.map((l) => (l.id === id ? { ...l, ...extra, status } : l)),
-        })),
+        run(async () => {
+          const update = {
+            status,
+            updated_at: new Date().toISOString(),
+            ...(extra?.appointmentAt !== undefined ? { appointment_at: extra.appointmentAt } : {}),
+            ...(extra?.jobValue !== undefined ? { job_value: extra.jobValue } : {}),
+          };
+          const { error: updateError } = await supabase.from("leads").update(update).eq("id", id);
+          if (updateError) throw updateError;
+          await refresh();
+        }),
       addNote: (id, body) =>
-        setState((s) => ({
-          ...s,
-          leads: s.leads.map((l) =>
-            l.id === id
-              ? {
-                  ...l,
-                  notes: [...l.notes, { id: uid("n"), body, createdAt: new Date().toISOString() }],
-                }
-              : l,
-          ),
-        })),
+        run(async () => {
+          const { error: noteError } = await supabase.rpc("append_lead_note", {
+            p_lead_id: id,
+            p_body: body,
+          });
+          if (noteError) throw noteError;
+          await refresh();
+        }),
       assignLead: (id, contractorId) =>
-        setState((s) => ({
-          ...s,
-          leads: s.leads.map((l) => (l.id === id ? { ...l, contractorId } : l)),
-        })),
+        run(async () => {
+          const { error: assignmentError } = await supabase.rpc("admin_assign_lead", {
+            p_lead_id: id,
+            p_contractor_id: contractorId,
+          });
+          if (assignmentError) throw assignmentError;
+          await refresh();
+        }),
       updateContractor: (id, patch) =>
-        setState((s) => ({
-          ...s,
-          contractors: s.contractors.map((c) => (c.id === id ? { ...c, ...patch } : c)),
-        })),
-      resetDemo: () => setState(INITIAL_STATE),
+        run(async () => {
+          const { error: profileError } = await supabase.rpc("update_contractor_profile", {
+            p_contractor_id: id,
+            p_company_name: patch.companyName,
+            p_contact_name: patch.contactName,
+            p_phone: patch.phone,
+            p_city: patch.city,
+            p_active: patch.active,
+            p_service_types: patch.serviceTypes,
+            p_territory_zips: patch.territoryZips,
+          });
+          if (profileError) throw profileError;
+          await refresh();
+        }),
+      refresh,
     }),
-    [state, hydrated, setSession],
+    [state, hydrated, busy, error, loadData, refresh, run],
   );
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
 }
 
 export function useApp() {
-  const ctx = useContext(StoreContext);
-  if (!ctx) throw new Error("useApp must be used inside StoreProvider");
-  return ctx;
+  const context = useContext(StoreContext);
+  if (!context) throw new Error("useApp must be used inside StoreProvider");
+  return context;
 }
 
 export function useCurrentContractor(): Contractor | null {
   const { state } = useApp();
   if (state.session?.role !== "contractor") return null;
-  return state.contractors.find((c) => c.id === state.session!.contractorId) ?? null;
+  return (
+    state.contractors.find((contractor) => contractor.id === state.session?.contractorId) ?? null
+  );
 }
 
 export function useContractorLeads(): Lead[] {
@@ -178,6 +373,6 @@ export function useContractorLeads(): Lead[] {
   const contractor = useCurrentContractor();
   if (!contractor) return [];
   return state.leads
-    .filter((l) => l.contractorId === contractor.id)
+    .filter((lead) => lead.contractorId === contractor.id)
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 }
