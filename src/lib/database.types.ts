@@ -334,7 +334,29 @@ export type Database = {
       };
     };
     Views: { [_ in never]: never };
-    Functions: { [_ in never]: never };
+    Functions: {
+      admin_assign_lead: {
+        Args: { p_contractor_id: string | null; p_lead_id: string };
+        Returns: undefined;
+      };
+      append_lead_note: {
+        Args: { p_body: string; p_lead_id: string };
+        Returns: Database["public"]["Tables"]["leads"]["Row"];
+      };
+      update_contractor_profile: {
+        Args: {
+          p_active?: boolean | null;
+          p_city?: string | null;
+          p_company_name?: string | null;
+          p_contact_name?: string | null;
+          p_contractor_id: string;
+          p_phone?: string | null;
+          p_service_types?: Json | null;
+          p_territory_zips?: Json | null;
+        };
+        Returns: undefined;
+      };
+    };
     Enums: { [_ in never]: never };
     CompositeTypes: { [_ in never]: never };
   };
