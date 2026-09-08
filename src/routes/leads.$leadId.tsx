@@ -33,7 +33,7 @@ export const Route = createFileRoute("/leads/$leadId")({
 
 function LeadDetailPage() {
   const { leadId } = useParams({ from: "/leads/$leadId" });
-  const { state, updateLeadStatus, addNote } = useApp();
+  const { state, updateLeadStatus, addNote, busy } = useApp();
   const lead = state.leads.find((l) => l.id === leadId);
   const [note, setNote] = useState("");
   const [appointment, setAppointment] = useState("");
@@ -52,8 +52,12 @@ function LeadDetailPage() {
     );
   }
 
-  const setStatus = (status: LeadStatus) => {
-    updateLeadStatus(lead.id, status);
+  const setStatus = async (status: LeadStatus) => {
+    const result = await updateLeadStatus(lead.id, status);
+    if (!result.ok) {
+      toast.error(result.error);
+      return;
+    }
     toast.success(`Marked as ${STATUS_LABELS[status]}`);
   };
 
@@ -99,7 +103,10 @@ function LeadDetailPage() {
             </div>
             <p className="mt-3 flex items-center gap-2 text-sm text-muted-foreground">
               <ShieldCheck
-                className={cn("size-4", lead.isHomeowner && lead.isDecisionMaker ? "text-success" : "text-destructive")}
+                className={cn(
+                  "size-4",
+                  lead.isHomeowner && lead.isDecisionMaker ? "text-success" : "text-destructive",
+                )}
               />
               {lead.isHomeowner && lead.isDecisionMaker
                 ? "Confirmed property owner and decision maker"
@@ -141,10 +148,15 @@ function LeadDetailPage() {
                 placeholder="Log a call, a quote sent, or next step…"
               />
               <Button
-                onClick={() => {
+                disabled={busy}
+                onClick={async () => {
                   const body = note.trim();
                   if (!body) return;
-                  addNote(lead.id, body);
+                  const result = await addNote(lead.id, body);
+                  if (!result.ok) {
+                    toast.error(result.error);
+                    return;
+                  }
                   setNote("");
                   toast.success("Note added");
                 }}
@@ -163,7 +175,8 @@ function LeadDetailPage() {
                 <Button
                   key={s}
                   variant={lead.status === s ? "default" : "outline"}
-                  onClick={() => setStatus(s)}
+                  disabled={busy}
+                  onClick={() => void setStatus(s)}
                 >
                   {STATUS_LABELS[s]}
                 </Button>
@@ -178,23 +191,25 @@ function LeadDetailPage() {
               <Input
                 id="appt"
                 type="datetime-local"
-                value={
-                  appointment ||
-                  (lead.appointmentAt ? lead.appointmentAt.slice(0, 16) : "")
-                }
+                value={appointment || (lead.appointmentAt ? lead.appointmentAt.slice(0, 16) : "")}
                 onChange={(e) => setAppointment(e.target.value)}
               />
             </div>
             <Button
               className="w-full"
-              onClick={() => {
+              disabled={busy}
+              onClick={async () => {
                 if (!appointment) {
                   toast.error("Pick a date and time first.");
                   return;
                 }
-                updateLeadStatus(lead.id, "appointment", {
+                const result = await updateLeadStatus(lead.id, "appointment", {
                   appointmentAt: new Date(appointment).toISOString(),
                 });
+                if (!result.ok) {
+                  toast.error(result.error);
+                  return;
+                }
                 toast.success("Appointment booked");
               }}
             >
@@ -216,13 +231,18 @@ function LeadDetailPage() {
             </div>
             <Button
               className="w-full"
-              onClick={() => {
+              disabled={busy}
+              onClick={async () => {
                 const v = Number(jobValue || lead.jobValue || 0);
                 if (!v) {
                   toast.error("Enter the contract value.");
                   return;
                 }
-                updateLeadStatus(lead.id, "won", { jobValue: v });
+                const result = await updateLeadStatus(lead.id, "won", { jobValue: v });
+                if (!result.ok) {
+                  toast.error(result.error);
+                  return;
+                }
                 toast.success("Job marked as won");
               }}
             >
