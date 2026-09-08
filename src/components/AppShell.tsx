@@ -1,6 +1,14 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
-import { HardHat, Inbox, LayoutDashboard, LogOut, Shield, UserRound } from "lucide-react";
+import {
+  CreditCard,
+  HardHat,
+  Inbox,
+  LayoutDashboard,
+  LogOut,
+  Shield,
+  UserRound,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useApp, useCurrentContractor } from "@/lib/store";
 import { cn } from "@/lib/utils";
@@ -9,6 +17,7 @@ const NAV = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { to: "/leads", label: "Leads", icon: Inbox },
   { to: "/profile", label: "Profile", icon: UserRound },
+  { to: "/billing", label: "Billing", icon: CreditCard },
 ] as const;
 
 export function AppShell({
