@@ -16,6 +16,7 @@ import { isSupabaseConfigured, supabase } from "./supabase";
 import {
   SERVICE_TYPES,
   type AppState,
+  type AdminFinancials,
   type Contractor,
   type Lead,
   type LeadStatus,
@@ -23,7 +24,9 @@ import {
 } from "./types";
 
 type NewLeadInput = Omit<Lead, "id" | "status" | "contractorId" | "createdAt" | "notes">;
-type SignupInput = Omit<Contractor, "id" | "createdAt" | "active"> & { password: string };
+type SignupInput = Omit<Contractor, "id" | "userId" | "createdAt" | "active"> & {
+  password: string;
+};
 type ActionResult = { ok: true } | { ok: false; error: string };
 type LoginResult = { ok: true; role: "contractor" | "admin" } | { ok: false; error: string };
 type SignupResult = { ok: true; requiresEmailConfirmation: boolean } | { ok: false; error: string };
@@ -48,7 +51,13 @@ type Store = {
   refresh: () => Promise<void>;
 };
 
-const EMPTY_STATE: AppState = { contractors: [], leads: [], session: null, subscription: null };
+const EMPTY_STATE: AppState = {
+  contractors: [],
+  leads: [],
+  session: null,
+  subscription: null,
+  adminFinancials: null,
+};
 const StoreContext = createContext<Store | null>(null);
 
 const errorMessage = (error: unknown) =>
@@ -113,6 +122,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     const assignments = assignmentsResult.data ?? [];
     const contractors: Contractor[] = contractorRows.map((row) => ({
       id: row.id,
+      userId: row.user_id,
       companyName: row.company_name,
       contactName: row.contact_name,
       email: row.email,
@@ -150,11 +160,45 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       notes: parseLeadNotes(row.notes),
     }));
 
+    let adminFinancials: AdminFinancials | null = null;
+    if (role === "admin") {
+      const [paymentsResult, subscriptionsResult] = await Promise.all([
+        supabase
+          .from("payments")
+          .select("id, user_id, amount_cents, currency, status, created_at")
+          .order("created_at", { ascending: false }),
+        supabase
+          .from("subscriptions")
+          .select("user_id, status, current_period_end, cancel_at_period_end, created_at")
+          .order("created_at", { ascending: false }),
+      ]);
+      if (paymentsResult.error) throw paymentsResult.error;
+      if (subscriptionsResult.error) throw subscriptionsResult.error;
+      adminFinancials = {
+        payments: (paymentsResult.data ?? []).map((row) => ({
+          id: row.id,
+          userId: row.user_id,
+          amountCents: row.amount_cents,
+          currency: row.currency,
+          status: row.status,
+          createdAt: row.created_at,
+        })),
+        subscriptions: (subscriptionsResult.data ?? []).map((row) => ({
+          userId: row.user_id,
+          status: row.status ?? "inactive",
+          currentPeriodEnd: row.current_period_end,
+          cancelAtPeriodEnd: row.cancel_at_period_end,
+          createdAt: row.created_at,
+        })),
+      };
+    }
+
     const ownRow = contractorRows.find((row) => row.user_id === user.id);
     if (sequence !== loadSequence.current) return role;
     setState({
       contractors,
       leads,
+      adminFinancials,
       subscription: subscriptionResult.data
         ? {
             status: subscriptionResult.data.status ?? "inactive",

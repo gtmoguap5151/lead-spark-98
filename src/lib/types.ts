@@ -68,6 +68,7 @@ export type Lead = {
 
 export type Contractor = {
   id: string;
+  userId: string;
   companyName: string;
   contactName: string;
   email: string;
@@ -86,6 +87,28 @@ export type BillingSubscription = {
   cancelAtPeriodEnd: boolean;
 };
 
+export type AdminPayment = {
+  id: string;
+  userId: string;
+  amountCents: number;
+  currency: string;
+  status: string;
+  createdAt: string;
+};
+
+export type AdminSubscription = {
+  userId: string;
+  status: string;
+  currentPeriodEnd: string | null;
+  cancelAtPeriodEnd: boolean;
+  createdAt: string;
+};
+
+export type AdminFinancials = {
+  payments: AdminPayment[];
+  subscriptions: AdminSubscription[];
+};
+
 export type Session = { role: "contractor"; contractorId: string } | { role: "admin" } | null;
 
 export type AppState = {
@@ -93,4 +116,5 @@ export type AppState = {
   leads: Lead[];
   session: Session;
   subscription: BillingSubscription | null;
+  adminFinancials: AdminFinancials | null;
 };
