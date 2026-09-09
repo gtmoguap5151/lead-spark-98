@@ -1,24 +1,65 @@
-# LeadFlow Pro
+# Contractor Lead Engine
 
-Build Version 1 of a mobile-first contractor lead-generation SaaS called Contractor Lead Engine. Goal: prove the business model with a simple working MVP, not a giant feature set. Create a polished responsive PWA-style web app with two roles: Admin and Contractor. Core screens: landing page explaining qualified contractor leads; contractor signup/login; contractor dashboard showing new leads, qualified leads, appointments, and simple revenue metrics; lead inbox with lead details (name, phone, ZIP, service type, project details, timeline, status); lead detail/status workflow (new, contacted, qualified, appointment, won, lost); contractor profile with service type and territory; admin dashboard to manage contractors, territories, leads, and basic metrics; lead intake form for homeowners that captures contact info, ZIP, service needed, project details, timeline, and homeowner/decision-maker confirmation. Use realistic demo data so the app looks functional immediately. Keep the design professional, modern, high-conversion, mobile-first, with a construction/home-services visual language. Do not add payments, AI, maps, or expensive external APIs yet. Use local/demo persistence initially so the MVP works without paid services. Structure the code cleanly so Supabase can be added next. Include clear CTAs: 'Get Qualified Leads' and 'Request an Estimate'.
+A mobile-first contractor growth platform combining qualified lead intake and routing, contractor CRM workflows, performance reporting, subscriptions, and referrals.
 
-This project was built with [Lovable](https://lovable.dev).
+## Current capabilities
 
-## Build with Lovable
+- Contractor signup and login with Supabase Auth
+- Public homeowner estimate requests
+- Automatic lead matching by service and ZIP territory
+- Contractor lead inbox, notes, status pipeline, appointments, and won-job values
+- Admin management for contractors, assignments, and performance metrics
+- Stripe subscription checkout, customer portal, and signed webhook processing
+- Referral and referral-reward data foundation
+- Responsive installable web-app manifest
 
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/9ad4bff4-159a-4d92-a5d2-6bcf254d4cdd).
+## Stack
 
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
+- TanStack Start, React 19, TypeScript, and Vite
+- Supabase Auth, Postgres, Row Level Security, and Edge Functions
+- Stripe Checkout and Billing Portal
 
-## Development
-
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+## Local development
 
 ```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
+npm ci
+cp .env.example .env.local
 npm run dev
 ```
+
+Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` in `.env.local`. Never expose a Supabase secret/service-role key or Stripe secret in a `VITE_` variable.
+
+## Verification
+
+```sh
+npm run lint
+npm run build
+```
+
+## Deployment configuration
+
+Frontend environment variables:
+
+- `VITE_SUPABASE_URL`
+- `VITE_SUPABASE_PUBLISHABLE_KEY`
+
+Supabase Edge Function secrets:
+
+- `STRIPE_RESTRICTED_KEY`
+- `STRIPE_WEBHOOK_SECRET`
+- `STRIPE_PRICE_LOOKUP_KEYS`
+- `APP_URL`
+
+The Stripe webhook endpoint is:
+
+```text
+https://<project-ref>.supabase.co/functions/v1/stripe-webhook
+```
+
+Subscribe it to the checkout-session, customer-subscription, and invoice events handled in `supabase/functions/stripe-webhook/index.ts`.
+
+## Security model
+
+Browser code uses only the Supabase publishable key. Postgres RLS limits contractors to their own records and assignments, while privileged mutations use authenticated database functions. Subscription and payment writes are reserved for the verified Stripe webhook.
+
+This repository remains connected to Lovable. Do not rewrite published Git history.
