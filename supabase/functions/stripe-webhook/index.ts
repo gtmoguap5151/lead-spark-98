@@ -1,11 +1,5 @@
 import Stripe from "npm:stripe@22.4.0";
-import {
-  env,
-  json,
-  safeError,
-  stripe,
-  supabaseAdmin,
-} from "../_shared/billing.ts";
+import { env, json, safeError, stripe, supabaseAdmin } from "../_shared/billing.ts";
 
 const subscriptionPeriodEnd = (subscription: Stripe.Subscription) => {
   const ends = subscription.items.data
@@ -16,9 +10,8 @@ const subscriptionPeriodEnd = (subscription: Stripe.Subscription) => {
 
 const syncSubscription = async (subscription: Stripe.Subscription) => {
   const admin = supabaseAdmin();
-  const customerId = typeof subscription.customer === "string"
-    ? subscription.customer
-    : subscription.customer.id;
+  const customerId =
+    typeof subscription.customer === "string" ? subscription.customer : subscription.customer.id;
   let userId = subscription.metadata.supabase_user_id;
   if (!userId) {
     const { data, error } = await admin
@@ -76,22 +69,16 @@ Deno.serve(async (request) => {
         break;
       case "checkout.session.completed": {
         const session = event.data.object;
-        if (
-          session.mode === "subscription" &&
-          typeof session.subscription === "string"
-        ) {
-          await syncSubscription(
-            await stripe().subscriptions.retrieve(session.subscription),
-          );
+        if (session.mode === "subscription" && typeof session.subscription === "string") {
+          await syncSubscription(await stripe().subscriptions.retrieve(session.subscription));
         }
         break;
       }
       case "invoice.payment_succeeded":
       case "invoice.payment_failed": {
         const invoice = event.data.object;
-        const customerId = typeof invoice.customer === "string"
-          ? invoice.customer
-          : invoice.customer?.id;
+        const customerId =
+          typeof invoice.customer === "string" ? invoice.customer : invoice.customer?.id;
         if (!customerId) break;
         const admin = supabaseAdmin();
         const { data: subscriptionRow, error: subscriptionError } = await admin
@@ -109,9 +96,7 @@ Deno.serve(async (request) => {
             stripe_payment_id: null,
             amount_cents: invoice.amount_paid || invoice.amount_due,
             currency: invoice.currency,
-            status: event.type === "invoice.payment_succeeded"
-              ? "paid"
-              : "failed",
+            status: event.type === "invoice.payment_succeeded" ? "paid" : "failed",
           },
           { onConflict: "stripe_invoice_id" },
         );
