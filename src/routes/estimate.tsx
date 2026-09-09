@@ -22,16 +22,16 @@ import { SERVICE_TYPES, TIMELINES, type ServiceType, type Timeline } from "@/lib
 export const Route = createFileRoute("/estimate")({
   head: () => ({
     meta: [
-      { title: "Request a Free Estimate — Contractor Lead Engine" },
+      { title: "Tell Us About Your Home Project — Lead Engine" },
       {
         name: "description",
         content:
-          "Tell us about your roofing, HVAC, plumbing or remodeling project and get matched with one vetted local contractor for a free estimate.",
+          "A simple request form for homeowners who need roofing, HVAC, plumbing, remodeling or other home project help.",
       },
-      { property: "og:title", content: "Request a Free Estimate — Contractor Lead Engine" },
+      { property: "og:title", content: "Tell Us About Your Home Project" },
       {
         property: "og:description",
-        content: "Get matched with one vetted local contractor for a free, no-obligation estimate.",
+        content: "Tell us what you need and we will route your request to one local contractor who serves your area.",
       },
     ],
   }),
@@ -59,8 +59,8 @@ const schema = z.object({
     .trim()
     .min(10, "Tell us a little more about the project")
     .max(1000, "Keep it under 1000 characters"),
-  isHomeowner: z.literal(true, { message: "We can only accept requests from property owners" }),
-  isDecisionMaker: z.literal(true, { message: "Please confirm you can approve the work" }),
+  isHomeowner: z.literal(true, { message: "Please confirm that you own the property" }),
+  isDecisionMaker: z.literal(true, { message: "Please confirm that you can approve the work" }),
 });
 
 const BUDGETS = [
@@ -101,7 +101,7 @@ function EstimatePage() {
       const next: Errors = {};
       for (const issue of parsed.error.issues) next[String(issue.path[0])] = issue.message;
       setErrors(next);
-      toast.error("Please fix the highlighted fields.");
+      toast.error("Please check the highlighted items below.");
       return;
     }
     setErrors({});
@@ -114,24 +114,28 @@ function EstimatePage() {
       return;
     }
     setSubmitted(true);
-    toast.success("Request received — a local pro will reach out shortly.");
+    toast.success("Your request was received.");
   }
 
   if (submitted) {
     return (
       <div className="min-h-screen bg-background">
         <SiteHeader />
-        <main className="mx-auto flex max-w-xl flex-col items-center px-4 py-20 text-center">
-          <span className="flex size-14 items-center justify-center rounded-full bg-success/15 text-success">
-            <CheckCircle2 className="size-7" />
+        <main className="mx-auto flex max-w-xl flex-col items-center px-4 py-16 text-center sm:py-20">
+          <span className="flex size-16 items-center justify-center rounded-full bg-success/15 text-success">
+            <CheckCircle2 className="size-8" />
           </span>
-          <h1 className="mt-4 text-3xl font-bold uppercase">Request received</h1>
-          <p className="mt-2 text-muted-foreground">
-            We&apos;re matching your {form.serviceType.toLowerCase()} project in {form.zip} with a
-            vetted local contractor. Expect a call at {form.phone} within one business day.
+          <h1 className="mt-5 text-3xl font-bold leading-tight sm:text-4xl">Your request was received</h1>
+          <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
+            We&apos;re routing your {form.serviceType.toLowerCase()} request in ZIP {form.zip} to a
+            contractor who serves that area. They can use the phone number you provided to contact you.
           </p>
-          <Button asChild className="mt-8">
-            <Link to="/">Back to home</Link>
+          <p className="mt-3 text-base leading-relaxed text-muted-foreground">
+            You are not obligated to hire anyone. Ask questions, discuss the project, and decide what
+            is right for you.
+          </p>
+          <Button asChild size="lg" className="mt-8 h-14 px-7 text-lg font-bold">
+            <Link to="/">Back to Home</Link>
           </Button>
         </main>
         <SiteFooter />
@@ -142,27 +146,42 @@ function EstimatePage() {
   return (
     <div className="min-h-screen bg-background">
       <SiteHeader />
-      <main className="mx-auto max-w-2xl px-4 py-10">
-        <p className="eyebrow text-muted-foreground">Free · No obligation</p>
-        <h1 className="mt-2 text-4xl font-bold uppercase leading-none">Request an Estimate</h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Two minutes now saves five phone calls later. We match you with one local pro for your
-          trade.
+      <main className="mx-auto max-w-2xl px-4 py-8 sm:py-12">
+        <p className="text-base font-bold uppercase tracking-wide text-muted-foreground">
+          Free to submit · No obligation
+        </p>
+        <h1 className="mt-3 text-4xl font-bold leading-tight sm:text-5xl">Tell us about your home project</h1>
+        <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
+          Fill out the simple form below. Your request will be routed to one contractor based on the
+          service you need and your ZIP code.
         </p>
 
-        <form onSubmit={onSubmit} className="surface-card mt-6 space-y-5 p-5 sm:p-6" noValidate>
-          <Field label="Full name" error={errors.name} htmlFor="name">
+        <div className="mt-6 rounded-xl border border-border bg-muted/45 p-4 sm:p-5">
+          <div className="flex items-start gap-3">
+            <ShieldCheck className="mt-0.5 size-6 shrink-0 text-success" />
+            <div>
+              <p className="text-lg font-bold">Your information stays focused on your project</p>
+              <p className="mt-1 text-base leading-relaxed text-muted-foreground">
+                Your request is routed to one matched contractor rather than sent to a long list of companies.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <form onSubmit={onSubmit} className="surface-card mt-6 space-y-6 p-5 sm:p-7" noValidate>
+          <Field label="Your full name" error={errors.name} htmlFor="name">
             <Input
               id="name"
               value={form.name}
               maxLength={100}
               onChange={(e) => set("name", e.target.value)}
-              placeholder="Jordan Miller"
+              placeholder="Your first and last name"
+              className="h-12 text-base"
             />
           </Field>
 
-          <div className="grid gap-5 sm:grid-cols-2">
-            <Field label="Phone" error={errors.phone} htmlFor="phone">
+          <div className="grid gap-6 sm:grid-cols-2">
+            <Field label="Best phone number" error={errors.phone} htmlFor="phone">
               <Input
                 id="phone"
                 type="tel"
@@ -170,10 +189,11 @@ function EstimatePage() {
                 maxLength={20}
                 value={form.phone}
                 onChange={(e) => set("phone", e.target.value)}
-                placeholder="(614) 555-0134"
+                placeholder="(555) 555-0123"
+                className="h-12 text-base"
               />
             </Field>
-            <Field label="Email" error={errors.email} htmlFor="email">
+            <Field label="Email address" error={errors.email} htmlFor="email">
               <Input
                 id="email"
                 type="email"
@@ -181,11 +201,12 @@ function EstimatePage() {
                 value={form.email}
                 onChange={(e) => set("email", e.target.value)}
                 placeholder="you@example.com"
+                className="h-12 text-base"
               />
             </Field>
           </div>
 
-          <div className="grid gap-5 sm:grid-cols-2">
+          <div className="grid gap-6 sm:grid-cols-2">
             <Field label="ZIP code" error={errors.zip} htmlFor="zip">
               <Input
                 id="zip"
@@ -193,15 +214,16 @@ function EstimatePage() {
                 maxLength={5}
                 value={form.zip}
                 onChange={(e) => set("zip", e.target.value.replace(/\D/g, ""))}
-                placeholder="43017"
+                placeholder="Your 5-digit ZIP code"
+                className="h-12 text-base"
               />
             </Field>
-            <Field label="Service needed" error={errors.serviceType}>
+            <Field label="What kind of help do you need?" error={errors.serviceType}>
               <Select
                 value={form.serviceType}
                 onValueChange={(v) => set("serviceType", v as ServiceType)}
               >
-                <SelectTrigger>
+                <SelectTrigger className="h-12 text-base">
                   <SelectValue placeholder="Choose a service" />
                 </SelectTrigger>
                 <SelectContent>
@@ -215,11 +237,11 @@ function EstimatePage() {
             </Field>
           </div>
 
-          <div className="grid gap-5 sm:grid-cols-2">
-            <Field label="Timeline" error={errors.timeline}>
+          <div className="grid gap-6 sm:grid-cols-2">
+            <Field label="When would you like the work done?" error={errors.timeline}>
               <Select value={form.timeline} onValueChange={(v) => set("timeline", v as Timeline)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="When do you need it?" />
+                <SelectTrigger className="h-12 text-base">
+                  <SelectValue placeholder="Choose a timeline" />
                 </SelectTrigger>
                 <SelectContent>
                   {TIMELINES.map((t) => (
@@ -230,10 +252,10 @@ function EstimatePage() {
                 </SelectContent>
               </Select>
             </Field>
-            <Field label="Budget range (optional)" error={errors.budget}>
+            <Field label="Estimated budget (optional)" error={errors.budget}>
               <Select value={form.budget} onValueChange={(v) => set("budget", v)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a range" />
+                <SelectTrigger className="h-12 text-base">
+                  <SelectValue placeholder="Not sure is okay" />
                 </SelectTrigger>
                 <SelectContent>
                   {BUDGETS.map((b) => (
@@ -246,20 +268,21 @@ function EstimatePage() {
             </Field>
           </div>
 
-          <Field label="Project details" error={errors.projectDetails} htmlFor="details">
+          <Field label="Tell us what is going on" error={errors.projectDetails} htmlFor="details">
             <Textarea
               id="details"
-              rows={4}
+              rows={5}
               maxLength={1000}
               value={form.projectDetails}
               onChange={(e) => set("projectDetails", e.target.value)}
-              placeholder="Describe the work: what's happening, size of the home, anything a contractor should know."
+              placeholder="Example: My roof has started leaking over the back bedroom and I would like someone to look at it."
+              className="text-base leading-relaxed"
             />
           </Field>
 
-          <div className="space-y-3 rounded-lg bg-muted/60 p-4">
-            <p className="flex items-center gap-2 text-sm font-semibold">
-              <ShieldCheck className="size-4 text-success" /> Quick confirmation
+          <div className="space-y-4 rounded-xl bg-muted/60 p-5">
+            <p className="flex items-center gap-2 text-lg font-bold">
+              <ShieldCheck className="size-5 text-success" /> Two quick confirmations
             </p>
             <ConfirmRow
               id="owner"
@@ -280,13 +303,13 @@ function EstimatePage() {
           <Button
             type="submit"
             size="lg"
-            className="h-12 w-full text-base font-semibold"
+            className="h-14 w-full text-lg font-bold"
             disabled={busy}
           >
-            {busy ? "Sending request…" : "Request an Estimate"}
+            {busy ? "Sending Your Request…" : "Send My Project Request"}
           </Button>
-          <p className="text-center text-xs text-muted-foreground">
-            Your details go to one matched contractor. We never resell your information.
+          <p className="text-center text-sm leading-relaxed text-muted-foreground">
+            Submitting the form does not obligate you to hire a contractor.
           </p>
         </form>
       </main>
@@ -307,12 +330,12 @@ function Field({
   children: React.ReactNode;
 }) {
   return (
-    <div className="space-y-1.5">
-      <Label htmlFor={htmlFor} className="text-sm font-semibold">
+    <div className="space-y-2">
+      <Label htmlFor={htmlFor} className="text-base font-bold">
         {label}
       </Label>
       {children}
-      {error ? <p className="text-xs font-medium text-destructive">{error}</p> : null}
+      {error ? <p className="text-sm font-semibold text-destructive">{error}</p> : null}
     </div>
   );
 }
@@ -332,13 +355,13 @@ function ConfirmRow({
 }) {
   return (
     <div>
-      <div className="flex items-start gap-2.5">
-        <Checkbox id={id} checked={checked} onCheckedChange={(v) => onChange(v === true)} />
-        <Label htmlFor={id} className="text-sm font-normal leading-snug">
+      <div className="flex items-start gap-3">
+        <Checkbox id={id} checked={checked} onCheckedChange={(v) => onChange(v === true)} className="mt-0.5 size-5" />
+        <Label htmlFor={id} className="text-base font-normal leading-relaxed">
           {label}
         </Label>
       </div>
-      {error ? <p className="mt-1 text-xs font-medium text-destructive">{error}</p> : null}
+      {error ? <p className="mt-1 text-sm font-semibold text-destructive">{error}</p> : null}
     </div>
   );
 }
