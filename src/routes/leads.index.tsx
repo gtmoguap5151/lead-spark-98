@@ -1,11 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Search } from "lucide-react";
+import { LockKeyhole, Search } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { StatusBadge } from "@/components/StatusBadge";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { LEAD_STATUSES, STATUS_LABELS, type LeadStatus } from "@/lib/types";
-import { useContractorLeads } from "@/lib/store";
+import { useApp, useContractorLeads } from "@/lib/store";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/leads/")({
@@ -29,8 +30,13 @@ export const Route = createFileRoute("/leads/")({
 
 function LeadsPage() {
   const leads = useContractorLeads();
+  const { state } = useApp();
   const [filter, setFilter] = useState<LeadStatus | "all">("all");
   const [query, setQuery] = useState("");
+  const hasPaidAccess = Boolean(
+    state.subscription && ["active", "trialing"].includes(state.subscription.status),
+  );
+  const freeLeadUsed = leads.length >= 1 && !hasPaidAccess;
 
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -43,6 +49,33 @@ function LeadsPage() {
 
   return (
     <AppShell title="Lead Inbox" subtitle={`${leads.length} leads delivered to your territory`}>
+      {freeLeadUsed ? (
+        <section className="surface-card mb-4 border-primary/40 p-5">
+          <div className="flex items-start gap-3">
+            <div className="rounded-full bg-primary/10 p-2 text-primary">
+              <LockKeyhole className="size-5" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-bold uppercase tracking-wider text-primary">
+                Free lead used
+              </p>
+              <h2 className="mt-1 text-xl font-bold">Unlock your next lead</h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Your first real lead was free. New lead details stay locked until you activate a paid plan.
+              </p>
+              <div className="mt-4 flex flex-wrap items-center gap-3">
+                <Button asChild className="h-11">
+                  <Link to="/billing">View Growth & Pro plans</Link>
+                </Button>
+                <span className="text-xs font-semibold text-muted-foreground">
+                  Growth $99/mo · Pro $249/mo
+                </span>
+              </div>
+            </div>
+          </div>
+        </section>
+      ) : null}
+
       <div className="relative">
         <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
         <Input
