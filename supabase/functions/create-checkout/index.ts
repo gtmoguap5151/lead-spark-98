@@ -34,13 +34,13 @@ Deno.serve(async (request) => {
       .eq("user_id", user.id)
       .maybeSingle();
     if (currentError) throw currentError;
-    if (
-      current?.status &&
-      ["active", "trialing", "past_due"].includes(current.status)
-    ) {
-      return json({
-        error: "Manage your existing subscription from the billing portal.",
-      }, 409);
+    if (current?.status && ["active", "trialing", "past_due"].includes(current.status)) {
+      return json(
+        {
+          error: "Manage your existing subscription from the billing portal.",
+        },
+        409,
+      );
     }
 
     let customerId = current?.stripe_customer_id;
@@ -50,16 +50,14 @@ Deno.serve(async (request) => {
         metadata: { app: "lead_spark_98", supabase_user_id: user.id },
       });
       customerId = customer.id;
-      const { error } = await admin
-        .from("subscriptions")
-        .upsert(
-          {
-            user_id: user.id,
-            stripe_customer_id: customerId,
-            status: "inactive",
-          },
-          { onConflict: "user_id" },
-        );
+      const { error } = await admin.from("subscriptions").upsert(
+        {
+          user_id: user.id,
+          stripe_customer_id: customerId,
+          status: "inactive",
+        },
+        { onConflict: "user_id" },
+      );
       if (error) throw error;
     }
 
