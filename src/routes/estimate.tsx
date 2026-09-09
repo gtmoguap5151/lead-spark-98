@@ -31,7 +31,8 @@ export const Route = createFileRoute("/estimate")({
       { property: "og:title", content: "Tell Us About Your Home Project" },
       {
         property: "og:description",
-        content: "Tell us what you need and we will route your request to one local contractor who serves your area.",
+        content:
+          "Tell us what you need and we will route your request to one local contractor who serves your area.",
       },
     ],
   }),
@@ -61,7 +62,14 @@ const schema = z.object({
     .max(1000, "Keep it under 1000 characters"),
   isHomeowner: z.literal(true, { message: "Please confirm that you own the property" }),
   isDecisionMaker: z.literal(true, { message: "Please confirm that you can approve the work" }),
+  contactConsent: z.literal(true, {
+    message: "Please agree so the matched contractor can contact you about this request",
+  }),
+  marketingConsent: z.boolean(),
+  website: z.string().max(0).optional(),
 });
+
+const CONSENT_VERSION = "2026-09-09" as const;
 
 const BUDGETS = [
   "Under $5,000",
@@ -89,6 +97,9 @@ function EstimatePage() {
     projectDetails: "",
     isHomeowner: false,
     isDecisionMaker: false,
+    contactConsent: false,
+    marketingConsent: false,
+    website: "",
   });
 
   const set = <K extends keyof typeof form>(key: K, value: (typeof form)[K]) =>
@@ -108,6 +119,8 @@ function EstimatePage() {
     const result = await submitLead({
       ...parsed.data,
       budget: parsed.data.budget || undefined,
+      consentVersion: CONSENT_VERSION,
+      attribution: getAttribution(),
     });
     if (!result.ok) {
       toast.error(result.error);
@@ -125,14 +138,17 @@ function EstimatePage() {
           <span className="flex size-16 items-center justify-center rounded-full bg-success/15 text-success">
             <CheckCircle2 className="size-8" />
           </span>
-          <h1 className="mt-5 text-3xl font-bold leading-tight sm:text-4xl">Your request was received</h1>
+          <h1 className="mt-5 text-3xl font-bold leading-tight sm:text-4xl">
+            Your request was received
+          </h1>
           <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
             We&apos;re routing your {form.serviceType.toLowerCase()} request in ZIP {form.zip} to a
-            contractor who serves that area. They can use the phone number you provided to contact you.
+            contractor who serves that area. They can use the phone number you provided to contact
+            you.
           </p>
           <p className="mt-3 text-base leading-relaxed text-muted-foreground">
-            You are not obligated to hire anyone. Ask questions, discuss the project, and decide what
-            is right for you.
+            You are not obligated to hire anyone. Ask questions, discuss the project, and decide
+            what is right for you.
           </p>
           <Button asChild size="lg" className="mt-8 h-14 px-7 text-lg font-bold">
             <Link to="/">Back to Home</Link>
@@ -150,7 +166,9 @@ function EstimatePage() {
         <p className="text-base font-bold uppercase tracking-wide text-muted-foreground">
           Free to submit · No obligation
         </p>
-        <h1 className="mt-3 text-4xl font-bold leading-tight sm:text-5xl">Tell us about your home project</h1>
+        <h1 className="mt-3 text-4xl font-bold leading-tight sm:text-5xl">
+          Tell us about your home project
+        </h1>
         <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
           Fill out the simple form below. Your request will be routed to one contractor based on the
           service you need and your ZIP code.
@@ -162,7 +180,8 @@ function EstimatePage() {
             <div>
               <p className="text-lg font-bold">Your information stays focused on your project</p>
               <p className="mt-1 text-base leading-relaxed text-muted-foreground">
-                Your request is routed to one matched contractor rather than sent to a long list of companies.
+                Your request is routed to one matched contractor rather than sent to a long list of
+                companies.
               </p>
             </div>
           </div>
@@ -280,9 +299,20 @@ function EstimatePage() {
             />
           </Field>
 
+          <input
+            type="text"
+            name="website"
+            value={form.website}
+            onChange={(event) => set("website", event.target.value)}
+            tabIndex={-1}
+            autoComplete="off"
+            aria-hidden="true"
+            className="absolute -left-[10000px] h-px w-px opacity-0"
+          />
+
           <div className="space-y-4 rounded-xl bg-muted/60 p-5">
             <p className="flex items-center gap-2 text-lg font-bold">
-              <ShieldCheck className="size-5 text-success" /> Two quick confirmations
+              <ShieldCheck className="size-5 text-success" /> Confirmations and privacy choices
             </p>
             <ConfirmRow
               id="owner"
@@ -298,24 +328,64 @@ function EstimatePage() {
               label="I can approve the work and hire a contractor"
               error={errors.isDecisionMaker}
             />
+            <ConfirmRow
+              id="contact-consent"
+              checked={form.contactConsent}
+              onChange={(v) => set("contactConsent", v)}
+              label="I agree that Lead Engine may share my contact and project details with one matched contractor, who may call, text, or email me about this request. I do not have to hire or buy anything."
+              error={errors.contactConsent}
+            />
+            <ConfirmRow
+              id="marketing-consent"
+              checked={form.marketingConsent}
+              onChange={(v) => set("marketingConsent", v)}
+              label="Optional: Email me occasional home-project tips and Lead Engine updates. I can unsubscribe at any time."
+            />
           </div>
 
-          <Button
-            type="submit"
-            size="lg"
-            className="h-14 w-full text-lg font-bold"
-            disabled={busy}
-          >
+          <Button type="submit" size="lg" className="h-14 w-full text-lg font-bold" disabled={busy}>
             {busy ? "Sending Your Request…" : "Send My Project Request"}
           </Button>
           <p className="text-center text-sm leading-relaxed text-muted-foreground">
-            Submitting the form does not obligate you to hire a contractor.
+            Submitting does not obligate you to hire anyone. See our{" "}
+            <Link
+              to="/privacy"
+              className="font-semibold text-foreground underline underline-offset-2"
+            >
+              Privacy &amp; Data Choices
+            </Link>
+            .
           </p>
         </form>
       </main>
       <SiteFooter />
     </div>
   );
+}
+
+function getAttribution() {
+  const params = new URLSearchParams(window.location.search);
+  let referrerHost: string | undefined;
+  if (document.referrer) {
+    try {
+      referrerHost = new URL(document.referrer).hostname;
+    } catch {
+      referrerHost = undefined;
+    }
+  }
+  const source = params.get("utm_source")?.slice(0, 120) || undefined;
+  const medium = params.get("utm_medium")?.slice(0, 120) || undefined;
+  const campaign = params.get("utm_campaign")?.slice(0, 160) || undefined;
+  const content = params.get("utm_content")?.slice(0, 160) || undefined;
+  const term = params.get("utm_term")?.slice(0, 160) || undefined;
+  return {
+    ...(source ? { source } : {}),
+    ...(medium ? { medium } : {}),
+    ...(campaign ? { campaign } : {}),
+    ...(content ? { content } : {}),
+    ...(term ? { term } : {}),
+    ...(referrerHost ? { referrerHost } : {}),
+  };
 }
 
 function Field({
@@ -356,7 +426,12 @@ function ConfirmRow({
   return (
     <div>
       <div className="flex items-start gap-3">
-        <Checkbox id={id} checked={checked} onCheckedChange={(v) => onChange(v === true)} className="mt-0.5 size-5" />
+        <Checkbox
+          id={id}
+          checked={checked}
+          onCheckedChange={(v) => onChange(v === true)}
+          className="mt-0.5 size-5"
+        />
         <Label htmlFor={id} className="text-base font-normal leading-relaxed">
           {label}
         </Label>

@@ -10,6 +10,7 @@ import {
   Inbox,
   Power,
   RefreshCw,
+  ShieldCheck,
   Users,
   Wrench,
 } from "lucide-react";
@@ -63,10 +64,11 @@ const moneyFromDollars = (amount: number) =>
   }).format(amount);
 
 function AdminPage() {
-  const { state, updateContractor, assignLead, refresh, busy } = useApp();
-  const { contractors, leads, adminFinancials } = state;
+  const { state, updateContractor, assignLead, updatePrivacyRequestStatus, refresh, busy } =
+    useApp();
+  const { contractors, leads, adminFinancials, privacyRequests } = state;
 
-  const [tab, setTab] = useState<"overview" | "contractors" | "leads">("overview");
+  const [tab, setTab] = useState<"overview" | "contractors" | "leads" | "privacy">("overview");
 
   const stats = useMemo(() => {
     const activeContractors = contractors.filter((c) => c.active).length;
@@ -95,6 +97,7 @@ function AdminPage() {
       totalContractors: contractors.length,
       totalLeads: leads.length,
       unassigned,
+      marketingOptIns: leads.filter((lead) => lead.marketingConsent).length,
       contractorJobValue,
       wonCount: wonLeads.length,
       totalRevenueCents,
@@ -149,7 +152,7 @@ function AdminPage() {
       }
     >
       <div className="flex gap-2 border-b border-border pb-px">
-        {(["overview", "contractors", "leads"] as const).map((t) => (
+        {(["overview", "contractors", "leads", "privacy"] as const).map((t) => (
           <button
             key={t}
             type="button"
@@ -162,6 +165,11 @@ function AdminPage() {
             )}
           >
             {t}
+            {t === "privacy" && privacyRequests.some((request) => request.status === "pending") ? (
+              <span className="ml-1 rounded-full bg-destructive px-1.5 py-0.5 text-[10px] text-destructive-foreground">
+                {privacyRequests.filter((request) => request.status === "pending").length}
+              </span>
+            ) : null}
           </button>
         ))}
       </div>
@@ -226,7 +234,7 @@ function AdminPage() {
                 <MetricCard
                   label="Total leads"
                   value={stats.totalLeads}
-                  hint={`${stats.unassigned} unassigned`}
+                  hint={`${stats.unassigned} unassigned · ${stats.marketingOptIns} email opt-ins`}
                   icon={Inbox}
                 />
                 <MetricCard
@@ -523,6 +531,97 @@ function AdminPage() {
                 </tbody>
               </table>
             </div>
+          </section>
+        )}
+
+        {tab === "privacy" && (
+          <section className="surface-card overflow-hidden p-0">
+            <div className="border-b border-border px-5 py-4">
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="size-5 text-success" />
+                <h2 className="text-xl font-bold uppercase">Privacy request queue</h2>
+              </div>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Verify identity before disclosing, changing, or deleting personal information.
+              </p>
+            </div>
+            {privacyRequests.length ? (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted-foreground">
+                      <th className="px-4 py-3 font-semibold">Request</th>
+                      <th className="px-4 py-3 font-semibold">Email</th>
+                      <th className="px-4 py-3 font-semibold">Received</th>
+                      <th className="px-4 py-3 font-semibold">Details</th>
+                      <th className="px-4 py-3 font-semibold">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border">
+                    {privacyRequests.map((request) => (
+                      <tr key={request.id} className="align-top hover:bg-muted/30">
+                        <td className="whitespace-nowrap px-4 py-3 font-semibold capitalize">
+                          {request.requestType.replaceAll("_", " ")}
+                        </td>
+                        <td className="px-4 py-3">
+                          <a
+                            className="font-medium underline underline-offset-2"
+                            href={`mailto:${request.email}`}
+                          >
+                            {request.email}
+                          </a>
+                        </td>
+                        <td className="whitespace-nowrap px-4 py-3 text-muted-foreground">
+                          {new Date(request.createdAt).toLocaleDateString("en-US", {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          })}
+                        </td>
+                        <td className="max-w-sm px-4 py-3 text-muted-foreground">
+                          {request.details || "—"}
+                        </td>
+                        <td className="px-4 py-3">
+                          <Select
+                            value={request.status}
+                            disabled={busy}
+                            onValueChange={async (status) => {
+                              const result = await updatePrivacyRequestStatus(
+                                request.id,
+                                status as typeof request.status,
+                              );
+                              if (!result.ok) {
+                                toast.error(result.error);
+                                return;
+                              }
+                              toast.success("Privacy request updated");
+                            }}
+                          >
+                            <SelectTrigger className="h-8 w-32 text-xs">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="pending">Pending</SelectItem>
+                              <SelectItem value="verifying">Verifying</SelectItem>
+                              <SelectItem value="completed">Completed</SelectItem>
+                              <SelectItem value="denied">Denied</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="px-5 py-10 text-center">
+                <ShieldCheck className="mx-auto size-9 text-success" />
+                <p className="mt-3 font-semibold">No privacy requests</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  New access, correction, deletion, and opt-out requests will appear here.
+                </p>
+              </div>
+            )}
           </section>
         )}
       </div>

@@ -46,6 +46,15 @@ export type LeadNote = {
   createdAt: string;
 };
 
+export type LeadAttribution = {
+  source?: string;
+  medium?: string;
+  campaign?: string;
+  content?: string;
+  term?: string;
+  referrerHost?: string;
+};
+
 export type Lead = {
   id: string;
   name: string;
@@ -58,6 +67,11 @@ export type Lead = {
   budget?: string;
   isHomeowner: boolean;
   isDecisionMaker: boolean;
+  contactConsent: boolean;
+  marketingConsent: boolean;
+  consentVersion: string | null;
+  consentRecordedAt: string | null;
+  attribution: LeadAttribution;
   status: LeadStatus;
   contractorId: string | null;
   createdAt: string;
@@ -109,6 +123,16 @@ export type AdminFinancials = {
   subscriptions: AdminSubscription[];
 };
 
+export type PrivacyRequest = {
+  id: string;
+  email: string;
+  requestType: "access" | "correct" | "delete" | "marketing_opt_out" | "other";
+  details: string | null;
+  status: "pending" | "verifying" | "completed" | "denied";
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type Session = { role: "contractor"; contractorId: string } | { role: "admin" } | null;
 
 export type AppState = {
@@ -117,4 +141,5 @@ export type AppState = {
   session: Session;
   subscription: BillingSubscription | null;
   adminFinancials: AdminFinancials | null;
+  privacyRequests: PrivacyRequest[];
 };

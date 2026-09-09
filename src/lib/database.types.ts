@@ -123,6 +123,16 @@ export type Database = {
           budget: string | null;
           is_homeowner: boolean;
           is_decision_maker: boolean;
+          contact_consent: boolean;
+          marketing_consent: boolean;
+          consent_version: string | null;
+          consent_recorded_at: string | null;
+          attribution_source: string | null;
+          attribution_medium: string | null;
+          attribution_campaign: string | null;
+          attribution_content: string | null;
+          attribution_term: string | null;
+          initial_referrer_host: string | null;
           status: string;
           created_at: string;
           updated_at: string;
@@ -142,6 +152,16 @@ export type Database = {
           budget?: string | null;
           is_homeowner?: boolean;
           is_decision_maker?: boolean;
+          contact_consent?: boolean;
+          marketing_consent?: boolean;
+          consent_version?: string | null;
+          consent_recorded_at?: string | null;
+          attribution_source?: string | null;
+          attribution_medium?: string | null;
+          attribution_campaign?: string | null;
+          attribution_content?: string | null;
+          attribution_term?: string | null;
+          initial_referrer_host?: string | null;
           status?: string;
           created_at?: string;
           updated_at?: string;
@@ -161,12 +181,52 @@ export type Database = {
           budget?: string | null;
           is_homeowner?: boolean;
           is_decision_maker?: boolean;
+          contact_consent?: boolean;
+          marketing_consent?: boolean;
+          consent_version?: string | null;
+          consent_recorded_at?: string | null;
+          attribution_source?: string | null;
+          attribution_medium?: string | null;
+          attribution_campaign?: string | null;
+          attribution_content?: string | null;
+          attribution_term?: string | null;
+          initial_referrer_host?: string | null;
           status?: string;
           created_at?: string;
           updated_at?: string;
           appointment_at?: string | null;
           job_value?: number | null;
           notes?: Json;
+        };
+        Relationships: [];
+      };
+      privacy_requests: {
+        Row: {
+          id: string;
+          email: string;
+          request_type: "access" | "correct" | "delete" | "marketing_opt_out" | "other";
+          details: string | null;
+          status: "pending" | "verifying" | "completed" | "denied";
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          email: string;
+          request_type: "access" | "correct" | "delete" | "marketing_opt_out" | "other";
+          details?: string | null;
+          status?: "pending" | "verifying" | "completed" | "denied";
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          email?: string;
+          request_type?: "access" | "correct" | "delete" | "marketing_opt_out" | "other";
+          details?: string | null;
+          status?: "pending" | "verifying" | "completed" | "denied";
+          created_at?: string;
+          updated_at?: string;
         };
         Relationships: [];
       };
@@ -359,6 +419,15 @@ export type Database = {
       append_lead_note: {
         Args: { p_body: string; p_lead_id: string };
         Returns: Database["public"]["Tables"]["leads"]["Row"];
+      };
+      consume_public_intake_limit: {
+        Args: {
+          p_request_hash: string;
+          p_action: string;
+          p_max_requests: number;
+          p_window_seconds: number;
+        };
+        Returns: boolean;
       };
       update_contractor_profile: {
         Args: {

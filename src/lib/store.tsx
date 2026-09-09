@@ -19,11 +19,35 @@ import {
   type AdminFinancials,
   type Contractor,
   type Lead,
+  type LeadAttribution,
   type LeadStatus,
+  type PrivacyRequest,
   type ServiceType,
 } from "./types";
 
-type NewLeadInput = Omit<Lead, "id" | "status" | "contractorId" | "createdAt" | "notes">;
+type NewLeadInput = Pick<
+  Lead,
+  | "name"
+  | "phone"
+  | "email"
+  | "zip"
+  | "serviceType"
+  | "projectDetails"
+  | "timeline"
+  | "budget"
+  | "isHomeowner"
+  | "isDecisionMaker"
+> & {
+  contactConsent: true;
+  marketingConsent: boolean;
+  consentVersion: "2026-09-09";
+  attribution?: LeadAttribution;
+  website?: string;
+};
+type PrivacyRequestInput = Pick<PrivacyRequest, "email" | "requestType"> & {
+  details?: string;
+  website?: string;
+};
 type SignupInput = Omit<Contractor, "id" | "userId" | "createdAt" | "active"> & {
   password: string;
 };
@@ -40,6 +64,11 @@ type Store = {
   login: (email: string, password: string) => Promise<LoginResult>;
   logout: () => Promise<void>;
   submitLead: (input: NewLeadInput) => Promise<ActionResult>;
+  submitPrivacyRequest: (input: PrivacyRequestInput) => Promise<ActionResult>;
+  updatePrivacyRequestStatus: (
+    id: string,
+    status: PrivacyRequest["status"],
+  ) => Promise<ActionResult>;
   updateLeadStatus: (
     id: string,
     status: LeadStatus,
@@ -57,6 +86,7 @@ const EMPTY_STATE: AppState = {
   session: null,
   subscription: null,
   adminFinancials: null,
+  privacyRequests: [],
 };
 const StoreContext = createContext<Store | null>(null);
 
@@ -151,6 +181,18 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       budget: row.budget ?? undefined,
       isHomeowner: row.is_homeowner,
       isDecisionMaker: row.is_decision_maker,
+      contactConsent: row.contact_consent,
+      marketingConsent: row.marketing_consent,
+      consentVersion: row.consent_version,
+      consentRecordedAt: row.consent_recorded_at,
+      attribution: {
+        ...(row.attribution_source ? { source: row.attribution_source } : {}),
+        ...(row.attribution_medium ? { medium: row.attribution_medium } : {}),
+        ...(row.attribution_campaign ? { campaign: row.attribution_campaign } : {}),
+        ...(row.attribution_content ? { content: row.attribution_content } : {}),
+        ...(row.attribution_term ? { term: row.attribution_term } : {}),
+        ...(row.initial_referrer_host ? { referrerHost: row.initial_referrer_host } : {}),
+      },
       status: row.status as LeadStatus,
       contractorId:
         assignments.find((assignment) => assignment.lead_id === row.id)?.contractor_id ?? null,
@@ -161,8 +203,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }));
 
     let adminFinancials: AdminFinancials | null = null;
+    let privacyRequests: PrivacyRequest[] = [];
     if (role === "admin") {
-      const [paymentsResult, subscriptionsResult] = await Promise.all([
+      const [paymentsResult, subscriptionsResult, privacyRequestsResult] = await Promise.all([
         supabase
           .from("payments")
           .select("id, user_id, amount_cents, currency, status, created_at")
@@ -171,9 +214,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           .from("subscriptions")
           .select("user_id, status, current_period_end, cancel_at_period_end, created_at")
           .order("created_at", { ascending: false }),
+        supabase.from("privacy_requests").select("*").order("created_at", { ascending: false }),
       ]);
       if (paymentsResult.error) throw paymentsResult.error;
       if (subscriptionsResult.error) throw subscriptionsResult.error;
+      if (privacyRequestsResult.error) throw privacyRequestsResult.error;
       adminFinancials = {
         payments: (paymentsResult.data ?? []).map((row) => ({
           id: row.id,
@@ -191,6 +236,15 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           createdAt: row.created_at,
         })),
       };
+      privacyRequests = (privacyRequestsResult.data ?? []).map((row) => ({
+        id: row.id,
+        email: row.email,
+        requestType: row.request_type,
+        details: row.details,
+        status: row.status,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at,
+      }));
     }
 
     const ownRow = contractorRows.find((row) => row.user_id === user.id);
@@ -199,6 +253,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       contractors,
       leads,
       adminFinancials,
+      privacyRequests,
       subscription: subscriptionResult.data
         ? {
             status: subscriptionResult.data.status ?? "inactive",
@@ -351,19 +406,34 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       },
       submitLead: (input) =>
         run(async () => {
-          const { error: insertError } = await supabase.from("leads").insert({
-            name: input.name,
-            phone: input.phone,
-            email: input.email,
-            zip: input.zip,
-            service_type: input.serviceType,
-            project_details: input.projectDetails,
-            timeline: input.timeline,
-            budget: input.budget ?? null,
-            is_homeowner: input.isHomeowner,
-            is_decision_maker: input.isDecisionMaker,
+          const { data, error: intakeError } = await supabase.functions.invoke("public-intake", {
+            body: { action: "lead", ...input },
           });
-          if (insertError) throw insertError;
+          if (intakeError || !data?.ok) {
+            throw new Error(
+              data?.error ?? "Your request could not be submitted. Please try again.",
+            );
+          }
+        }),
+      submitPrivacyRequest: (input) =>
+        run(async () => {
+          const { data, error: intakeError } = await supabase.functions.invoke("public-intake", {
+            body: { action: "privacy_request", ...input },
+          });
+          if (intakeError || !data?.ok) {
+            throw new Error(
+              data?.error ?? "Your request could not be submitted. Please try again.",
+            );
+          }
+        }),
+      updatePrivacyRequestStatus: (id, status) =>
+        run(async () => {
+          const { error: updateError } = await supabase
+            .from("privacy_requests")
+            .update({ status })
+            .eq("id", id);
+          if (updateError) throw updateError;
+          await refresh();
         }),
       updateLeadStatus: (id, status, extra) =>
         run(async () => {
