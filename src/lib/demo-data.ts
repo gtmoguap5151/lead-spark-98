@@ -20,7 +20,6 @@ export const DEMO_CONTRACTORS: Contractor[] = [
     companyName: "Summit Roofing & Exteriors",
     contactName: "Dave Alvarez",
     email: "dave@summitroofing.com",
-    password: "demo1234",
     phone: "(614) 555-0142",
     serviceTypes: ["Roofing", "Windows & Doors"],
     territoryZips: ["43004", "43016", "43017", "43026", "43081"],
@@ -33,7 +32,6 @@ export const DEMO_CONTRACTORS: Contractor[] = [
     companyName: "TrueTemp Heating & Air",
     contactName: "Marcy Whitfield",
     email: "marcy@truetemp.com",
-    password: "demo1234",
     phone: "(614) 555-0188",
     serviceTypes: ["HVAC"],
     territoryZips: ["43004", "43081", "43230"],
@@ -46,7 +44,6 @@ export const DEMO_CONTRACTORS: Contractor[] = [
     companyName: "Buckeye Plumbing Co.",
     contactName: "Ron Kessler",
     email: "ron@buckeyeplumbing.com",
-    password: "demo1234",
     phone: "(614) 555-0119",
     serviceTypes: ["Plumbing", "Bathroom Remodel"],
     territoryZips: ["43016", "43026", "43230"],
@@ -82,7 +79,8 @@ export const DEMO_LEADS: Lead[] = [
     email: "t.hall@example.com",
     zip: "43081",
     serviceType: "Roofing",
-    projectDetails: "Full tear-off and replacement, 2,400 sq ft ranch. Wants architectural shingles.",
+    projectDetails:
+      "Full tear-off and replacement, 2,400 sq ft ranch. Wants architectural shingles.",
     timeline: "1-3 months",
     budget: "$18,000 - $25,000",
     isHomeowner: true,
@@ -107,7 +105,13 @@ export const DEMO_LEADS: Lead[] = [
     status: "qualified",
     contractorId: "c-1",
     createdAt: daysAgo(4, 13),
-    notes: [{ id: "n-2", body: "Confirmed budget and ownership. Ready for site visit.", createdAt: daysAgo(3) }],
+    notes: [
+      {
+        id: "n-2",
+        body: "Confirmed budget and ownership. Ready for site visit.",
+        createdAt: daysAgo(3),
+      },
+    ],
   },
   {
     id: "l-1004",
@@ -125,7 +129,13 @@ export const DEMO_LEADS: Lead[] = [
     contractorId: "c-1",
     createdAt: daysAgo(6, 15),
     appointmentAt: daysAhead(3),
-    notes: [{ id: "n-3", body: "In-home estimate scheduled, both spouses attending.", createdAt: daysAgo(2) }],
+    notes: [
+      {
+        id: "n-3",
+        body: "In-home estimate scheduled, both spouses attending.",
+        createdAt: daysAgo(2),
+      },
+    ],
   },
   {
     id: "l-1005",
@@ -143,7 +153,9 @@ export const DEMO_LEADS: Lead[] = [
     contractorId: "c-1",
     createdAt: daysAgo(18, 10),
     jobValue: 19400,
-    notes: [{ id: "n-4", body: "Contract signed. Install week of the 12th.", createdAt: daysAgo(12) }],
+    notes: [
+      { id: "n-4", body: "Contract signed. Install week of the 12th.", createdAt: daysAgo(12) },
+    ],
   },
   {
     id: "l-1006",
@@ -159,7 +171,9 @@ export const DEMO_LEADS: Lead[] = [
     status: "lost",
     contractorId: "c-1",
     createdAt: daysAgo(21, 16),
-    notes: [{ id: "n-5", body: "Renter, not the decision maker. Disqualified.", createdAt: daysAgo(20) }],
+    notes: [
+      { id: "n-5", body: "Renter, not the decision maker. Disqualified.", createdAt: daysAgo(20) },
+    ],
   },
   {
     id: "l-1007",
@@ -186,7 +200,8 @@ export const DEMO_LEADS: Lead[] = [
     email: "gsandoval@example.com",
     zip: "43230",
     serviceType: "HVAC",
-    projectDetails: "22-year-old furnace short cycling. Wants full system replacement quote with AC.",
+    projectDetails:
+      "22-year-old furnace short cycling. Wants full system replacement quote with AC.",
     timeline: "ASAP (emergency)",
     budget: "$8,000 - $12,000",
     isHomeowner: true,

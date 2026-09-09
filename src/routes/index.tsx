@@ -22,7 +22,10 @@ export const Route = createFileRoute("/")({
         content:
           "Exclusive, phone-verified home improvement leads routed to contractors by ZIP code and trade. Homeowners get free estimates from vetted local pros.",
       },
-      { property: "og:title", content: "Contractor Lead Engine — Qualified Home Improvement Leads" },
+      {
+        property: "og:title",
+        content: "Contractor Lead Engine — Qualified Home Improvement Leads",
+      },
       {
         property: "og:description",
         content:
@@ -148,7 +151,9 @@ function Landing() {
       <section className="border-y border-border bg-muted/50">
         <div className="mx-auto max-w-6xl px-4 py-16">
           <p className="eyebrow text-muted-foreground">How it works</p>
-          <h2 className="mt-2 text-3xl font-bold uppercase sm:text-4xl">Three steps to a booked job</h2>
+          <h2 className="mt-2 text-3xl font-bold uppercase sm:text-4xl">
+            Three steps to a booked job
+          </h2>
           <ol className="mt-8 grid gap-4 md:grid-cols-3">
             {STEPS.map((s) => (
               <li key={s.n} className="surface-card p-5">
@@ -173,13 +178,15 @@ function Landing() {
               the truck, not the desk.
             </p>
             <ul className="mt-4 space-y-2 text-sm">
-              {["Exclusive lead routing", "Pipeline & appointment tracking", "Revenue per closed job"].map(
-                (t) => (
-                  <li key={t} className="flex items-center gap-2">
-                    <BadgeCheck className="size-4 text-success" /> {t}
-                  </li>
-                ),
-              )}
+              {[
+                "Exclusive lead routing",
+                "Pipeline & appointment tracking",
+                "Revenue per closed job",
+              ].map((t) => (
+                <li key={t} className="flex items-center gap-2">
+                  <BadgeCheck className="size-4 text-success" /> {t}
+                </li>
+              ))}
             </ul>
           </div>
           <Button asChild size="lg" className="h-12 text-base font-semibold">
@@ -198,13 +205,15 @@ function Landing() {
               trade — not a call center full of them.
             </p>
             <ul className="mt-4 space-y-2 text-sm">
-              {["Free, no-obligation estimate", "One local pro, not five calls", "Response within one business day"].map(
-                (t) => (
-                  <li key={t} className="flex items-center gap-2">
-                    <CalendarCheck className="size-4 text-success" /> {t}
-                  </li>
-                ),
-              )}
+              {[
+                "Free, no-obligation estimate",
+                "One local pro, not five calls",
+                "Response within one business day",
+              ].map((t) => (
+                <li key={t} className="flex items-center gap-2">
+                  <CalendarCheck className="size-4 text-success" /> {t}
+                </li>
+              ))}
             </ul>
           </div>
           <Button asChild size="lg" variant="secondary" className="h-12 text-base font-semibold">

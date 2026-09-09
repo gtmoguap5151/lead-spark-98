@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { z } from "zod";
 import { toast } from "sonner";
-import { Shield } from "lucide-react";
+import { MailCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -43,8 +43,30 @@ const signupSchema = z.object({
 });
 
 function LoginPage() {
-  const { login, signup, loginAsAdmin, loginDemo } = useApp();
+  const { login, signup, busy } = useApp();
   const navigate = useNavigate();
+  const [confirmationEmail, setConfirmationEmail] = useState<string | null>(null);
+
+  if (confirmationEmail) {
+    return (
+      <div className="min-h-screen bg-background">
+        <SiteHeader />
+        <main className="mx-auto flex max-w-lg flex-col items-center px-4 py-20 text-center">
+          <span className="flex size-14 items-center justify-center rounded-full bg-success/15 text-success">
+            <MailCheck className="size-7" />
+          </span>
+          <h1 className="mt-4 text-3xl font-bold uppercase">Check your email</h1>
+          <p className="mt-2 text-muted-foreground">
+            We created your account and territory. Open the confirmation link sent to{" "}
+            <strong>{confirmationEmail}</strong>, then return here to sign in.
+          </p>
+          <Button className="mt-8" onClick={() => setConfirmationEmail(null)}>
+            Return to login
+          </Button>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -64,52 +86,30 @@ function LoginPage() {
 
           <TabsContent value="login">
             <LoginForm
-              onSubmit={(email, password) => {
-                const res = login(email, password);
+              busy={busy}
+              onSubmit={async (email, password) => {
+                const res = await login(email, password);
                 if (!res.ok) {
-                  toast.error(res.error ?? "Login failed");
+                  toast.error(res.error);
                   return;
                 }
                 toast.success("Welcome back");
-                navigate({ to: "/dashboard" });
+                navigate({ to: res.role === "admin" ? "/admin" : "/dashboard" });
               }}
             />
-            <div className="surface-card mt-4 space-y-3 p-4">
-              <p className="text-sm font-semibold">Just exploring?</p>
-              <div className="flex flex-col gap-2 sm:flex-row">
-                <Button
-                  variant="secondary"
-                  className="flex-1"
-                  onClick={() => {
-                    loginDemo();
-                    navigate({ to: "/dashboard" });
-                  }}
-                >
-                  Open demo contractor
-                </Button>
-                <Button
-                  variant="outline"
-                  className="flex-1"
-                  onClick={() => {
-                    loginAsAdmin();
-                    navigate({ to: "/admin" });
-                  }}
-                >
-                  <Shield className="size-4" /> Admin console
-                </Button>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Demo login: dave@summitroofing.com / demo1234
-              </p>
-            </div>
           </TabsContent>
 
           <TabsContent value="signup">
             <SignupForm
-              onSubmit={(values) => {
-                const res = signup({ ...values });
+              busy={busy}
+              onSubmit={async (values) => {
+                const res = await signup(values);
                 if (!res.ok) {
                   toast.error(res.error);
+                  return;
+                }
+                if (res.requiresEmailConfirmation) {
+                  setConfirmationEmail(values.email);
                   return;
                 }
                 toast.success("Account created — your territory is live");
@@ -130,16 +130,22 @@ function LoginPage() {
   );
 }
 
-function LoginForm({ onSubmit }: { onSubmit: (email: string, password: string) => void }) {
-  const [email, setEmail] = useState("dave@summitroofing.com");
-  const [password, setPassword] = useState("demo1234");
+function LoginForm({
+  onSubmit,
+  busy,
+}: {
+  onSubmit: (email: string, password: string) => Promise<void>;
+  busy: boolean;
+}) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   return (
     <form
       className="surface-card mt-4 space-y-4 p-5"
       onSubmit={(e) => {
         e.preventDefault();
-        onSubmit(email, password);
+        void onSubmit(email, password);
       }}
     >
       <div className="space-y-1.5">
@@ -162,8 +168,13 @@ function LoginForm({ onSubmit }: { onSubmit: (email: string, password: string) =
           autoComplete="current-password"
         />
       </div>
-      <Button type="submit" size="lg" className="h-12 w-full text-base font-semibold">
-        Log in
+      <Button
+        type="submit"
+        size="lg"
+        className="h-12 w-full text-base font-semibold"
+        disabled={busy}
+      >
+        {busy ? "Signing in…" : "Log in"}
       </Button>
     </form>
   );
@@ -171,7 +182,13 @@ function LoginForm({ onSubmit }: { onSubmit: (email: string, password: string) =
 
 type SignupValues = z.infer<typeof signupSchema>;
 
-function SignupForm({ onSubmit }: { onSubmit: (values: SignupValues) => void }) {
+function SignupForm({
+  onSubmit,
+  busy,
+}: {
+  onSubmit: (values: SignupValues) => Promise<void>;
+  busy: boolean;
+}) {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [services, setServices] = useState<ServiceType[]>([]);
   const [zips, setZips] = useState("");
@@ -208,7 +225,7 @@ function SignupForm({ onSubmit }: { onSubmit: (values: SignupValues) => void }) 
           return;
         }
         setErrors({});
-        onSubmit(parsed.data);
+        void onSubmit(parsed.data);
       }}
     >
       {(
@@ -230,7 +247,9 @@ function SignupForm({ onSubmit }: { onSubmit: (values: SignupValues) => void }) 
             value={form[key]}
             onChange={(e) => set(key, e.target.value)}
           />
-          {errors[key] ? <p className="text-xs font-medium text-destructive">{errors[key]}</p> : null}
+          {errors[key] ? (
+            <p className="text-xs font-medium text-destructive">{errors[key]}</p>
+          ) : null}
         </div>
       ))}
 
@@ -277,8 +296,13 @@ function SignupForm({ onSubmit }: { onSubmit: (values: SignupValues) => void }) 
         ) : null}
       </div>
 
-      <Button type="submit" size="lg" className="h-12 w-full text-base font-semibold">
-        Get Qualified Leads
+      <Button
+        type="submit"
+        size="lg"
+        className="h-12 w-full text-base font-semibold"
+        disabled={busy}
+      >
+        {busy ? "Creating account…" : "Get Qualified Leads"}
       </Button>
     </form>
   );

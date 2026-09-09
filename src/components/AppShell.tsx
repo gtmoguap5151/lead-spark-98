@@ -1,6 +1,14 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
-import { HardHat, Inbox, LayoutDashboard, LogOut, Shield, UserRound } from "lucide-react";
+import {
+  CreditCard,
+  HardHat,
+  Inbox,
+  LayoutDashboard,
+  LogOut,
+  Shield,
+  UserRound,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useApp, useCurrentContractor } from "@/lib/store";
 import { cn } from "@/lib/utils";
@@ -9,6 +17,7 @@ const NAV = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { to: "/leads", label: "Leads", icon: Inbox },
   { to: "/profile", label: "Profile", icon: UserRound },
+  { to: "/billing", label: "Billing", icon: CreditCard },
 ] as const;
 
 export function AppShell({
@@ -91,8 +100,7 @@ export function AppShell({
               size="icon"
               aria-label="Sign out"
               onClick={() => {
-                logout();
-                navigate({ to: "/" });
+                void logout().finally(() => navigate({ to: "/" }));
               }}
             >
               <LogOut className="size-4" />
@@ -105,9 +113,7 @@ export function AppShell({
         <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
           <div>
             <h1 className="font-display text-3xl font-bold uppercase leading-none">{title}</h1>
-            {subtitle ? (
-              <p className="mt-1.5 text-sm text-muted-foreground">{subtitle}</p>
-            ) : null}
+            {subtitle ? <p className="mt-1.5 text-sm text-muted-foreground">{subtitle}</p> : null}
           </div>
           {actions}
         </div>

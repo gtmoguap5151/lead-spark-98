@@ -1,0 +1,10 @@
+{
+  "name": "Contractor Lead Engine",
+  "short_name": "Lead Engine",
+  "description": "Qualified home-services leads routed to contractors by ZIP code and trade.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#1f2937",
+  "icons": [{ "src": "/favicon.ico", "sizes": "48x48", "type": "image/x-icon" }]
+}

@@ -50,7 +50,12 @@ function DashboardPage() {
       }
     >
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <MetricCard label="New leads" value={newLeads.length} hint="Awaiting first call" icon={Inbox} />
+        <MetricCard
+          label="New leads"
+          value={newLeads.length}
+          hint="Awaiting first call"
+          icon={Inbox}
+        />
         <MetricCard
           label="Qualified"
           value={qualified.length}

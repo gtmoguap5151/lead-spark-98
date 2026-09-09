@@ -37,8 +37,7 @@ function LeadsPage() {
     return leads.filter(
       (l) =>
         (filter === "all" || l.status === filter) &&
-        (!q ||
-          [l.name, l.zip, l.serviceType, l.phone].some((v) => v.toLowerCase().includes(q))),
+        (!q || [l.name, l.zip, l.serviceType, l.phone].some((v) => v.toLowerCase().includes(q))),
     );
   }, [leads, filter, query]);
 
