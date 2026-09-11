@@ -16,19 +16,20 @@ import { SiteFooter, SiteHeader } from "@/components/SiteHeader";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Find a Local Contractor for Your Home Project — Lead Engine" },
+      { title: "Find a Contractor for Your Home Project — Lead Engine" },
       {
         name: "description",
         content:
-          "Tell us what you need done and get matched with one local contractor for roofing, HVAC, plumbing, remodeling and other home projects.",
+          "Homeowners across the U.S. can request one matched contractor for roofing, HVAC, plumbing, remodeling, and other home projects.",
       },
       {
         property: "og:title",
-        content: "Find a Local Contractor for Your Home Project",
+        content: "Find a Contractor for Your Home Project",
       },
       {
         property: "og:description",
-        content: "A simple way to request help with your home project without calling contractor after contractor.",
+        content:
+          "A simple way to request help with your home project without calling contractor after contractor.",
       },
     ],
   }),
@@ -76,8 +77,9 @@ function Landing() {
             <span className="mt-2 block text-primary">Start here.</span>
           </h1>
           <p className="mt-6 max-w-2xl text-lg leading-relaxed text-steel-foreground/90 sm:text-xl">
-            Tell us what you need and we&apos;ll route your request to one local contractor who works
-            in your area. No complicated process and no need to call around all day.
+            From any U.S. ZIP code, tell us what you need and we&apos;ll route your request to one
+            contractor who works in your area when a match is available. No complicated process and
+            no need to call around all day.
           </p>
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
@@ -97,15 +99,20 @@ function Landing() {
           <div className="mt-10 grid max-w-3xl gap-3 sm:grid-cols-3">
             {[
               [ShieldCheck, "No obligation", "You decide whether to move forward."],
-              [MapPin, "Local matching", "Requests route by service and ZIP code."],
+              [MapPin, "Nationwide intake", "Requests route by service and U.S. ZIP code."],
               [Clock3, "Quick to complete", "The request form takes only a few minutes."],
             ].map(([Icon, title, body]) => {
               const ItemIcon = Icon as typeof ShieldCheck;
               return (
-                <div key={String(title)} className="rounded-xl border border-white/15 bg-black/15 p-4">
+                <div
+                  key={String(title)}
+                  className="rounded-xl border border-white/15 bg-black/15 p-4"
+                >
                   <ItemIcon className="size-6 text-primary" />
                   <p className="mt-2 text-base font-bold">{String(title)}</p>
-                  <p className="mt-1 text-sm leading-relaxed text-steel-foreground/75">{String(body)}</p>
+                  <p className="mt-1 text-sm leading-relaxed text-steel-foreground/75">
+                    {String(body)}
+                  </p>
                 </div>
               );
             })}
@@ -120,7 +127,10 @@ function Landing() {
             "One contractor receives your request",
             "Your contact details are not sold to a list of contractors",
           ].map((text) => (
-            <div key={text} className="flex items-start gap-3 text-base font-medium leading-relaxed">
+            <div
+              key={text}
+              className="flex items-start gap-3 text-base font-medium leading-relaxed"
+            >
               <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-success" />
               <span>{text}</span>
             </div>
@@ -129,7 +139,9 @@ function Landing() {
       </section>
 
       <section className="mx-auto max-w-6xl px-4 py-14 sm:py-16">
-        <p className="text-base font-bold uppercase tracking-wide text-muted-foreground">How it works</p>
+        <p className="text-base font-bold uppercase tracking-wide text-muted-foreground">
+          How it works
+        </p>
         <h2 className="mt-2 max-w-3xl text-3xl font-bold leading-tight sm:text-4xl">
           Three simple steps. No confusing process.
         </h2>
@@ -163,14 +175,19 @@ function Landing() {
           <div className="surface-card p-6 sm:p-7">
             <h3 className="text-2xl font-bold">Common projects</h3>
             <ul className="mt-4 grid gap-3 text-lg sm:grid-cols-2">
-              {["Roofing", "Heating & cooling", "Plumbing", "Bathroom remodels", "Windows & doors", "Other home repairs"].map(
-                (item) => (
-                  <li key={item} className="flex items-center gap-2">
-                    <BadgeCheck className="size-5 shrink-0 text-success" />
-                    {item}
-                  </li>
-                ),
-              )}
+              {[
+                "Roofing",
+                "Heating & cooling",
+                "Plumbing",
+                "Bathroom remodels",
+                "Windows & doors",
+                "Other home repairs",
+              ].map((item) => (
+                <li key={item} className="flex items-center gap-2">
+                  <BadgeCheck className="size-5 shrink-0 text-success" />
+                  {item}
+                </li>
+              ))}
             </ul>
           </div>
         </div>
@@ -184,8 +201,8 @@ function Landing() {
             </span>
             <h2 className="mt-4 text-2xl font-bold">For homeowners</h2>
             <p className="mt-3 text-base leading-relaxed text-muted-foreground">
-              Request help without creating an account. Tell us about the project and we&apos;ll route it
-              based on the service you need and your ZIP code.
+              Request help without creating an account. Tell us about the project and we&apos;ll
+              route it based on the service you need and your ZIP code.
             </p>
           </div>
           <Button asChild size="lg" className="h-14 text-lg font-bold">

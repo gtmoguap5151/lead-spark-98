@@ -4,6 +4,7 @@ import { z } from "zod";
 import { toast } from "sonner";
 import { MailCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -37,9 +38,14 @@ const signupSchema = z.object({
   email: z.string().trim().email("Enter a valid email").max(255),
   phone: z.string().trim().min(7, "Enter a valid phone").max(20),
   city: z.string().trim().min(2, "Enter your city").max(100),
+  licenseNumber: z.string().trim().max(100, "Keep the license number under 100 characters"),
   password: z.string().min(8, "Use at least 8 characters").max(72),
   territoryZips: z.array(z.string().regex(/^\d{5}$/)).min(1, "Add at least one ZIP code"),
   serviceTypes: z.array(z.enum(SERVICE_TYPES)).min(1, "Pick at least one service"),
+  complianceAttested: z.literal(true, {
+    message: "Confirm that your business meets the rules where it operates",
+  }),
+  termsAccepted: z.literal(true, { message: "Accept the Terms of Service to create an account" }),
 });
 
 function LoginPage() {
@@ -75,7 +81,7 @@ function LoginPage() {
         <p className="eyebrow text-muted-foreground">Contractor access</p>
         <h1 className="mt-2 text-4xl font-bold uppercase leading-none">Get Qualified Leads</h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Sign in to your pipeline, or claim a territory in under a minute.
+          Sign in to your pipeline, or claim eligible ZIP territories across the U.S.
         </p>
 
         <Tabs defaultValue="login" className="mt-6">
@@ -192,12 +198,15 @@ function SignupForm({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [services, setServices] = useState<ServiceType[]>([]);
   const [zips, setZips] = useState("");
+  const [complianceAttested, setComplianceAttested] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const [form, setForm] = useState({
     companyName: "",
     contactName: "",
     email: "",
     phone: "",
     city: "",
+    licenseNumber: "",
     password: "",
   });
 
@@ -211,6 +220,8 @@ function SignupForm({
         e.preventDefault();
         const parsed = signupSchema.safeParse({
           ...form,
+          complianceAttested,
+          termsAccepted,
           serviceTypes: services,
           territoryZips: zips
             .split(/[\s,]+/)
@@ -234,7 +245,13 @@ function SignupForm({
           ["contactName", "Your name", "Dave Alvarez", "text"],
           ["email", "Work email", "you@company.com", "email"],
           ["phone", "Phone", "(614) 555-0142", "tel"],
-          ["city", "City / base of operations", "Columbus, OH", "text"],
+          ["city", "City / base of operations", "Denver, CO", "text"],
+          [
+            "licenseNumber",
+            "License / registration number (optional)",
+            "State or local credential, if applicable",
+            "text",
+          ],
           ["password", "Password", "At least 8 characters", "password"],
         ] as const
       ).map(([key, label, placeholder, type]) => (
@@ -286,7 +303,7 @@ function SignupForm({
         <Label htmlFor="su-zips">Territory ZIP codes</Label>
         <Input
           id="su-zips"
-          placeholder="43017, 43016, 43026"
+          placeholder="80202, 80203, 80204"
           value={zips}
           onChange={(e) => setZips(e.target.value)}
         />
@@ -294,6 +311,52 @@ function SignupForm({
         {errors.territoryZips ? (
           <p className="text-xs font-medium text-destructive">{errors.territoryZips}</p>
         ) : null}
+      </div>
+
+      <div className="space-y-4 rounded-xl bg-muted/60 p-4">
+        <div className="flex items-start gap-3">
+          <Checkbox
+            id="compliance-attestation"
+            checked={complianceAttested}
+            onCheckedChange={(checked) => setComplianceAttested(checked === true)}
+            className="mt-0.5"
+          />
+          <div>
+            <Label htmlFor="compliance-attestation" className="leading-relaxed">
+              I confirm that my business will maintain all licenses, registrations, permits, and
+              insurance required where it works, and will contact homeowners lawfully.
+            </Label>
+            {errors.complianceAttested ? (
+              <p className="mt-1 text-xs font-medium text-destructive">
+                {errors.complianceAttested}
+              </p>
+            ) : null}
+          </div>
+        </div>
+        <div className="flex items-start gap-3">
+          <Checkbox
+            id="terms-acceptance"
+            checked={termsAccepted}
+            onCheckedChange={(checked) => setTermsAccepted(checked === true)}
+            className="mt-0.5"
+          />
+          <div>
+            <Label htmlFor="terms-acceptance" className="leading-relaxed">
+              I accept the{" "}
+              <Link to="/terms" className="font-semibold underline underline-offset-2">
+                Terms of Service
+              </Link>{" "}
+              and acknowledge the{" "}
+              <Link to="/privacy" className="font-semibold underline underline-offset-2">
+                Privacy &amp; Data Choices notice
+              </Link>
+              .
+            </Label>
+            {errors.termsAccepted ? (
+              <p className="mt-1 text-xs font-medium text-destructive">{errors.termsAccepted}</p>
+            ) : null}
+          </div>
+        </div>
       </div>
 
       <Button

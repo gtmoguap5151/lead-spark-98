@@ -116,7 +116,12 @@ Deno.serve(async (request) => {
     if (!nextStep) {
       await supabase
         .from("sales_enrollments")
-        .update({ current_step: enrollment.current_step + 1, status: "completed", completed_at: now, last_error: null })
+        .update({
+          current_step: enrollment.current_step + 1,
+          status: "completed",
+          completed_at: now,
+          last_error: null,
+        })
         .eq("id", enrollment.id);
     } else {
       const nextRun = new Date(Date.now() + nextStep.delay_minutes * 60_000).toISOString();

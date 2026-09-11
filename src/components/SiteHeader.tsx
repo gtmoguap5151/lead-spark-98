@@ -50,6 +50,9 @@ export function SiteFooter() {
           <Link to="/privacy" className="hover:text-primary">
             Privacy &amp; Data Choices
           </Link>
+          <Link to="/terms" className="hover:text-primary">
+            Terms of Service
+          </Link>
           <Link to="/admin" className="hover:text-primary">
             Admin
           </Link>

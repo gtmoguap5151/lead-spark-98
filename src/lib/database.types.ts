@@ -14,6 +14,20 @@ type Relation<
   referencedColumns: ReferencedColumns;
 };
 
+type PrivacyRequestType =
+  | "access"
+  | "correct"
+  | "delete"
+  | "portable_copy"
+  | "marketing_opt_out"
+  | "sale_opt_out"
+  | "targeted_advertising_opt_out"
+  | "profiling_opt_out"
+  | "appeal"
+  | "other";
+
+type PrivacySuppressionType = "marketing" | "sale" | "targeted_advertising" | "profiling";
+
 export type Database = {
   __InternalSupabase: { PostgrestVersion: "14.5" };
   public: {
@@ -55,6 +69,10 @@ export type Database = {
           phone: string | null;
           city: string | null;
           active: boolean;
+          license_number: string | null;
+          compliance_attested_at: string | null;
+          terms_version: string | null;
+          terms_accepted_at: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -67,6 +85,10 @@ export type Database = {
           phone?: string | null;
           city?: string | null;
           active?: boolean;
+          license_number?: string | null;
+          compliance_attested_at?: string | null;
+          terms_version?: string | null;
+          terms_accepted_at?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -79,6 +101,10 @@ export type Database = {
           phone?: string | null;
           city?: string | null;
           active?: boolean;
+          license_number?: string | null;
+          compliance_attested_at?: string | null;
+          terms_version?: string | null;
+          terms_accepted_at?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -123,6 +149,7 @@ export type Database = {
           budget: string | null;
           is_homeowner: boolean;
           is_decision_maker: boolean;
+          is_adult: boolean;
           contact_consent: boolean;
           marketing_consent: boolean;
           consent_version: string | null;
@@ -152,6 +179,7 @@ export type Database = {
           budget?: string | null;
           is_homeowner?: boolean;
           is_decision_maker?: boolean;
+          is_adult?: boolean;
           contact_consent?: boolean;
           marketing_consent?: boolean;
           consent_version?: string | null;
@@ -181,6 +209,7 @@ export type Database = {
           budget?: string | null;
           is_homeowner?: boolean;
           is_decision_maker?: boolean;
+          is_adult?: boolean;
           contact_consent?: boolean;
           marketing_consent?: boolean;
           consent_version?: string | null;
@@ -204,31 +233,68 @@ export type Database = {
         Row: {
           id: string;
           email: string;
-          request_type: "access" | "correct" | "delete" | "marketing_opt_out" | "other";
+          request_type: PrivacyRequestType;
           details: string | null;
           status: "pending" | "verifying" | "completed" | "denied";
           created_at: string;
           updated_at: string;
+          due_at: string;
+          resolved_at: string | null;
+          decision_reason: string | null;
         };
         Insert: {
           id?: string;
           email: string;
-          request_type: "access" | "correct" | "delete" | "marketing_opt_out" | "other";
+          request_type: PrivacyRequestType;
           details?: string | null;
           status?: "pending" | "verifying" | "completed" | "denied";
           created_at?: string;
           updated_at?: string;
+          due_at?: string;
+          resolved_at?: string | null;
+          decision_reason?: string | null;
         };
         Update: {
           id?: string;
           email?: string;
-          request_type?: "access" | "correct" | "delete" | "marketing_opt_out" | "other";
+          request_type?: PrivacyRequestType;
           details?: string | null;
           status?: "pending" | "verifying" | "completed" | "denied";
           created_at?: string;
           updated_at?: string;
+          due_at?: string;
+          resolved_at?: string | null;
+          decision_reason?: string | null;
         };
         Relationships: [];
+      };
+      privacy_suppressions: {
+        Row: {
+          email: string;
+          suppression_type: PrivacySuppressionType;
+          source_request_id: string | null;
+          created_at: string;
+        };
+        Insert: {
+          email: string;
+          suppression_type: PrivacySuppressionType;
+          source_request_id?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          email?: string;
+          suppression_type?: PrivacySuppressionType;
+          source_request_id?: string | null;
+          created_at?: string;
+        };
+        Relationships: [
+          Relation<
+            "privacy_suppressions_source_request_id_fkey",
+            ["source_request_id"],
+            "privacy_requests",
+            ["id"]
+          >,
+        ];
       };
       lead_assignments: {
         Row: { id: string; lead_id: string; contractor_id: string; assigned_at: string };
@@ -330,6 +396,138 @@ export type Database = {
         };
         Relationships: [
           Relation<"referral_rewards_referral_id_fkey", ["referral_id"], "referrals", ["id"]>,
+        ];
+      };
+      sales_prospects: {
+        Row: {
+          id: string;
+          company_name: string;
+          contact_name: string | null;
+          email: string | null;
+          phone: string | null;
+          website: string | null;
+          trade: string | null;
+          city: string | null;
+          state: string | null;
+          zip: string | null;
+          source: string;
+          score: number;
+          stage: string;
+          owner_agent: string;
+          opted_out: boolean;
+          last_contacted_at: string | null;
+          next_action_at: string | null;
+          converted_contractor_id: string | null;
+          metadata: Json;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          company_name: string;
+          contact_name?: string | null;
+          email?: string | null;
+          phone?: string | null;
+          website?: string | null;
+          trade?: string | null;
+          city?: string | null;
+          state?: string | null;
+          zip?: string | null;
+          source?: string;
+          score?: number;
+          stage?: string;
+          owner_agent?: string;
+          opted_out?: boolean;
+          last_contacted_at?: string | null;
+          next_action_at?: string | null;
+          converted_contractor_id?: string | null;
+          metadata?: Json;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          company_name?: string;
+          contact_name?: string | null;
+          email?: string | null;
+          phone?: string | null;
+          website?: string | null;
+          trade?: string | null;
+          city?: string | null;
+          state?: string | null;
+          zip?: string | null;
+          source?: string;
+          score?: number;
+          stage?: string;
+          owner_agent?: string;
+          opted_out?: boolean;
+          last_contacted_at?: string | null;
+          next_action_at?: string | null;
+          converted_contractor_id?: string | null;
+          metadata?: Json;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          Relation<
+            "sales_prospects_converted_contractor_id_fkey",
+            ["converted_contractor_id"],
+            "contractors",
+            ["id"]
+          >,
+        ];
+      };
+      sales_activities: {
+        Row: {
+          id: string;
+          prospect_id: string;
+          enrollment_id: string | null;
+          agent_role: string;
+          channel: string;
+          direction: string;
+          status: string;
+          subject: string | null;
+          body: string | null;
+          provider_message_id: string | null;
+          error_message: string | null;
+          scheduled_for: string;
+          sent_at: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          prospect_id: string;
+          enrollment_id?: string | null;
+          agent_role: string;
+          channel: string;
+          direction?: string;
+          status?: string;
+          subject?: string | null;
+          body?: string | null;
+          provider_message_id?: string | null;
+          error_message?: string | null;
+          scheduled_for?: string;
+          sent_at?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          prospect_id?: string;
+          enrollment_id?: string | null;
+          agent_role?: string;
+          channel?: string;
+          direction?: string;
+          status?: string;
+          subject?: string | null;
+          body?: string | null;
+          provider_message_id?: string | null;
+          error_message?: string | null;
+          scheduled_for?: string;
+          sent_at?: string | null;
+          created_at?: string;
+        };
+        Relationships: [
+          Relation<"sales_activities_prospect_id_fkey", ["prospect_id"], "sales_prospects", ["id"]>,
         ];
       };
       payments: {

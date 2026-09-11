@@ -37,10 +37,11 @@ type NewLeadInput = Pick<
   | "budget"
   | "isHomeowner"
   | "isDecisionMaker"
+  | "isAdult"
 > & {
   contactConsent: true;
   marketingConsent: boolean;
-  consentVersion: "2026-09-09";
+  consentVersion: "2026-09-09-us-2";
   attribution?: LeadAttribution;
   website?: string;
 };
@@ -48,8 +49,19 @@ type PrivacyRequestInput = Pick<PrivacyRequest, "email" | "requestType"> & {
   details?: string;
   website?: string;
 };
-type SignupInput = Omit<Contractor, "id" | "userId" | "createdAt" | "active"> & {
+type SignupInput = Omit<
+  Contractor,
+  | "id"
+  | "userId"
+  | "createdAt"
+  | "active"
+  | "complianceAttestedAt"
+  | "termsVersion"
+  | "termsAcceptedAt"
+> & {
   password: string;
+  complianceAttested: true;
+  termsAccepted: true;
 };
 type ActionResult = { ok: true } | { ok: false; error: string };
 type LoginResult = { ok: true; role: "contractor" | "admin" } | { ok: false; error: string };
@@ -68,6 +80,7 @@ type Store = {
   updatePrivacyRequestStatus: (
     id: string,
     status: PrivacyRequest["status"],
+    decisionReason?: string,
   ) => Promise<ActionResult>;
   updateLeadStatus: (
     id: string,
@@ -159,6 +172,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       phone: row.phone ?? "",
       city: row.city ?? "",
       active: row.active,
+      licenseNumber: row.license_number ?? "",
+      complianceAttestedAt: row.compliance_attested_at,
+      termsVersion: row.terms_version,
+      termsAcceptedAt: row.terms_accepted_at,
       createdAt: row.created_at,
       serviceTypes: services
         .filter((item) => item.contractor_id === row.id)
@@ -181,6 +198,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       budget: row.budget ?? undefined,
       isHomeowner: row.is_homeowner,
       isDecisionMaker: row.is_decision_maker,
+      isAdult: row.is_adult,
       contactConsent: row.contact_consent,
       marketingConsent: row.marketing_consent,
       consentVersion: row.consent_version,
@@ -244,6 +262,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         status: row.status,
         createdAt: row.created_at,
         updatedAt: row.updated_at,
+        dueAt: row.due_at,
+        resolvedAt: row.resolved_at,
+        decisionReason: row.decision_reason,
       }));
     }
 
@@ -363,8 +384,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
                 contact_name: input.contactName,
                 phone: input.phone,
                 city: input.city,
+                license_number: input.licenseNumber,
                 service_types: input.serviceTypes,
                 territory_zips: input.territoryZips,
+                compliance_attested: input.complianceAttested,
+                terms_version: input.termsAccepted ? "2026-09-09-us-1" : null,
               },
             },
           });
@@ -426,11 +450,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
             );
           }
         }),
-      updatePrivacyRequestStatus: (id, status) =>
+      updatePrivacyRequestStatus: (id, status, decisionReason) =>
         run(async () => {
           const { error: updateError } = await supabase
             .from("privacy_requests")
-            .update({ status })
+            .update({
+              status,
+              decision_reason: status === "denied" ? (decisionReason ?? null) : null,
+            })
             .eq("id", id);
           if (updateError) throw updateError;
           await refresh();

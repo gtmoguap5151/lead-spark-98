@@ -542,7 +542,8 @@ function AdminPage() {
                 <h2 className="text-xl font-bold uppercase">Privacy request queue</h2>
               </div>
               <p className="mt-1 text-sm text-muted-foreground">
-                Verify identity before disclosing, changing, or deleting personal information.
+                Verify identity before acting. Standard requests target 45 days; appeals target 60
+                days.
               </p>
             </div>
             {privacyRequests.length ? (
@@ -553,6 +554,7 @@ function AdminPage() {
                       <th className="px-4 py-3 font-semibold">Request</th>
                       <th className="px-4 py-3 font-semibold">Email</th>
                       <th className="px-4 py-3 font-semibold">Received</th>
+                      <th className="px-4 py-3 font-semibold">Due</th>
                       <th className="px-4 py-3 font-semibold">Details</th>
                       <th className="px-4 py-3 font-semibold">Status</th>
                     </tr>
@@ -578,6 +580,22 @@ function AdminPage() {
                             year: "numeric",
                           })}
                         </td>
+                        <td
+                          className={cn(
+                            "whitespace-nowrap px-4 py-3 text-muted-foreground",
+                            request.status !== "completed" &&
+                              request.status !== "denied" &&
+                              Date.parse(request.dueAt) < Date.now()
+                              ? "font-semibold text-destructive"
+                              : "",
+                          )}
+                        >
+                          {new Date(request.dueAt).toLocaleDateString("en-US", {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          })}
+                        </td>
                         <td className="max-w-sm px-4 py-3 text-muted-foreground">
                           {request.details || "—"}
                         </td>
@@ -586,9 +604,22 @@ function AdminPage() {
                             value={request.status}
                             disabled={busy}
                             onValueChange={async (status) => {
+                              let decisionReason: string | undefined;
+                              if (status === "denied") {
+                                const entered = window.prompt(
+                                  "Why is this request being denied? This reason must be included in the response.",
+                                  request.decisionReason ?? "",
+                                );
+                                if (!entered?.trim()) {
+                                  toast.error("A denial reason is required.");
+                                  return;
+                                }
+                                decisionReason = entered.trim().slice(0, 1000);
+                              }
                               const result = await updatePrivacyRequestStatus(
                                 request.id,
                                 status as typeof request.status,
+                                decisionReason,
                               );
                               if (!result.ok) {
                                 toast.error(result.error);
@@ -618,7 +649,8 @@ function AdminPage() {
                 <ShieldCheck className="mx-auto size-9 text-success" />
                 <p className="mt-3 font-semibold">No privacy requests</p>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  New access, correction, deletion, and opt-out requests will appear here.
+                  New access, correction, deletion, export, appeal, and opt-out requests will appear
+                  here.
                 </p>
               </div>
             )}

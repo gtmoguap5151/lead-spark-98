@@ -67,6 +67,7 @@ export type Lead = {
   budget?: string;
   isHomeowner: boolean;
   isDecisionMaker: boolean;
+  isAdult: boolean;
   contactConsent: boolean;
   marketingConsent: boolean;
   consentVersion: string | null;
@@ -91,6 +92,10 @@ export type Contractor = {
   territoryZips: string[];
   city: string;
   active: boolean;
+  licenseNumber: string;
+  complianceAttestedAt: string | null;
+  termsVersion: string | null;
+  termsAcceptedAt: string | null;
   createdAt: string;
 };
 
@@ -126,11 +131,24 @@ export type AdminFinancials = {
 export type PrivacyRequest = {
   id: string;
   email: string;
-  requestType: "access" | "correct" | "delete" | "marketing_opt_out" | "other";
+  requestType:
+    | "access"
+    | "correct"
+    | "delete"
+    | "portable_copy"
+    | "marketing_opt_out"
+    | "sale_opt_out"
+    | "targeted_advertising_opt_out"
+    | "profiling_opt_out"
+    | "appeal"
+    | "other";
   details: string | null;
   status: "pending" | "verifying" | "completed" | "denied";
   createdAt: string;
   updatedAt: string;
+  dueAt: string;
+  resolvedAt: string | null;
+  decisionReason: string | null;
 };
 
 export type Session = { role: "contractor"; contractorId: string } | { role: "admin" } | null;

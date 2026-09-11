@@ -61,7 +61,8 @@ function LeadsPage() {
               </p>
               <h2 className="mt-1 text-xl font-bold">Unlock your next lead</h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                Your first real lead was free. New lead details stay locked until you activate a paid plan.
+                Your first real lead was free. New lead details stay locked until you activate a
+                paid plan.
               </p>
               <div className="mt-4 flex flex-wrap items-center gap-3">
                 <Button asChild className="h-11">

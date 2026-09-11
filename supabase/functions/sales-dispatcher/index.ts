@@ -24,12 +24,19 @@ type Prospect = {
   opted_out: boolean;
 };
 
-function extractOutputText(payload: any): string {
-  if (typeof payload?.output_text === "string") return payload.output_text.trim();
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null;
+
+function extractOutputText(payload: unknown): string {
+  if (!isRecord(payload)) return "";
+  if (typeof payload.output_text === "string") return payload.output_text.trim();
   const parts: string[] = [];
-  for (const item of payload?.output ?? []) {
-    for (const content of item?.content ?? []) {
-      if (typeof content?.text === "string") parts.push(content.text);
+  const output = Array.isArray(payload.output) ? payload.output : [];
+  for (const item of output) {
+    if (!isRecord(item)) continue;
+    const contentParts = Array.isArray(item.content) ? item.content : [];
+    for (const content of contentParts) {
+      if (isRecord(content) && typeof content.text === "string") parts.push(content.text);
     }
   }
   return parts.join("\n").trim();
@@ -38,7 +45,8 @@ function extractOutputText(payload: any): string {
 function parseDraft(text: string) {
   const subjectMatch = text.match(/^SUBJECT:\s*(.+)$/im);
   const bodyMatch = text.match(/^BODY:\s*([\s\S]+)$/im);
-  if (!subjectMatch || !bodyMatch) throw new Error("AI response did not contain SUBJECT and BODY fields");
+  if (!subjectMatch || !bodyMatch)
+    throw new Error("AI response did not contain SUBJECT and BODY fields");
   return {
     subject: subjectMatch[1].trim().slice(0, 160),
     body: bodyMatch[1].trim(),
@@ -50,10 +58,12 @@ async function generateEmail(prospect: Prospect, objective: string, agentRole: s
   if (!apiKey) throw new Error("OPENAI_API_KEY is missing");
 
   const model = Deno.env.get("OPENAI_MODEL") || "gpt-5-mini";
-  const signupUrl = Deno.env.get("LEAD_SPARK_SIGNUP_URL") || "https://lead-spark-98.vercel.app/login";
-  const location = [prospect.city, prospect.state].filter(Boolean).join(", ") || "their service area";
+  const signupUrl =
+    Deno.env.get("LEAD_SPARK_SIGNUP_URL") || "https://lead-spark-98.vercel.app/login";
+  const location =
+    [prospect.city, prospect.state].filter(Boolean).join(", ") || "their service area";
 
-  const prompt = `You are the ${agentRole} for Lead Spark, a contractor lead platform.\n\nWrite a short, credible sales email to a contractor. Do not sound robotic, exaggerated, deceptive, or spammy. Never claim results, customers, savings, exclusivity, or lead volume that are not provided. The one approved acquisition offer is: the contractor's first real lead can be free one time; after that, continued real-lead access requires payment, credits, or an active paid subscription.\n\nProspect:\nCompany: ${prospect.company_name}\nContact: ${prospect.contact_name || "owner/team"}\nTrade: ${prospect.trade || "contractor"}\nLocation: ${location}\nWebsite: ${prospect.website || "unknown"}\n\nObjective: ${objective}\nSignup URL: ${signupUrl}\n\nRequirements:\n- 45 to 110 words in the body.\n- One clear call to action.\n- Mention Lead Spark naturally.\n- Personalize only from the supplied facts.\n- Do not use fake urgency.\n- Include a simple opt-out sentence at the end: \"If you'd rather not hear from us, just reply stop.\"\n- Plain text only.\n- Output exactly:\nSUBJECT: <subject>\nBODY: <body>`;
+  const prompt = `You are the ${agentRole} for Lead Spark, a contractor lead platform.\n\nWrite a short, credible sales email to a contractor. Do not sound robotic, exaggerated, deceptive, or spammy. Never claim results, customers, savings, exclusivity, or lead volume that are not provided. The one approved acquisition offer is: the contractor's first real lead can be free one time; after that, continued real-lead access requires payment, credits, or an active paid subscription.\n\nProspect:\nCompany: ${prospect.company_name}\nContact: ${prospect.contact_name || "owner/team"}\nTrade: ${prospect.trade || "contractor"}\nLocation: ${location}\nWebsite: ${prospect.website || "unknown"}\n\nObjective: ${objective}\nSignup URL: ${signupUrl}\n\nRequirements:\n- 45 to 110 words in the body.\n- One clear call to action.\n- Mention Lead Spark naturally.\n- Personalize only from the supplied facts.\n- Do not use fake urgency.\n- Include a simple opt-out sentence at the end: "If you'd rather not hear from us, just reply stop."\n- Plain text only.\n- Output exactly:\nSUBJECT: <subject>\nBODY: <body>`;
 
   const response = await fetch("https://api.openai.com/v1/responses", {
     method: "POST",
@@ -69,7 +79,8 @@ async function generateEmail(prospect: Prospect, objective: string, agentRole: s
   });
 
   const payload = await response.json();
-  if (!response.ok) throw new Error(payload?.error?.message || `OpenAI request failed (${response.status})`);
+  if (!response.ok)
+    throw new Error(payload?.error?.message || `OpenAI request failed (${response.status})`);
   return parseDraft(extractOutputText(payload));
 }
 
@@ -95,7 +106,8 @@ async function sendEmail(to: string, subject: string, body: string, activityId: 
   });
 
   const payload = await response.json();
-  if (!response.ok) throw new Error(payload?.message || payload?.error || `Email send failed (${response.status})`);
+  if (!response.ok)
+    throw new Error(payload?.message || payload?.error || `Email send failed (${response.status})`);
   return payload?.id as string | undefined;
 }
 
@@ -143,7 +155,10 @@ Deno.serve(async (request) => {
       if (activity.channel !== "email") {
         await supabase
           .from("sales_activities")
-          .update({ status: "skipped", error_message: `Channel ${activity.channel} not connected yet` })
+          .update({
+            status: "skipped",
+            error_message: `Channel ${activity.channel} not connected yet`,
+          })
           .eq("id", activity.id);
         skipped++;
         continue;
@@ -151,27 +166,47 @@ Deno.serve(async (request) => {
 
       const { data: prospect, error: prospectError } = await supabase
         .from("sales_prospects")
-        .select("id, company_name, contact_name, email, trade, city, state, website, stage, opted_out")
+        .select(
+          "id, company_name, contact_name, email, trade, city, state, website, stage, opted_out",
+        )
         .eq("id", activity.prospect_id)
         .maybeSingle();
 
-      if (prospectError || !prospect) throw new Error(prospectError?.message || "Prospect not found");
+      if (prospectError || !prospect)
+        throw new Error(prospectError?.message || "Prospect not found");
       if (prospect.opted_out || prospect.stage === "do_not_contact" || !prospect.email) {
         await supabase
           .from("sales_activities")
-          .update({ status: "skipped", error_message: "Prospect is opted out, do-not-contact, or missing email" })
+          .update({
+            status: "skipped",
+            error_message: "Prospect is opted out, do-not-contact, or missing email",
+          })
           .eq("id", activity.id);
         skipped++;
         continue;
       }
 
-      const draft = await generateEmail(prospect as Prospect, activity.body || "Introduce Lead Spark", activity.agent_role);
+      const draft = await generateEmail(
+        prospect as Prospect,
+        activity.body || "Introduce Lead Spark",
+        activity.agent_role,
+      );
       await supabase
         .from("sales_activities")
-        .update({ status: "drafted", subject: draft.subject, body: draft.body, error_message: null })
+        .update({
+          status: "drafted",
+          subject: draft.subject,
+          body: draft.body,
+          error_message: null,
+        })
         .eq("id", activity.id);
 
-      const providerMessageId = await sendEmail(prospect.email, draft.subject, draft.body, activity.id);
+      const providerMessageId = await sendEmail(
+        prospect.email,
+        draft.subject,
+        draft.body,
+        activity.id,
+      );
       await supabase
         .from("sales_activities")
         .update({

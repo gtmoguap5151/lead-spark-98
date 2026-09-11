@@ -34,7 +34,18 @@ export const Route = createFileRoute("/privacy")({
 
 const requestSchema = z.object({
   email: z.string().trim().email("Enter the email used with Lead Engine").max(255),
-  requestType: z.enum(["access", "correct", "delete", "marketing_opt_out", "other"]),
+  requestType: z.enum([
+    "access",
+    "correct",
+    "delete",
+    "portable_copy",
+    "marketing_opt_out",
+    "sale_opt_out",
+    "targeted_advertising_opt_out",
+    "profiling_opt_out",
+    "appeal",
+    "other",
+  ]),
   details: z.string().trim().max(1000, "Keep the note under 1000 characters").optional(),
   website: z.string().max(0).optional(),
 });
@@ -43,7 +54,12 @@ const requestLabels: Record<PrivacyRequest["requestType"], string> = {
   access: "Access my data",
   correct: "Correct my data",
   delete: "Delete my data",
+  portable_copy: "Get a portable copy",
   marketing_opt_out: "Stop marketing emails",
+  sale_opt_out: "Opt out of a sale of data",
+  targeted_advertising_opt_out: "Opt out of targeted advertising",
+  profiling_opt_out: "Opt out of significant profiling",
+  appeal: "Appeal a privacy decision",
   other: "Another privacy question",
 };
 
@@ -88,7 +104,8 @@ function PrivacyPage() {
         </h1>
         <p className="mt-4 max-w-3xl text-lg leading-relaxed text-muted-foreground">
           Lead Engine uses personal information to connect a homeowner with one relevant contractor.
-          We do not quietly sell contact lists or broadcast a request to a crowd of companies.
+          We serve users across the United States. We do not quietly sell contact lists or broadcast
+          a request to a crowd of companies.
         </p>
         <p className="mt-2 text-sm text-muted-foreground">Effective September 9, 2026</p>
 
@@ -116,7 +133,10 @@ function PrivacyPage() {
               When you request a project match, we collect your name, phone, email, ZIP code,
               requested trade, timeline, budget if supplied, and project description. We also record
               the consent language version and time. Campaign tags and the referring site hostname
-              may be recorded so we can measure which marketing actually produces useful requests.
+              may be recorded so we can measure which marketing produces useful requests. Contractor
+              accounts include business and contact details, territory, services, and any optional
+              license or registration number provided. Please do not submit medical information,
+              financial account numbers, Social Security numbers, or government identification.
             </PrivacySection>
 
             <PrivacySection title="How we use and share it">
@@ -124,7 +144,16 @@ function PrivacyPage() {
               match. One eligible contractor may receive it so they can contact you about that
               project. Contractors may pay Lead Engine for platform or matched-lead access; that
               supports the free homeowner request service. We do not sell homeowner lists for
-              unrelated advertising or data-broker purposes.
+              unrelated advertising or data-broker purposes. Service providers that host, secure,
+              support, or process payments for the platform may handle only the information needed
+              for those functions.
+            </PrivacySection>
+
+            <PrivacySection title="Sale, targeted advertising, and profiling">
+              Lead Engine does not currently sell personal information, use it for cross-context
+              targeted advertising, or make legal or similarly significant decisions through
+              profiling. The request form still provides durable opt-outs for these activities so a
+              future marketing system cannot silently override your choice.
             </PrivacySection>
 
             <PrivacySection title="Marketing choices">
@@ -143,9 +172,34 @@ function PrivacyPage() {
             </PrivacySection>
 
             <PrivacySection title="Your choices">
-              You may request access, correction, deletion, or a marketing opt-out. We verify
-              identity before disclosing or deleting information, and some records may be retained
-              where law or a legitimate fraud, billing, or dispute need requires it.
+              We offer every U.S. user the ability to request access, correction, deletion, a
+              portable copy, or an opt-out of marketing, sale, targeted advertising, and significant
+              profiling. We verify identity before disclosing or deleting information. Some records
+              may be retained where law or a legitimate fraud, billing, security, or dispute need
+              requires it. If a request is denied, you may appeal using this form.
+            </PrivacySection>
+
+            <PrivacySection title="Response times and Kentucky residents">
+              We target a response within 45 days for privacy requests and within 60 days for an
+              appeal, applying those Kentucky Consumer Data Protection Act timelines nationwide. A
+              permitted 45-day extension may be used with notice. Kentucky residents whose appeal is
+              denied may also contact the{" "}
+              <a
+                href="https://www.ag.ky.gov/Resources/Consumer-Resources/Consumers/Pages/Consumer-Complaints.aspx"
+                target="_blank"
+                rel="noreferrer"
+                className="font-semibold text-foreground underline underline-offset-2"
+              >
+                Kentucky Attorney General
+              </a>
+              . Other state rights remain available where applicable.
+            </PrivacySection>
+
+            <PrivacySection title="Children and de-identified data">
+              The service is for adults age 18 or older and is not directed to children. We do not
+              knowingly collect project requests from children. When information is de-identified,
+              we publicly commit to maintain it in de-identified form and not attempt to reidentify
+              it except as permitted by law to test privacy safeguards.
             </PrivacySection>
           </section>
 
@@ -269,6 +323,10 @@ function PrivacyPage() {
             className="font-semibold text-foreground underline underline-offset-2"
           >
             Request an estimate
+          </Link>
+          . You can also review our{" "}
+          <Link to="/terms" className="font-semibold text-foreground underline underline-offset-2">
+            Terms of Service
           </Link>
           .
         </p>

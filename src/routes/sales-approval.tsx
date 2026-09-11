@@ -35,10 +35,11 @@ function SalesApprovalPage() {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const client = supabase as any;
-    const { data, error } = await client
+    const { data, error } = await supabase
       .from("sales_activities")
-      .select("id,status,subject,body,created_at,sales_prospects(company_name,contact_name,email,trade,city,state)")
+      .select(
+        "id,status,subject,body,created_at,sales_prospects(company_name,contact_name,email,trade,city,state)",
+      )
       .in("status", ["queued", "drafted"])
       .order("created_at", { ascending: false });
     if (error) toast.error(error.message);
@@ -83,7 +84,11 @@ function SalesApprovalPage() {
           <Button variant="outline" size="sm" onClick={() => void load()} disabled={loading}>
             <RefreshCw className={loading ? "size-4 animate-spin" : "size-4"} /> Refresh
           </Button>
-          <Button size="sm" onClick={() => void generateDrafts()} disabled={generating || queued === 0}>
+          <Button
+            size="sm"
+            onClick={() => void generateDrafts()}
+            disabled={generating || queued === 0}
+          >
             {generating ? <Loader2 className="size-4 animate-spin" /> : <Mail className="size-4" />}
             Generate Drafts
           </Button>
@@ -92,11 +97,15 @@ function SalesApprovalPage() {
     >
       <div className="mb-5 grid grid-cols-2 gap-3">
         <div className="surface-card p-4">
-          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Queued</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            Queued
+          </p>
           <p className="mt-1 font-display text-3xl font-bold">{queued}</p>
         </div>
         <div className="surface-card p-4">
-          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Ready for review</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            Ready for review
+          </p>
           <p className="mt-1 font-display text-3xl font-bold">{drafted}</p>
         </div>
       </div>
@@ -109,7 +118,9 @@ function SalesApprovalPage() {
         <div className="surface-card p-8 text-center">
           <CheckCircle2 className="mx-auto size-10 text-success" />
           <h2 className="mt-3 text-xl font-bold uppercase">Inbox clear</h2>
-          <p className="mt-1 text-sm text-muted-foreground">No queued or drafted outreach needs attention.</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            No queued or drafted outreach needs attention.
+          </p>
         </div>
       ) : (
         <div className="space-y-4">
@@ -120,35 +131,62 @@ function SalesApprovalPage() {
               <article key={row.id} className="surface-card p-5">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
-                    <p className="eyebrow text-primary">{row.status === "drafted" ? "Ready for approval" : "Waiting for draft"}</p>
-                    <h2 className="mt-1 text-xl font-bold uppercase">{prospect?.company_name ?? "Contractor prospect"}</h2>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      {[prospect?.contact_name, prospect?.trade, prospect?.city, prospect?.state].filter(Boolean).join(" · ")}
+                    <p className="eyebrow text-primary">
+                      {row.status === "drafted" ? "Ready for approval" : "Waiting for draft"}
                     </p>
-                    <p className="mt-1 text-sm text-muted-foreground">{prospect?.email ?? "No email"}</p>
+                    <h2 className="mt-1 text-xl font-bold uppercase">
+                      {prospect?.company_name ?? "Contractor prospect"}
+                    </h2>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      {[prospect?.contact_name, prospect?.trade, prospect?.city, prospect?.state]
+                        .filter(Boolean)
+                        .join(" · ")}
+                    </p>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      {prospect?.email ?? "No email"}
+                    </p>
                   </div>
-                  <span className="rounded-full bg-muted px-3 py-1 text-xs font-bold uppercase">{row.status}</span>
+                  <span className="rounded-full bg-muted px-3 py-1 text-xs font-bold uppercase">
+                    {row.status}
+                  </span>
                 </div>
 
                 {row.status === "drafted" ? (
                   <div className="mt-4 rounded-lg border border-border bg-muted/30 p-4">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Subject</p>
+                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                      Subject
+                    </p>
                     <p className="mt-1 font-semibold">{row.subject}</p>
                     <p className="mt-4 whitespace-pre-wrap text-sm leading-6">{row.body}</p>
                   </div>
                 ) : (
                   <div className="mt-4 rounded-lg border border-dashed border-border p-4 text-sm text-muted-foreground">
-                    This item is queued. Tap Generate Drafts to let the AI sales agent prepare the email for review.
+                    This item is queued. Tap Generate Drafts to let the AI sales agent prepare the
+                    email for review.
                   </div>
                 )}
 
                 {row.status === "drafted" ? (
                   <div className="mt-4 grid grid-cols-2 gap-3">
-                    <Button variant="outline" disabled={busy} onClick={() => void review(row.id, "reject")}>
-                      {busy ? <Loader2 className="size-4 animate-spin" /> : <XCircle className="size-4" />} Reject
+                    <Button
+                      variant="outline"
+                      disabled={busy}
+                      onClick={() => void review(row.id, "reject")}
+                    >
+                      {busy ? (
+                        <Loader2 className="size-4 animate-spin" />
+                      ) : (
+                        <XCircle className="size-4" />
+                      )}{" "}
+                      Reject
                     </Button>
                     <Button disabled={busy} onClick={() => void review(row.id, "send")}>
-                      {busy ? <Loader2 className="size-4 animate-spin" /> : <CheckCircle2 className="size-4" />} Send
+                      {busy ? (
+                        <Loader2 className="size-4 animate-spin" />
+                      ) : (
+                        <CheckCircle2 className="size-4" />
+                      )}{" "}
+                      Send
                     </Button>
                   </div>
                 ) : null}

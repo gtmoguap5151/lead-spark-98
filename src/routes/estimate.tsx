@@ -62,6 +62,7 @@ const schema = z.object({
     .max(1000, "Keep it under 1000 characters"),
   isHomeowner: z.literal(true, { message: "Please confirm that you own the property" }),
   isDecisionMaker: z.literal(true, { message: "Please confirm that you can approve the work" }),
+  isAdult: z.literal(true, { message: "Please confirm that you are at least 18" }),
   contactConsent: z.literal(true, {
     message: "Please agree so the matched contractor can contact you about this request",
   }),
@@ -69,7 +70,7 @@ const schema = z.object({
   website: z.string().max(0).optional(),
 });
 
-const CONSENT_VERSION = "2026-09-09" as const;
+const CONSENT_VERSION = "2026-09-09-us-2" as const;
 
 const BUDGETS = [
   "Under $5,000",
@@ -97,6 +98,7 @@ function EstimatePage() {
     projectDetails: "",
     isHomeowner: false,
     isDecisionMaker: false,
+    isAdult: false,
     contactConsent: false,
     marketingConsent: false,
     website: "",
@@ -171,7 +173,8 @@ function EstimatePage() {
         </h1>
         <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
           Fill out the simple form below. Your request will be routed to one contractor based on the
-          service you need and your ZIP code.
+          service you need and your ZIP code, anywhere in the United States where an eligible
+          contractor is available.
         </p>
 
         <div className="mt-6 rounded-xl border border-border bg-muted/45 p-4 sm:p-5">
@@ -298,6 +301,10 @@ function EstimatePage() {
               className="text-base leading-relaxed"
             />
           </Field>
+          <p className="-mt-4 text-sm leading-relaxed text-muted-foreground">
+            Please do not include medical information, financial account numbers, Social Security
+            numbers, or other government identification.
+          </p>
 
           <input
             type="text"
@@ -314,6 +321,13 @@ function EstimatePage() {
             <p className="flex items-center gap-2 text-lg font-bold">
               <ShieldCheck className="size-5 text-success" /> Confirmations and privacy choices
             </p>
+            <ConfirmRow
+              id="adult"
+              checked={form.isAdult}
+              onChange={(v) => set("isAdult", v)}
+              label="I am at least 18 years old"
+              error={errors.isAdult}
+            />
             <ConfirmRow
               id="owner"
               checked={form.isHomeowner}
@@ -353,6 +367,13 @@ function EstimatePage() {
               className="font-semibold text-foreground underline underline-offset-2"
             >
               Privacy &amp; Data Choices
+            </Link>{" "}
+            and{" "}
+            <Link
+              to="/terms"
+              className="font-semibold text-foreground underline underline-offset-2"
+            >
+              Terms of Service
             </Link>
             .
           </p>

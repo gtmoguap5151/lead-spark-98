@@ -2,7 +2,8 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.116.0";
 import { z } from "npm:zod@3.24.2";
 
-const CONSENT_VERSION = "2026-09-09";
+const CONSENT_VERSION = "2026-09-09-us-2";
+const ACCEPTED_CONSENT_VERSIONS = ["2026-09-09", CONSENT_VERSION] as const;
 const LOCAL_ORIGIN = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i;
 
 const serviceTypes = [
@@ -56,9 +57,12 @@ const leadSchema = z
     projectDetails: z.string().trim().min(10).max(1000),
     isHomeowner: z.literal(true),
     isDecisionMaker: z.literal(true),
+    isAdult: z.literal(true).optional(),
     contactConsent: z.literal(true),
     marketingConsent: z.boolean(),
-    consentVersion: z.literal(CONSENT_VERSION),
+    // Keep the immediately previous notice version valid while cached clients
+    // roll over to the nationwide notice. The server records the current version.
+    consentVersion: z.enum(ACCEPTED_CONSENT_VERSIONS),
     attribution: attributionSchema,
     website: z.string().max(0).optional(),
   })
@@ -68,7 +72,18 @@ const privacyRequestSchema = z
   .object({
     action: z.literal("privacy_request"),
     email: z.string().trim().email().max(255),
-    requestType: z.enum(["access", "correct", "delete", "marketing_opt_out", "other"]),
+    requestType: z.enum([
+      "access",
+      "correct",
+      "delete",
+      "portable_copy",
+      "marketing_opt_out",
+      "sale_opt_out",
+      "targeted_advertising_opt_out",
+      "profiling_opt_out",
+      "appeal",
+      "other",
+    ]),
     details: z.string().trim().max(1000).optional(),
     website: z.string().max(0).optional(),
   })
@@ -174,6 +189,20 @@ Deno.serve(async (request) => {
 
     if (parsed.data.action === "lead") {
       const lead = parsed.data;
+      if (lead.consentVersion === CONSENT_VERSION && lead.isAdult !== true) {
+        return json(origin, { error: "Please confirm that you are at least 18." }, 400);
+      }
+      let marketingConsent = lead.marketingConsent;
+      if (marketingConsent) {
+        const { data: suppression, error: suppressionError } = await admin
+          .from("privacy_suppressions")
+          .select("email")
+          .eq("email", lead.email.toLowerCase())
+          .eq("suppression_type", "marketing")
+          .maybeSingle();
+        if (suppressionError) throw suppressionError;
+        marketingConsent = !suppression;
+      }
       const { error } = await admin.from("leads").insert({
         name: lead.name,
         phone: lead.phone,
@@ -185,8 +214,9 @@ Deno.serve(async (request) => {
         budget: clean(lead.budget),
         is_homeowner: true,
         is_decision_maker: true,
+        is_adult: lead.isAdult === true,
         contact_consent: true,
-        marketing_consent: lead.marketingConsent,
+        marketing_consent: marketingConsent,
         consent_version: CONSENT_VERSION,
         consent_recorded_at: new Date().toISOString(),
         attribution_source: clean(lead.attribution?.source),
@@ -199,12 +229,40 @@ Deno.serve(async (request) => {
       if (error) throw error;
     } else {
       const privacyRequest = parsed.data;
-      const { error } = await admin.from("privacy_requests").insert({
-        email: privacyRequest.email.toLowerCase(),
-        request_type: privacyRequest.requestType,
-        details: clean(privacyRequest.details),
-      });
+      const dueDays = privacyRequest.requestType === "appeal" ? 60 : 45;
+      const { data: createdRequest, error } = await admin
+        .from("privacy_requests")
+        .insert({
+          email: privacyRequest.email.toLowerCase(),
+          request_type: privacyRequest.requestType,
+          details: clean(privacyRequest.details),
+          due_at: new Date(Date.now() + dueDays * 24 * 60 * 60 * 1000).toISOString(),
+        })
+        .select("id")
+        .single();
       if (error) throw error;
+
+      const suppressionType =
+        privacyRequest.requestType === "marketing_opt_out"
+          ? "marketing"
+          : privacyRequest.requestType === "sale_opt_out"
+            ? "sale"
+            : privacyRequest.requestType === "targeted_advertising_opt_out"
+              ? "targeted_advertising"
+              : privacyRequest.requestType === "profiling_opt_out"
+                ? "profiling"
+                : null;
+      if (suppressionType) {
+        const { error: suppressionError } = await admin.from("privacy_suppressions").upsert(
+          {
+            email: privacyRequest.email.toLowerCase(),
+            suppression_type: suppressionType,
+            source_request_id: createdRequest.id,
+          },
+          { onConflict: "email,suppression_type" },
+        );
+        if (suppressionError) throw suppressionError;
+      }
     }
 
     return json(origin, { ok: true }, 201);
