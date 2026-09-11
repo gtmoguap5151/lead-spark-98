@@ -6,6 +6,7 @@ import {
   Inbox,
   LayoutDashboard,
   LogOut,
+  MailCheck,
   Shield,
   UserRound,
 } from "lucide-react";
@@ -80,9 +81,26 @@ export function AppShell({
                 </Link>
               ))
             ) : (
-              <span className="flex items-center gap-1.5 rounded-md bg-muted px-3 py-2 text-sm font-medium">
-                <Shield className="size-4" /> Admin console
-              </span>
+              <>
+                <Link
+                  to="/admin"
+                  className={cn(
+                    "flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-muted",
+                    pathname === "/admin" ? "bg-muted text-foreground" : "text-muted-foreground",
+                  )}
+                >
+                  <Shield className="size-4" /> Admin
+                </Link>
+                <Link
+                  to="/sales-approval"
+                  className={cn(
+                    "flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-muted",
+                    pathname.startsWith("/sales-approval") ? "bg-muted text-foreground" : "text-muted-foreground",
+                  )}
+                >
+                  <MailCheck className="size-4" /> Sales
+                </Link>
+              </>
             )}
           </nav>
 
