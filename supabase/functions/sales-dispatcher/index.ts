@@ -45,8 +45,9 @@ function extractOutputText(payload: unknown): string {
 function parseDraft(text: string) {
   const subjectMatch = text.match(/^SUBJECT:\s*(.+)$/im);
   const bodyMatch = text.match(/^BODY:\s*([\s\S]+)$/im);
-  if (!subjectMatch || !bodyMatch)
+  if (!subjectMatch || !bodyMatch) {
     throw new Error("AI response did not contain SUBJECT and BODY fields");
+  }
   return {
     subject: subjectMatch[1].trim().slice(0, 160),
     body: bodyMatch[1].trim(),
@@ -71,62 +72,45 @@ async function generateEmail(prospect: Prospect, objective: string, agentRole: s
       Authorization: `Bearer ${apiKey}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({
-      model,
-      input: prompt,
-      store: false,
-    }),
+    body: JSON.stringify({ model, input: prompt, store: false }),
   });
 
   const payload = await response.json();
-  if (!response.ok)
-    throw new Error(payload?.error?.message || `OpenAI request failed (${response.status})`);
+  if (!response.ok) {
+    const message = isRecord(payload) && isRecord(payload.error) && payload.error.message;
+    throw new Error(
+      typeof message === "string" ? message : `OpenAI request failed (${response.status})`,
+    );
+  }
   return parseDraft(extractOutputText(payload));
-}
-
-async function sendEmail(to: string, subject: string, body: string, activityId: string) {
-  const apiKey = Deno.env.get("RESEND_API_KEY");
-  const from = Deno.env.get("SALES_FROM_EMAIL");
-  if (!apiKey) throw new Error("RESEND_API_KEY is missing");
-  if (!from) throw new Error("SALES_FROM_EMAIL is missing");
-
-  const response = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-      "Idempotency-Key": `lead-spark-sales/${activityId}`,
-    },
-    body: JSON.stringify({
-      from,
-      to: [to],
-      subject,
-      text: body,
-    }),
-  });
-
-  const payload = await response.json();
-  if (!response.ok)
-    throw new Error(payload?.message || payload?.error || `Email send failed (${response.status})`);
-  return payload?.id as string | undefined;
 }
 
 Deno.serve(async (request) => {
   if (request.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   if (request.method !== "POST") return json({ error: "Method not allowed" }, 405);
 
-  const expectedSecret = Deno.env.get("SALES_ORCHESTRATOR_SECRET");
-  if (!expectedSecret || request.headers.get("x-sales-secret") !== expectedSecret) {
-    return json({ error: "Unauthorized" }, 401);
-  }
-
+  const authHeader = request.headers.get("Authorization");
   const url = Deno.env.get("SUPABASE_URL");
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  if (!authHeader) return json({ error: "Unauthorized" }, 401);
   if (!url || !serviceKey) return json({ error: "Supabase service configuration missing" }, 500);
 
   const supabase = createClient(url, serviceKey, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
+  const token = authHeader.replace(/^Bearer\s+/i, "");
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser(token);
+  if (userError || !user) return json({ error: "Unauthorized" }, 401);
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .maybeSingle();
+  if (profile?.role !== "admin") return json({ error: "Admin access required" }, 403);
 
   const now = new Date().toISOString();
   const { data: activities, error } = await supabase
@@ -138,26 +122,22 @@ Deno.serve(async (request) => {
     .limit(25);
 
   if (error) return json({ error: error.message }, 500);
-  if (!activities?.length) return json({ processed: 0, sent: 0, skipped: 0, failed: 0 });
+  if (!activities?.length) {
+    return json({ processed: 0, drafted: 0, skipped: 0, failed: 0 });
+  }
 
-  let sent = 0;
+  let drafted = 0;
   let skipped = 0;
   let failed = 0;
 
   for (const activity of activities) {
     try {
-      if (activity.channel === "internal") {
-        await supabase.from("sales_activities").update({ status: "skipped" }).eq("id", activity.id);
-        skipped++;
-        continue;
-      }
-
       if (activity.channel !== "email") {
         await supabase
           .from("sales_activities")
           .update({
             status: "skipped",
-            error_message: `Channel ${activity.channel} not connected yet`,
+            error_message: `Channel ${activity.channel} is not connected for drafting`,
           })
           .eq("id", activity.id);
         skipped++;
@@ -172,8 +152,9 @@ Deno.serve(async (request) => {
         .eq("id", activity.prospect_id)
         .maybeSingle();
 
-      if (prospectError || !prospect)
+      if (prospectError || !prospect) {
         throw new Error(prospectError?.message || "Prospect not found");
+      }
       if (prospect.opted_out || prospect.stage === "do_not_contact" || !prospect.email) {
         await supabase
           .from("sales_activities")
@@ -182,6 +163,32 @@ Deno.serve(async (request) => {
             error_message: "Prospect is opted out, do-not-contact, or missing email",
           })
           .eq("id", activity.id);
+        skipped++;
+        continue;
+      }
+
+      const normalizedEmail = prospect.email.trim().toLowerCase();
+      const { data: suppressions, error: suppressionError } = await supabase
+        .from("privacy_suppressions")
+        .select("suppression_type")
+        .eq("email", normalizedEmail)
+        .limit(1);
+      if (suppressionError) throw new Error(suppressionError.message);
+      if (suppressions?.length) {
+        await supabase
+          .from("sales_prospects")
+          .update({ opted_out: true, stage: "do_not_contact" })
+          .eq("id", prospect.id);
+        await supabase
+          .from("sales_activities")
+          .update({ status: "skipped", error_message: "Blocked by global privacy suppression" })
+          .eq("id", activity.id);
+        if (activity.enrollment_id) {
+          await supabase
+            .from("sales_enrollments")
+            .update({ status: "opted_out", completed_at: now })
+            .eq("id", activity.enrollment_id);
+        }
         skipped++;
         continue;
       }
@@ -200,44 +207,13 @@ Deno.serve(async (request) => {
           error_message: null,
         })
         .eq("id", activity.id);
-
-      const providerMessageId = await sendEmail(
-        prospect.email,
-        draft.subject,
-        draft.body,
-        activity.id,
-      );
-      await supabase
-        .from("sales_activities")
-        .update({
-          status: "sent",
-          provider_message_id: providerMessageId || null,
-          sent_at: new Date().toISOString(),
-          error_message: null,
-        })
-        .eq("id", activity.id);
-
-      await supabase
-        .from("sales_prospects")
-        .update({
-          stage: prospect.stage === "prospect" ? "contacted" : prospect.stage,
-          last_contacted_at: new Date().toISOString(),
-          owner_agent: activity.agent_role,
-        })
-        .eq("id", prospect.id);
-
       await supabase.from("sales_agent_events").insert({
         prospect_id: prospect.id,
         agent_role: activity.agent_role,
-        event_type: "email_sent",
-        decision: {
-          activity_id: activity.id,
-          provider_message_id: providerMessageId || null,
-          subject: draft.subject,
-        },
+        event_type: "email_drafted",
+        decision: { activity_id: activity.id, subject: draft.subject, reviewed_by: user.id },
       });
-
-      sent++;
+      drafted++;
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       await supabase
@@ -254,5 +230,5 @@ Deno.serve(async (request) => {
     }
   }
 
-  return json({ processed: activities.length, sent, skipped, failed });
+  return json({ processed: activities.length, drafted, skipped, failed });
 });

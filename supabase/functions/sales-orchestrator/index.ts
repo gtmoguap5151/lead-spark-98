@@ -46,7 +46,7 @@ Deno.serve(async (request) => {
   for (const enrollment of enrollments) {
     const { data: prospect } = await supabase
       .from("sales_prospects")
-      .select("id, opted_out, stage")
+      .select("id, email, opted_out, stage")
       .eq("id", enrollment.prospect_id)
       .maybeSingle();
 
@@ -57,6 +57,34 @@ Deno.serve(async (request) => {
         .eq("id", enrollment.id);
       skipped++;
       continue;
+    }
+
+    if (prospect.email) {
+      const normalizedEmail = prospect.email.trim().toLowerCase();
+      const { data: suppressions, error: suppressionError } = await supabase
+        .from("privacy_suppressions")
+        .select("suppression_type")
+        .eq("email", normalizedEmail)
+        .limit(1);
+      if (suppressionError) {
+        await supabase
+          .from("sales_enrollments")
+          .update({ last_error: suppressionError.message })
+          .eq("id", enrollment.id);
+        continue;
+      }
+      if (suppressions?.length) {
+        await supabase
+          .from("sales_prospects")
+          .update({ opted_out: true, stage: "do_not_contact" })
+          .eq("id", prospect.id);
+        await supabase
+          .from("sales_enrollments")
+          .update({ status: "opted_out", completed_at: now, last_error: null })
+          .eq("id", enrollment.id);
+        skipped++;
+        continue;
+      }
     }
 
     const { data: step, error: stepError } = await supabase

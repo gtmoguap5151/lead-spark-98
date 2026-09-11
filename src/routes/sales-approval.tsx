@@ -110,6 +110,12 @@ function SalesApprovalPage() {
         </div>
       </div>
 
+      <p className="mb-5 rounded-lg border border-border bg-muted/30 p-3 text-sm text-muted-foreground">
+        Nothing sends when a draft is generated. Sending requires your approval, a final global
+        privacy-suppression check, and configured business identity and mailing-address details. A
+        compliance footer is added at send time.
+      </p>
+
       {loading ? (
         <div className="surface-card flex items-center justify-center p-10 text-muted-foreground">
           <Loader2 className="mr-2 size-5 animate-spin" /> Loading sales work…
