@@ -11,9 +11,9 @@ export function SiteHeader() {
             <HardHat className="size-5" />
           </span>
           <span className="font-display text-lg font-bold uppercase leading-none tracking-tight">
-            Contractor
+            RivetReach
             <span className="block text-xs font-semibold tracking-[0.2em] text-muted-foreground">
-              Lead Engine
+              Contractor Network
             </span>
           </span>
         </Link>
@@ -35,9 +35,12 @@ export function SiteFooter() {
     <footer className="border-t border-border bg-steel text-steel-foreground">
       <div className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-10 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="font-display text-xl font-bold uppercase">Contractor Lead Engine</p>
+          <p className="font-display text-xl font-bold uppercase">RivetReach</p>
           <p className="text-sm text-steel-foreground/70">
             Qualified home-services leads, routed by ZIP and trade.
+          </p>
+          <p className="mt-1 text-xs text-steel-foreground/55">
+            A Southeast Home Service platform.
           </p>
         </div>
         <div className="flex flex-wrap gap-4 text-sm">
