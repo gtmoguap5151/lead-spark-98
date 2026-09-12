@@ -21,6 +21,10 @@ const services = [
   { name: "Electrical", homeowner: "/find-an-electrician", contractor: "/electrical-leads" },
   { name: "Concrete", homeowner: "/find-a-concrete-contractor", contractor: "/concrete-leads" },
   { name: "Decks", homeowner: "/find-a-deck-builder", contractor: "/deck-leads" },
+  { name: "Painting", homeowner: "/find-a-painter", contractor: "/painting-leads" },
+  { name: "Flooring", homeowner: "/find-a-flooring-contractor", contractor: "/flooring-leads" },
+  { name: "Siding", homeowner: "/find-a-siding-contractor", contractor: "/siding-leads" },
+  { name: "Windows & Doors", homeowner: "/find-window-door-contractor", contractor: "/window-door-leads" },
 ];
 
 function ServicesPage() {
