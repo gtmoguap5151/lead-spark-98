@@ -21,11 +21,11 @@ import type { PrivacyRequest } from "@/lib/types";
 export const Route = createFileRoute("/privacy")({
   head: () => ({
     meta: [
-      { title: "Privacy & Data Choices — Contractor Lead Engine" },
+      { title: "Privacy & Data Choices — RivetReach" },
       {
         name: "description",
         content:
-          "How Contractor Lead Engine protects homeowner and contractor information, plus a simple privacy request form.",
+          "How RivetReach protects homeowner and contractor information, plus a simple privacy request form.",
       },
     ],
   }),
@@ -33,7 +33,7 @@ export const Route = createFileRoute("/privacy")({
 });
 
 const requestSchema = z.object({
-  email: z.string().trim().email("Enter the email used with Lead Engine").max(255),
+  email: z.string().trim().email("Enter the email used with RivetReach").max(255),
   requestType: z.enum([
     "access",
     "correct",
@@ -103,7 +103,7 @@ function PrivacyPage() {
           Privacy &amp; Data Choices
         </h1>
         <p className="mt-4 max-w-3xl text-lg leading-relaxed text-muted-foreground">
-          Lead Engine uses personal information to connect a homeowner with one relevant contractor.
+          RivetReach uses personal information to connect a homeowner with one relevant contractor.
           We serve users across the United States. We do not quietly sell contact lists or broadcast
           a request to a crowd of companies.
         </p>
@@ -123,7 +123,7 @@ function PrivacyPage() {
           <PrivacyCard
             icon={Database}
             title="Separate permission"
-            body="Project-contact consent is required; Lead Engine marketing email permission is optional and off by default."
+            body="Project-contact consent is required; RivetReach marketing email permission is optional and off by default."
           />
         </section>
 
@@ -142,7 +142,7 @@ function PrivacyPage() {
             <PrivacySection title="How we use and share it">
               We use the information to validate, route, support, secure, and measure your requested
               match. One eligible contractor may receive it so they can contact you about that
-              project. Contractors may pay Lead Engine for platform or matched-lead access; that
+              project. Contractors may pay RivetReach for platform or matched-lead access; that
               supports the free homeowner request service. We do not sell homeowner lists for
               unrelated advertising or data-broker purposes. Service providers that host, secure,
               support, or process payments for the platform may handle only the information needed
@@ -150,14 +150,14 @@ function PrivacyPage() {
             </PrivacySection>
 
             <PrivacySection title="Sale, targeted advertising, and profiling">
-              Lead Engine does not currently sell personal information, use it for cross-context
+              RivetReach does not currently sell personal information, use it for cross-context
               targeted advertising, or make legal or similarly significant decisions through
               profiling. The request form still provides durable opt-outs for these activities so a
               future marketing system cannot silently override your choice.
             </PrivacySection>
 
             <PrivacySection title="Marketing choices">
-              Promotional Lead Engine email is sent only when you select the separate optional
+              Promotional RivetReach email is sent only when you select the separate optional
               checkbox. Project-related messages from the matched contractor are part of the match
               you requested, not permission for unrelated advertising. You can withdraw optional
               marketing permission below.
