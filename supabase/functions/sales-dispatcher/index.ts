@@ -24,65 +24,52 @@ type Prospect = {
   opted_out: boolean;
 };
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null;
+type Draft = {
+  subject: string;
+  body: string;
+};
 
-function extractOutputText(payload: unknown): string {
-  if (!isRecord(payload)) return "";
-  if (typeof payload.output_text === "string") return payload.output_text.trim();
-  const parts: string[] = [];
-  const output = Array.isArray(payload.output) ? payload.output : [];
-  for (const item of output) {
-    if (!isRecord(item)) continue;
-    const contentParts = Array.isArray(item.content) ? item.content : [];
-    for (const content of contentParts) {
-      if (isRecord(content) && typeof content.text === "string") parts.push(content.text);
-    }
-  }
-  return parts.join("\n").trim();
+function firstName(contactName: string | null) {
+  const name = contactName?.trim();
+  return name ? name.split(/\s+/)[0] : null;
 }
 
-function parseDraft(text: string) {
-  const subjectMatch = text.match(/^SUBJECT:\s*(.+)$/im);
-  const bodyMatch = text.match(/^BODY:\s*([\s\S]+)$/im);
-  if (!subjectMatch || !bodyMatch) {
-    throw new Error("AI response did not contain SUBJECT and BODY fields");
+function buildTemplateEmail(prospect: Prospect, objective: string, agentRole: string): Draft {
+  const signupUrl = Deno.env.get("RIVET_REACH_SIGNUP_URL") ||
+    Deno.env.get("LEAD_SPARK_SIGNUP_URL") ||
+    "https://rivetreach.com/login";
+  const contact = firstName(prospect.contact_name);
+  const greeting = contact ? `Hi ${contact},` : "Hi there,";
+  const trade = prospect.trade?.trim() || "contractor";
+  const location = [prospect.city, prospect.state].filter(Boolean).join(", ");
+  const locationPhrase = location ? ` in ${location}` : "";
+  const company = prospect.company_name?.trim() || "your company";
+  const objectiveText = (objective || "").toLowerCase();
+
+  let subject = `A lead option for ${company}`;
+  let middle = `Rivet Reach connects homeowners with contractors when they are actively looking for help. I wanted to see whether ${company} is interested in receiving ${trade} opportunities${locationPhrase}.`;
+
+  if (objectiveText.includes("follow") || objectiveText.includes("check") || objectiveText.includes("remind")) {
+    subject = `Quick follow-up for ${company}`;
+    middle = `I wanted to follow up about Rivet Reach. We connect homeowners with contractors who want new project opportunities${locationPhrase}. If adding another source of ${trade} work makes sense for ${company}, you can take a look whenever it is convenient.`;
+  } else if (objectiveText.includes("free") || objectiveText.includes("offer") || objectiveText.includes("trial")) {
+    subject = `${company}: first real lead can be free`;
+    middle = `Rivet Reach helps contractors connect with homeowners looking for project help${locationPhrase}. Your first real lead can be free one time, so ${company} can judge the service from an actual opportunity before deciding whether continued paid access makes sense.`;
+  } else if (objectiveText.includes("close") || objectiveText.includes("signup") || objectiveText.includes("sign up")) {
+    subject = `Ready when ${company} is`;
+    middle = `If ${company} wants another source of ${trade} opportunities${locationPhrase}, Rivet Reach is ready to use. The first real lead can be free one time; continued real-lead access after that requires payment, credits, or an active subscription.`;
   }
+
+  const roleLine = agentRole === "closer"
+    ? "If it looks useful, the next step is simply to create the contractor account."
+    : "You can review it and create a contractor account here:";
+
+  const body = `${greeting}\n\n${middle}\n\n${roleLine} ${signupUrl}\n\nIf you'd rather not hear from us, just reply stop.`;
+
   return {
-    subject: subjectMatch[1].trim().slice(0, 160),
-    body: bodyMatch[1].trim(),
+    subject: subject.slice(0, 160),
+    body,
   };
-}
-
-async function generateEmail(prospect: Prospect, objective: string, agentRole: string) {
-  const apiKey = Deno.env.get("OPENAI_API_KEY");
-  if (!apiKey) throw new Error("OPENAI_API_KEY is missing");
-
-  const model = Deno.env.get("OPENAI_MODEL") || "gpt-5-mini";
-  const signupUrl =
-    Deno.env.get("LEAD_SPARK_SIGNUP_URL") || "https://lead-spark-98.vercel.app/login";
-  const location =
-    [prospect.city, prospect.state].filter(Boolean).join(", ") || "their service area";
-
-  const prompt = `You are the ${agentRole} for Lead Spark, a contractor lead platform.\n\nWrite a short, credible sales email to a contractor. Do not sound robotic, exaggerated, deceptive, or spammy. Never claim results, customers, savings, exclusivity, or lead volume that are not provided. The one approved acquisition offer is: the contractor's first real lead can be free one time; after that, continued real-lead access requires payment, credits, or an active paid subscription.\n\nProspect:\nCompany: ${prospect.company_name}\nContact: ${prospect.contact_name || "owner/team"}\nTrade: ${prospect.trade || "contractor"}\nLocation: ${location}\nWebsite: ${prospect.website || "unknown"}\n\nObjective: ${objective}\nSignup URL: ${signupUrl}\n\nRequirements:\n- 45 to 110 words in the body.\n- One clear call to action.\n- Mention Lead Spark naturally.\n- Personalize only from the supplied facts.\n- Do not use fake urgency.\n- Include a simple opt-out sentence at the end: "If you'd rather not hear from us, just reply stop."\n- Plain text only.\n- Output exactly:\nSUBJECT: <subject>\nBODY: <body>`;
-
-  const response = await fetch("https://api.openai.com/v1/responses", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ model, input: prompt, store: false }),
-  });
-
-  const payload = await response.json();
-  if (!response.ok) {
-    const message = isRecord(payload) && isRecord(payload.error) && payload.error.message;
-    throw new Error(
-      typeof message === "string" ? message : `OpenAI request failed (${response.status})`,
-    );
-  }
-  return parseDraft(extractOutputText(payload));
 }
 
 Deno.serve(async (request) => {
@@ -123,7 +110,7 @@ Deno.serve(async (request) => {
 
   if (error) return json({ error: error.message }, 500);
   if (!activities?.length) {
-    return json({ processed: 0, drafted: 0, skipped: 0, failed: 0 });
+    return json({ processed: 0, drafted: 0, skipped: 0, failed: 0, mode: "zero_cost" });
   }
 
   let drafted = 0;
@@ -193,11 +180,12 @@ Deno.serve(async (request) => {
         continue;
       }
 
-      const draft = await generateEmail(
+      const draft = buildTemplateEmail(
         prospect as Prospect,
-        activity.body || "Introduce Lead Spark",
+        activity.body || "Introduce Rivet Reach",
         activity.agent_role,
       );
+
       await supabase
         .from("sales_activities")
         .update({
@@ -207,11 +195,24 @@ Deno.serve(async (request) => {
           error_message: null,
         })
         .eq("id", activity.id);
+
+      if (activity.enrollment_id) {
+        await supabase
+          .from("sales_enrollments")
+          .update({ last_error: null })
+          .eq("id", activity.enrollment_id);
+      }
+
       await supabase.from("sales_agent_events").insert({
         prospect_id: prospect.id,
         agent_role: activity.agent_role,
         event_type: "email_drafted",
-        decision: { activity_id: activity.id, subject: draft.subject, reviewed_by: user.id },
+        decision: {
+          activity_id: activity.id,
+          subject: draft.subject,
+          reviewed_by: user.id,
+          generation_mode: "zero_cost_template",
+        },
       });
       drafted++;
     } catch (err) {
@@ -230,5 +231,5 @@ Deno.serve(async (request) => {
     }
   }
 
-  return json({ processed: activities.length, drafted, skipped, failed });
+  return json({ processed: activities.length, drafted, skipped, failed, mode: "zero_cost" });
 });
