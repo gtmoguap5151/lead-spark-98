@@ -2,7 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.116.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-sales-secret",
 };
 
 const json = (body: unknown, status = 200) =>
@@ -76,28 +76,37 @@ Deno.serve(async (request) => {
   if (request.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   if (request.method !== "POST") return json({ error: "Method not allowed" }, 405);
 
-  const authHeader = request.headers.get("Authorization");
   const url = Deno.env.get("SUPABASE_URL");
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-  if (!authHeader) return json({ error: "Unauthorized" }, 401);
+  const expectedSecret = Deno.env.get("SALES_ORCHESTRATOR_SECRET");
   if (!url || !serviceKey) return json({ error: "Supabase service configuration missing" }, 500);
+
+  const suppliedSecret = request.headers.get("x-sales-secret");
+  const authHeader = request.headers.get("Authorization");
+  const cronAuthorized = Boolean(expectedSecret && suppliedSecret && suppliedSecret === expectedSecret);
 
   const supabase = createClient(url, serviceKey, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
-  const token = authHeader.replace(/^Bearer\s+/i, "");
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser(token);
-  if (userError || !user) return json({ error: "Unauthorized" }, 401);
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .maybeSingle();
-  if (profile?.role !== "admin") return json({ error: "Admin access required" }, 403);
+  let actor = "system_cron";
+  if (!cronAuthorized) {
+    if (!authHeader) return json({ error: "Unauthorized" }, 401);
+    const token = authHeader.replace(/^Bearer\s+/i, "");
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser(token);
+    if (userError || !user) return json({ error: "Unauthorized" }, 401);
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .maybeSingle();
+    if (profile?.role !== "admin") return json({ error: "Admin access required" }, 403);
+    actor = user.id;
+  }
 
   const now = new Date().toISOString();
   const { data: activities, error } = await supabase
@@ -210,7 +219,7 @@ Deno.serve(async (request) => {
         decision: {
           activity_id: activity.id,
           subject: draft.subject,
-          reviewed_by: user.id,
+          reviewed_by: actor,
           generation_mode: "zero_cost_template",
         },
       });
@@ -231,5 +240,5 @@ Deno.serve(async (request) => {
     }
   }
 
-  return json({ processed: activities.length, drafted, skipped, failed, mode: "zero_cost" });
+  return json({ processed: activities.length, drafted, skipped, failed, mode: "zero_cost", actor });
 });
