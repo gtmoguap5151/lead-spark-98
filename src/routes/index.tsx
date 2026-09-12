@@ -13,9 +13,10 @@ export const Route = createFileRoute("/")({
 });
 
 const proof = [
-  { stat: "58%", title: "of U.S. small businesses use generative AI", body: "Up from 40% in 2024 and 23% in 2023.", source: "U.S. Chamber of Commerce, 2025" },
-  { stat: "87%", title: "say AI helps them operate more efficiently and compete", body: "AI is moving from experiment to everyday business tool.", source: "U.S. Chamber of Commerce, 2025" },
-  { stat: "64%", title: "of surveyed homeowners called a professional after online research", body: "Digital research can become a real service conversation.", source: "Angi homeowner survey, 2026" },
+  { stat: "58%", title: "of U.S. small businesses use generative AI", body: "Up from 40% in 2024 and 23% in 2023. The small-business technology shift is already underway.", source: "U.S. Chamber of Commerce, 2025" },
+  { stat: "52%", title: "of home-service callers speak with a person", body: "Nearly half of inbound calls never reach a person, showing how easily paid demand can leak out of the funnel.", source: "Invoca Home Services Benchmarks, 2026" },
+  { stat: "55%", title: "of home-service businesses don't ask the lead to buy or book", body: "Generating interest is only half the job. Opportunities still need a clear path toward the next action.", source: "Invoca Home Services Benchmarks, 2026" },
+  { stat: "30 / 29 / 26%", title: "phone, text, and email preferences are closely split", body: "Homeowners prefer different ways to be contacted, making flexible follow-up more important than a one-channel approach.", source: "Modernize Homeowner Insights, 2025" },
 ];
 
 const steps = [
@@ -50,7 +51,18 @@ function Landing() {
       </div>
     </section>
 
-    <section className="border-b border-border bg-card"><div className="mx-auto max-w-6xl px-4 py-14"><div className="max-w-3xl"><p className="text-sm font-bold uppercase tracking-[.18em] text-primary">The market is moving</p><h2 className="mt-3 text-3xl font-bold sm:text-4xl">Technology is changing how small businesses compete — and how homeowners find help.</h2><p className="mt-3 text-muted-foreground">These are independent market statistics, not Rivet Reach performance claims.</p></div><div className="mt-8 grid gap-4 md:grid-cols-3">{proof.map(p=><div key={p.stat+p.title} className="surface-card p-6"><p className="text-5xl font-black text-primary">{p.stat}</p><h3 className="mt-3 text-xl font-bold">{p.title}</h3><p className="mt-2 text-sm leading-relaxed text-muted-foreground">{p.body}</p><p className="mt-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Source: {p.source}</p></div>)}</div></div></section>
+    <section className="border-b border-border bg-card">
+      <div className="mx-auto max-w-6xl px-4 py-14 sm:py-16">
+        <div className="max-w-4xl">
+          <p className="text-sm font-bold uppercase tracking-[.18em] text-primary">The market is moving</p>
+          <h2 className="mt-3 text-3xl font-bold sm:text-4xl">Getting the lead is not enough. The businesses that respond, communicate, and move opportunities forward have the advantage.</h2>
+          <p className="mt-4 text-muted-foreground">Independent industry research shows why faster, more flexible lead handling matters. These are market statistics, not Rivet Reach performance claims.</p>
+        </div>
+        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {proof.map(p=><div key={p.stat+p.title} className="surface-card flex h-full flex-col p-6"><p className="text-4xl font-black text-primary sm:text-5xl">{p.stat}</p><h3 className="mt-3 text-xl font-bold">{p.title}</h3><p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">{p.body}</p><p className="mt-5 border-t border-border pt-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Source: {p.source}</p></div>)}
+        </div>
+      </div>
+    </section>
 
     <section className="mx-auto max-w-6xl px-4 py-16 sm:py-20"><p className="text-sm font-bold uppercase tracking-[.18em] text-primary">How it works</p><h2 className="mt-3 max-w-3xl text-3xl font-bold sm:text-5xl">Less hunting. Less guessing. A cleaner path from project to conversation.</h2><div className="mt-10 grid gap-5 md:grid-cols-3">{steps.map(([n,t,b])=><div key={n} className="surface-card p-7"><span className="text-5xl font-black text-primary/25">{n}</span><h3 className="mt-4 text-2xl font-bold">{t}</h3><p className="mt-3 leading-relaxed text-muted-foreground">{b}</p></div>)}</div></section>
 
