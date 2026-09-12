@@ -80,10 +80,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { name: "theme-color", content: "#1f2937" },
-      { title: "Contractor Lead Engine" },
+      { title: "RivetReach" },
       {
         name: "description",
-        content: "Qualified home-services leads routed to contractors by ZIP code and trade.",
+        content: "RivetReach connects homeowners with matched contractors by ZIP code and trade.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
