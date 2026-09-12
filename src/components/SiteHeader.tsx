@@ -11,13 +11,16 @@ export function SiteHeader() {
             <HardHat className="size-5" />
           </span>
           <span className="font-display text-lg font-bold uppercase leading-none tracking-tight">
-            RivetReach
+            Rivet Reach
             <span className="block text-xs font-semibold tracking-[0.2em] text-muted-foreground">
               Contractor Network
             </span>
           </span>
         </Link>
         <div className="flex items-center gap-2">
+          <Button asChild variant="ghost" size="sm" className="hidden md:inline-flex">
+            <Link to="/services">Services</Link>
+          </Button>
           <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
             <Link to="/login">Contractor login</Link>
           </Button>
@@ -35,7 +38,7 @@ export function SiteFooter() {
     <footer className="border-t border-border bg-steel text-steel-foreground">
       <div className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-10 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="font-display text-xl font-bold uppercase">RivetReach</p>
+          <p className="font-display text-xl font-bold uppercase">Rivet Reach</p>
           <p className="text-sm text-steel-foreground/70">
             Qualified home-services leads, routed by ZIP and trade.
           </p>
@@ -44,6 +47,9 @@ export function SiteFooter() {
           </p>
         </div>
         <div className="flex flex-wrap gap-4 text-sm">
+          <Link to="/services" className="hover:text-primary">
+            Browse Services
+          </Link>
           <Link to="/estimate" className="hover:text-primary">
             Request an Estimate
           </Link>
