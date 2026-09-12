@@ -1,6 +1,6 @@
 {
-  "name": "Contractor Lead Engine",
-  "short_name": "Lead Engine",
+  "name": "RivetReach",
+  "short_name": "RivetReach",
   "description": "Qualified home-services leads routed to contractors by ZIP code and trade.",
   "start_url": "/",
   "display": "standalone",
