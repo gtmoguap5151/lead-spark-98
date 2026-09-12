@@ -16,7 +16,7 @@ import { SiteFooter, SiteHeader } from "@/components/SiteHeader";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Find a Contractor for Your Home Project — Lead Engine" },
+      { title: "Find a Contractor for Your Home Project — RivetReach" },
       {
         name: "description",
         content:
@@ -24,7 +24,7 @@ export const Route = createFileRoute("/")({
       },
       {
         property: "og:title",
-        content: "Find a Contractor for Your Home Project",
+        content: "Find a Contractor for Your Home Project — RivetReach",
       },
       {
         property: "og:description",
