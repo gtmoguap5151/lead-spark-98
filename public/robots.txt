@@ -1,4 +1,9 @@
 User-agent: *
 Allow: /
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /leads
+Disallow: /profile
+Disallow: /estimate
 
 Sitemap: https://rivetreach.com/sitemap.xml
