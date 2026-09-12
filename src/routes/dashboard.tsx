@@ -1,10 +1,17 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { CalendarCheck, DollarSign, Inbox, Sparkles, TrendingUp } from "lucide-react";
+import {
+  CalendarCheck,
+  CreditCard,
+  DollarSign,
+  Inbox,
+  Sparkles,
+  TrendingUp,
+} from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { MetricCard } from "@/components/MetricCard";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
-import { useContractorLeads } from "@/lib/store";
+import { useApp, useContractorLeads } from "@/lib/store";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
@@ -29,6 +36,7 @@ const money = (n: number) => `$${n.toLocaleString("en-US")}`;
 
 function DashboardPage() {
   const leads = useContractorLeads();
+  const { state } = useApp();
 
   const newLeads = leads.filter((l) => l.status === "new");
   const qualified = leads.filter((l) => l.status === "qualified");
@@ -38,6 +46,8 @@ function DashboardPage() {
   const won = leads.filter((l) => l.status === "won");
   const revenue = won.reduce((sum, l) => sum + (l.jobValue ?? 0), 0);
   const closeRate = leads.length ? Math.round((won.length / leads.length) * 100) : 0;
+  const subscriptionActive =
+    state.subscription && ["active", "trialing", "past_due"].includes(state.subscription.status);
 
   return (
     <AppShell
@@ -49,6 +59,32 @@ function DashboardPage() {
         </Button>
       }
     >
+      <section className="surface-card mb-5 overflow-hidden p-5">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-start gap-3">
+            <span className="flex size-11 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
+              <CreditCard className="size-5" />
+            </span>
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                Lead access & billing
+              </p>
+              <h2 className="mt-1 text-xl font-bold uppercase">
+                {subscriptionActive ? "Paid access active" : "First real lead is free"}
+              </h2>
+              <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
+                {subscriptionActive
+                  ? "Your subscription is active. Manage your plan or billing whenever you need to."
+                  : "Every contractor gets one real lead free once. After that, continued lead access requires a paid plan."}
+              </p>
+            </div>
+          </div>
+          <Button asChild className="h-12 shrink-0 px-6">
+            <Link to="/billing">{subscriptionActive ? "Manage plan" : "Buy / Upgrade"}</Link>
+          </Button>
+        </div>
+      </section>
+
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <MetricCard
           label="New leads"
