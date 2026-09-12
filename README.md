@@ -1,6 +1,6 @@
-# Contractor Lead Engine
+# RivetReach
 
-A mobile-first contractor growth platform combining qualified lead intake and routing, contractor CRM workflows, performance reporting, subscriptions, and referrals.
+RivetReach is a mobile-first contractor growth platform operated by Southeast Home Service, combining qualified lead intake and routing, contractor CRM workflows, performance reporting, subscriptions, referrals, and automated sales outreach.
 
 ## Current capabilities
 
@@ -12,6 +12,7 @@ A mobile-first contractor growth platform combining qualified lead intake and ro
 - Stripe subscription checkout, customer portal, and signed webhook processing
 - Referral and referral-reward data foundation
 - Responsive installable web-app manifest
+- Automated contractor outreach queue with AI drafting and admin approval before sending
 
 ## Stack
 
