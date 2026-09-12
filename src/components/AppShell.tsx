@@ -62,7 +62,7 @@ export function AppShell({
               <HardHat className="size-4" />
             </span>
             <span className="font-display text-base font-bold uppercase tracking-tight">
-              Lead Engine
+              RivetReach
             </span>
           </Link>
 
