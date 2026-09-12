@@ -5,11 +5,11 @@ import { SiteFooter, SiteHeader } from "@/components/SiteHeader";
 export const Route = createFileRoute("/terms")({
   head: () => ({
     meta: [
-      { title: "Terms of Service — Contractor Lead Engine" },
+      { title: "Terms of Service — RivetReach" },
       {
         name: "description",
         content:
-          "Terms for homeowners and contractors using the nationwide Contractor Lead Engine matching platform.",
+          "Terms for homeowners and contractors using the nationwide RivetReach matching platform.",
       },
     ],
   }),
@@ -24,9 +24,9 @@ function TermsPage() {
         <p className="eyebrow text-primary">Service rules</p>
         <h1 className="mt-2 text-4xl font-bold leading-tight sm:text-5xl">Terms of Service</h1>
         <p className="mt-4 max-w-3xl text-lg leading-relaxed text-muted-foreground">
-          These terms apply to homeowners and contractors who use Contractor Lead Engine anywhere in
-          the United States. By submitting a request, creating an account, or using the service, you
-          agree to them.
+          These terms apply to homeowners and contractors who use RivetReach anywhere in the United
+          States. By submitting a request, creating an account, or using the service, you agree to
+          them.
         </p>
         <p className="mt-2 text-sm text-muted-foreground">Effective September 9, 2026</p>
 
@@ -50,10 +50,10 @@ function TermsPage() {
 
         <section className="surface-card mt-8 space-y-8 p-6 sm:p-8">
           <TermsSection title="1. What the service does">
-            Contractor Lead Engine receives home-project requests and may route a request to one
-            contractor based on service type, ZIP territory, availability, and platform rules. We do
-            not guarantee a match, response, estimate, project award, customer, revenue, result, or
-            quality of work. A match is not an endorsement of either party.
+            RivetReach receives home-project requests and may route a request to one contractor based
+            on service type, ZIP territory, availability, and platform rules. We do not guarantee a
+            match, response, estimate, project award, customer, revenue, result, or quality of work. A
+            match is not an endorsement of either party.
           </TermsSection>
 
           <TermsSection title="2. Homeowner eligibility and requests">
@@ -107,9 +107,9 @@ function TermsPage() {
           </TermsSection>
 
           <TermsSection title="8. No emergency service">
-            Contractor Lead Engine is not an emergency-dispatch service. For an immediate threat to
-            life, health, fire safety, gas, electricity, flooding, or property, call 911, the
-            appropriate utility emergency line, or a qualified emergency provider.
+            RivetReach is not an emergency-dispatch service. For an immediate threat to life, health,
+            fire safety, gas, electricity, flooding, or property, call 911, the appropriate utility
+            emergency line, or a qualified emergency provider.
           </TermsSection>
 
           <TermsSection title="9. Privacy">
@@ -120,7 +120,7 @@ function TermsPage() {
             >
               Privacy &amp; Data Choices notice
             </Link>
-            . Optional Lead Engine marketing permission is separate from project-contact permission
+            . Optional RivetReach marketing permission is separate from project-contact permission
             and may be withdrawn at any time.
           </TermsSection>
 
