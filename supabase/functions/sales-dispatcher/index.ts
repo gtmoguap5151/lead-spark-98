@@ -24,17 +24,12 @@ type Prospect = {
   opted_out: boolean;
 };
 
-type Draft = {
-  subject: string;
-  body: string;
-};
-
 function firstName(contactName: string | null) {
   const name = contactName?.trim();
   return name ? name.split(/\s+/)[0] : null;
 }
 
-function buildTemplateEmail(prospect: Prospect, objective: string, agentRole: string): Draft {
+function buildTemplateEmail(prospect: Prospect, objective: string, agentRole: string) {
   const signupUrl = Deno.env.get("RIVET_REACH_SIGNUP_URL") ||
     Deno.env.get("LEAD_SPARK_SIGNUP_URL") ||
     "https://rivetreach.com/login";
@@ -64,11 +59,9 @@ function buildTemplateEmail(prospect: Prospect, objective: string, agentRole: st
     ? "If it looks useful, the next step is simply to create the contractor account."
     : "You can review it and create a contractor account here:";
 
-  const body = `${greeting}\n\n${middle}\n\n${roleLine} ${signupUrl}\n\nIf you'd rather not hear from us, just reply stop.`;
-
   return {
     subject: subject.slice(0, 160),
-    body,
+    body: `${greeting}\n\n${middle}\n\n${roleLine} ${signupUrl}\n\nIf you'd rather not hear from us, just reply stop.`,
   };
 }
 
@@ -78,32 +71,24 @@ Deno.serve(async (request) => {
 
   const url = Deno.env.get("SUPABASE_URL");
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-  const expectedSecret = Deno.env.get("SALES_ORCHESTRATOR_SECRET");
   if (!url || !serviceKey) return json({ error: "Supabase service configuration missing" }, 500);
-
-  const suppliedSecret = request.headers.get("x-sales-secret");
-  const authHeader = request.headers.get("Authorization");
-  const cronAuthorized = Boolean(expectedSecret && suppliedSecret && suppliedSecret === expectedSecret);
 
   const supabase = createClient(url, serviceKey, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 
+  const suppliedSecret = request.headers.get("x-sales-secret");
+  const { data: expectedSecret, error: secretError } = await supabase.rpc("get_sales_orchestrator_secret");
+  const cronAuthorized = Boolean(!secretError && expectedSecret && suppliedSecret === expectedSecret);
+
   let actor = "system_cron";
   if (!cronAuthorized) {
+    const authHeader = request.headers.get("Authorization");
     if (!authHeader) return json({ error: "Unauthorized" }, 401);
     const token = authHeader.replace(/^Bearer\s+/i, "");
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser(token);
+    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
     if (userError || !user) return json({ error: "Unauthorized" }, 401);
-
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", user.id)
-      .maybeSingle();
+    const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle();
     if (profile?.role !== "admin") return json({ error: "Admin access required" }, 403);
     actor = user.id;
   }
@@ -118,9 +103,7 @@ Deno.serve(async (request) => {
     .limit(25);
 
   if (error) return json({ error: error.message }, 500);
-  if (!activities?.length) {
-    return json({ processed: 0, drafted: 0, skipped: 0, failed: 0, mode: "zero_cost" });
-  }
+  if (!activities?.length) return json({ processed: 0, drafted: 0, skipped: 0, failed: 0, mode: "zero_cost", actor });
 
   let drafted = 0;
   let skipped = 0;
@@ -129,36 +112,20 @@ Deno.serve(async (request) => {
   for (const activity of activities) {
     try {
       if (activity.channel !== "email") {
-        await supabase
-          .from("sales_activities")
-          .update({
-            status: "skipped",
-            error_message: `Channel ${activity.channel} is not connected for drafting`,
-          })
-          .eq("id", activity.id);
+        await supabase.from("sales_activities").update({ status: "skipped", error_message: `Channel ${activity.channel} is not connected for drafting` }).eq("id", activity.id);
         skipped++;
         continue;
       }
 
       const { data: prospect, error: prospectError } = await supabase
         .from("sales_prospects")
-        .select(
-          "id, company_name, contact_name, email, trade, city, state, website, stage, opted_out",
-        )
+        .select("id, company_name, contact_name, email, trade, city, state, website, stage, opted_out")
         .eq("id", activity.prospect_id)
         .maybeSingle();
+      if (prospectError || !prospect) throw new Error(prospectError?.message || "Prospect not found");
 
-      if (prospectError || !prospect) {
-        throw new Error(prospectError?.message || "Prospect not found");
-      }
       if (prospect.opted_out || prospect.stage === "do_not_contact" || !prospect.email) {
-        await supabase
-          .from("sales_activities")
-          .update({
-            status: "skipped",
-            error_message: "Prospect is opted out, do-not-contact, or missing email",
-          })
-          .eq("id", activity.id);
+        await supabase.from("sales_activities").update({ status: "skipped", error_message: "Prospect is opted out, do-not-contact, or missing email" }).eq("id", activity.id);
         skipped++;
         continue;
       }
@@ -170,71 +137,34 @@ Deno.serve(async (request) => {
         .eq("email", normalizedEmail)
         .limit(1);
       if (suppressionError) throw new Error(suppressionError.message);
+
       if (suppressions?.length) {
-        await supabase
-          .from("sales_prospects")
-          .update({ opted_out: true, stage: "do_not_contact" })
-          .eq("id", prospect.id);
-        await supabase
-          .from("sales_activities")
-          .update({ status: "skipped", error_message: "Blocked by global privacy suppression" })
-          .eq("id", activity.id);
+        await supabase.from("sales_prospects").update({ opted_out: true, stage: "do_not_contact" }).eq("id", prospect.id);
+        await supabase.from("sales_activities").update({ status: "skipped", error_message: "Blocked by global privacy suppression" }).eq("id", activity.id);
         if (activity.enrollment_id) {
-          await supabase
-            .from("sales_enrollments")
-            .update({ status: "opted_out", completed_at: now })
-            .eq("id", activity.enrollment_id);
+          await supabase.from("sales_enrollments").update({ status: "opted_out", completed_at: now }).eq("id", activity.enrollment_id);
         }
         skipped++;
         continue;
       }
 
-      const draft = buildTemplateEmail(
-        prospect as Prospect,
-        activity.body || "Introduce Rivet Reach",
-        activity.agent_role,
-      );
-
-      await supabase
-        .from("sales_activities")
-        .update({
-          status: "drafted",
-          subject: draft.subject,
-          body: draft.body,
-          error_message: null,
-        })
-        .eq("id", activity.id);
-
+      const draft = buildTemplateEmail(prospect as Prospect, activity.body || "Introduce Rivet Reach", activity.agent_role);
+      await supabase.from("sales_activities").update({ status: "drafted", subject: draft.subject, body: draft.body, error_message: null }).eq("id", activity.id);
       if (activity.enrollment_id) {
-        await supabase
-          .from("sales_enrollments")
-          .update({ last_error: null })
-          .eq("id", activity.enrollment_id);
+        await supabase.from("sales_enrollments").update({ last_error: null }).eq("id", activity.enrollment_id);
       }
-
       await supabase.from("sales_agent_events").insert({
         prospect_id: prospect.id,
         agent_role: activity.agent_role,
         event_type: "email_drafted",
-        decision: {
-          activity_id: activity.id,
-          subject: draft.subject,
-          reviewed_by: actor,
-          generation_mode: "zero_cost_template",
-        },
+        decision: { activity_id: activity.id, subject: draft.subject, reviewed_by: actor, generation_mode: "zero_cost_template" },
       });
       drafted++;
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
-      await supabase
-        .from("sales_activities")
-        .update({ status: "failed", error_message: message.slice(0, 1000) })
-        .eq("id", activity.id);
+      await supabase.from("sales_activities").update({ status: "failed", error_message: message.slice(0, 1000) }).eq("id", activity.id);
       if (activity.enrollment_id) {
-        await supabase
-          .from("sales_enrollments")
-          .update({ last_error: message.slice(0, 1000) })
-          .eq("id", activity.enrollment_id);
+        await supabase.from("sales_enrollments").update({ last_error: message.slice(0, 1000) }).eq("id", activity.enrollment_id);
       }
       failed++;
     }
