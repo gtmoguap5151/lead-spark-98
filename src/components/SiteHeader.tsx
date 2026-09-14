@@ -112,7 +112,7 @@ export function SiteHeader() {
       </div>
 
       {!isInstalled && (
-        <div className="border-t border-emerald-400/20 bg-gradient-to-r from-emerald-950/5 via-emerald-500/10 to-green-400/5 px-4 py-3 sm:hidden">
+        <div className="border-t border-emerald-400/20 bg-gradient-to-r from-emerald-950/5 via-emerald-500/10 to-green-400/5 px-4 py-3 lg:hidden">
           <Button
             type="button"
             size="lg"
