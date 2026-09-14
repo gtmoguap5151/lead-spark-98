@@ -1,8 +1,57 @@
 import { Link } from "@tanstack/react-router";
-import { HardHat } from "lucide-react";
+import { Download, HardHat } from "lucide-react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 
+type BeforeInstallPromptEvent = Event & {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform: string }>;
+};
+
 export function SiteHeader() {
+  const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [isInstalled, setIsInstalled] = useState(false);
+
+  useEffect(() => {
+    const standalone = window.matchMedia("(display-mode: standalone)").matches ||
+      ("standalone" in navigator && Boolean((navigator as Navigator & { standalone?: boolean }).standalone));
+    setIsInstalled(standalone);
+
+    const handleBeforeInstallPrompt = (event: Event) => {
+      event.preventDefault();
+      setInstallPrompt(event as BeforeInstallPromptEvent);
+    };
+
+    const handleInstalled = () => {
+      setIsInstalled(true);
+      setInstallPrompt(null);
+    };
+
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+    window.addEventListener("appinstalled", handleInstalled);
+    return () => {
+      window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+      window.removeEventListener("appinstalled", handleInstalled);
+    };
+  }, []);
+
+  const installApp = async () => {
+    if (installPrompt) {
+      await installPrompt.prompt();
+      const choice = await installPrompt.userChoice;
+      if (choice.outcome === "accepted") setInstallPrompt(null);
+      return;
+    }
+
+    const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    if (isIos) {
+      window.alert("To install Rivet Reach on iPhone or iPad: tap Share, then choose Add to Home Screen.");
+      return;
+    }
+
+    window.alert("Open your browser menu and choose Install app or Add to Home screen. Rivet Reach is already configured as an installable web app.");
+  };
+
   return (
     <header className="sticky top-0 z-40 border-b border-border/60 bg-background/90 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-3 px-4">
@@ -21,7 +70,13 @@ export function SiteHeader() {
           <Button asChild variant="ghost" size="sm" className="hidden md:inline-flex">
             <Link to="/services">Services</Link>
           </Button>
-          <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
+          {!isInstalled && (
+            <Button type="button" variant="outline" size="sm" onClick={installApp} className="hidden sm:inline-flex">
+              <Download className="mr-1.5 size-4" />
+              Install App
+            </Button>
+          )}
+          <Button asChild variant="ghost" size="sm" className="hidden lg:inline-flex">
             <Link to="/login">Contractor login</Link>
           </Button>
           <Button asChild size="sm">
@@ -29,6 +84,14 @@ export function SiteHeader() {
           </Button>
         </div>
       </div>
+      {!isInstalled && (
+        <div className="border-t border-border/50 px-4 py-2 sm:hidden">
+          <Button type="button" variant="outline" size="sm" onClick={installApp} className="w-full font-bold">
+            <Download className="mr-2 size-4" />
+            Install Rivet Reach App
+          </Button>
+        </div>
+      )}
     </header>
   );
 }
