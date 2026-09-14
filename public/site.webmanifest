@@ -1,10 +1,37 @@
 {
-  "name": "RivetReach",
-  "short_name": "RivetReach",
+  "id": "/",
+  "name": "Rivet Reach",
+  "short_name": "Rivet Reach",
   "description": "Qualified home-services leads routed to contractors by ZIP code and trade.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
+  "orientation": "portrait-primary",
   "background_color": "#f8fafc",
-  "theme_color": "#1f2937",
-  "icons": [{ "src": "/favicon.ico", "sizes": "48x48", "type": "image/x-icon" }]
+  "theme_color": "#065f46",
+  "categories": ["business", "productivity"],
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "48x48",
+      "type": "image/x-icon"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "url": "/dashboard"
+    },
+    {
+      "name": "Leads",
+      "short_name": "Leads",
+      "url": "/leads"
+    },
+    {
+      "name": "Billing",
+      "short_name": "Billing",
+      "url": "/billing"
+    }
+  ]
 }
