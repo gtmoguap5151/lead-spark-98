@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, BadgeCheck, Building2, CheckCircle2, Home, MapPin, Search, Sparkles, Target, Wrench, Zap } from "lucide-react";
+import { useEffect, useState } from "react";
 import heroImage from "@/assets/hero-contractor.jpg";
 import { Button } from "@/components/ui/button";
 import { SiteFooter, SiteHeader } from "@/components/SiteHeader";
@@ -12,11 +13,19 @@ export const Route = createFileRoute("/")({
   component: Landing,
 });
 
-const proof = [
-  { stat: "58%", title: "of U.S. small businesses use generative AI", body: "Up from 40% in 2024 and 23% in 2023. The small-business technology shift is already underway.", source: "U.S. Chamber of Commerce, 2025" },
-  { stat: "52%", title: "of home-service callers speak with a person", body: "Nearly half of inbound calls never reach a person, showing how easily paid demand can leak out of the funnel.", source: "Invoca Home Services Benchmarks, 2026" },
-  { stat: "55%", title: "of home-service businesses don't ask the lead to buy or book", body: "Generating interest is only half the job. Opportunities still need a clear path toward the next action.", source: "Invoca Home Services Benchmarks, 2026" },
-  { stat: "30 / 29 / 26%", title: "phone, text, and email preferences are closely split", body: "Homeowners prefer different ways to be contacted, making flexible follow-up more important than a one-channel approach.", source: "Modernize Homeowner Insights, 2025" },
+const proofPages = [
+  [
+    { stat: "58%", title: "of U.S. small businesses use generative AI", body: "Up from 40% in 2024 and 23% in 2023. The small-business technology shift is already underway.", source: "U.S. Chamber of Commerce, 2025" },
+    { stat: "52%", title: "of home-service callers speak with a person", body: "Nearly half of inbound calls never reach a person, showing how easily paid demand can leak out of the funnel.", source: "Invoca Home Services Benchmarks, 2026" },
+    { stat: "55%", title: "of home-service businesses don't ask the lead to buy or book", body: "Generating interest is only half the job. Opportunities still need a clear path toward the next action.", source: "Invoca Home Services Benchmarks, 2026" },
+    { stat: "30 / 29 / 26%", title: "phone, text, and email preferences are closely split", body: "Homeowners prefer different ways to be contacted, making flexible follow-up more important than a one-channel approach.", source: "Modernize Homeowner Insights, 2025" },
+  ],
+  [
+    { stat: "38%", title: "of home-service calls from digital marketing are leads", body: "A meaningful share of answered calls are real opportunities, making fast qualification and routing important after the marketing click.", source: "Invoca Home Services Benchmarks, 2026" },
+    { stat: "45%", title: "of home-service phone leads convert on the call", body: "When a real lead reaches a business, the conversation itself can be a decisive moment for turning demand into booked work.", source: "Invoca Home Services Benchmarks, 2026" },
+    { stat: "43.88%", title: "prefer text for scheduling the first appointment", body: "Homeowners increasingly expect scheduling to fit naturally into a mobile-first experience instead of requiring another phone call.", source: "Modernize Homeowner Insights, 2025" },
+    { stat: "69.55%", title: "want to know appointment duration beforehand", body: "Clear expectations around timing and next steps can help homeowners feel more prepared before meeting a contractor.", source: "Modernize Homeowner Insights, 2025" },
+  ],
 ];
 
 const services = [
@@ -39,6 +48,17 @@ const steps = [
 ];
 
 function Landing() {
+  const [proofPage, setProofPage] = useState(0);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setProofPage(current => (current + 1) % proofPages.length);
+    }, 30000);
+    return () => window.clearInterval(timer);
+  }, []);
+
+  const proof = proofPages[proofPage];
+
   return <div className="min-h-screen bg-background">
     <SiteHeader />
 
@@ -88,9 +108,13 @@ function Landing() {
           <h2 className="mt-3 text-3xl font-bold sm:text-4xl">Getting the lead is not enough. The businesses that respond, communicate, and move opportunities forward have the advantage.</h2>
           <p className="mt-4 text-muted-foreground">Independent industry research shows why faster, more flexible lead handling matters. These are market statistics, not Rivet Reach performance claims.</p>
         </div>
-        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div key={proofPage} className="mt-8 grid animate-in gap-4 fade-in duration-700 sm:grid-cols-2 lg:grid-cols-4">
           {proof.map(p=><div key={p.stat+p.title} className="surface-card flex h-full flex-col p-6"><p className="text-4xl font-black text-primary sm:text-5xl">{p.stat}</p><h3 className="mt-3 text-xl font-bold">{p.title}</h3><p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">{p.body}</p><p className="mt-5 border-t border-border pt-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Source: {p.source}</p></div>)}
         </div>
+        <div className="mt-5 flex items-center justify-center gap-2" aria-label="Market statistics rotation">
+          {proofPages.map((_, index) => <button key={index} type="button" onClick={() => setProofPage(index)} aria-label={`Show statistics set ${index + 1}`} className={`h-2.5 rounded-full transition-all ${index === proofPage ? "w-8 bg-primary" : "w-2.5 bg-muted-foreground/30 hover:bg-muted-foreground/50"}`} />)}
+        </div>
+        <p className="mt-2 text-center text-xs font-medium text-muted-foreground">Market insights refresh every 30 seconds.</p>
       </div>
     </section>
 
