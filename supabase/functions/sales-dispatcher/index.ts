@@ -41,27 +41,27 @@ function buildTemplateEmail(prospect: Prospect, objective: string, agentRole: st
   const company = prospect.company_name?.trim() || "your company";
   const objectiveText = (objective || "").toLowerCase();
 
-  let subject = `A lead option for ${company}`;
-  let middle = `Rivet Reach connects homeowners with contractors when they are actively looking for help. I wanted to see whether ${company} is interested in receiving ${trade} opportunities${locationPhrase}.`;
+  let subject = "Want more local jobs without paying for junk leads?";
+  let middle = `Rivet Reach helps contractors get more jobs without wasting time chasing dead leads. We connect contractors with homeowners who are actively looking for work${locationPhrase}, then help keep the follow-up organized so good opportunities do not fall through the cracks.\n\nWe are opening Rivet Reach to a small group of contractors right now. Your first real lead is free so ${company} can judge the quality from an actual opportunity before deciding whether to continue. After that, plans start at $99/month. No long-term contract.`;
 
   if (objectiveText.includes("follow") || objectiveText.includes("check") || objectiveText.includes("remind")) {
-    subject = `Quick follow-up for ${company}`;
-    middle = `I wanted to follow up about Rivet Reach. We connect homeowners with contractors who want new project opportunities${locationPhrase}. If adding another source of ${trade} work makes sense for ${company}, you can take a look whenever it is convenient.`;
-  } else if (objectiveText.includes("free") || objectiveText.includes("offer") || objectiveText.includes("trial")) {
-    subject = `${company}: first real lead can be free`;
-    middle = `Rivet Reach helps contractors connect with homeowners looking for project help${locationPhrase}. Your first real lead can be free one time, so ${company} can judge the service from an actual opportunity before deciding whether continued paid access makes sense.`;
+    subject = `Still want more ${trade} jobs${location ? ` in ${location}` : ""}?`;
+    middle = `Just following up about Rivet Reach. We connect contractors with homeowners who are actively looking for work${locationPhrase}. Your first real lead is free, so ${company} can judge the quality before paying for continued access. Plans start at $99/month after the first lead.`;
+  } else if (objectiveText.includes("cost") || objectiveText.includes("quality") || objectiveText.includes("objection")) {
+    subject = `${company}: judge the lead before paying`;
+    middle = `The point of Rivet Reach is simple: do not ask a contractor to pay first and hope the leads are worth it. ${company} gets one real lead free. If the opportunity is useful, continued access starts at $99/month. If it is not useful, you have learned that without buying a long contract.`;
   } else if (objectiveText.includes("close") || objectiveText.includes("signup") || objectiveText.includes("sign up")) {
-    subject = `Ready when ${company} is`;
-    middle = `If ${company} wants another source of ${trade} opportunities${locationPhrase}, Rivet Reach is ready to use. The first real lead can be free one time; continued real-lead access after that requires payment, credits, or an active subscription.`;
+    subject = "Your first Rivet Reach lead is still free";
+    middle = `Rivet Reach is ready for ${company}. Create the contractor account, receive the first real lead free, and decide from the actual opportunity whether continued access makes sense. Paid plans start at $99/month after the first lead, with no long-term contract.`;
   }
 
   const roleLine = agentRole === "closer"
-    ? "If it looks useful, the next step is simply to create the contractor account."
-    : "You can review it and create a contractor account here:";
+    ? "Create the contractor account here:"
+    : "Take a look and create your contractor account here:";
 
   return {
     subject: subject.slice(0, 160),
-    body: `${greeting}\n\n${middle}\n\n${roleLine} ${signupUrl}\n\nIf you'd rather not hear from us, just reply stop.`,
+    body: `${greeting}\n\n${middle}\n\n${roleLine} ${signupUrl}\n\nRivet Reach\nBuilt for contractors who would rather close jobs than chase leads.\n\nIf you'd rather not hear from us, just reply stop.`,
   };
 }
 
