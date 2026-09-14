@@ -19,8 +19,8 @@ type Plan = {
 export const Route = createFileRoute("/billing")({
   head: () => ({
     meta: [
-      { title: "Billing — Lead Engine" },
-      { name: "description", content: "Choose or manage your Lead Engine subscription." },
+      { title: "Billing — Rivet Reach" },
+      { name: "description", content: "Choose or manage your Rivet Reach subscription." },
     ],
   }),
   component: BillingPage,
@@ -148,7 +148,7 @@ function BillingPage() {
           <ShieldCheck className="mx-auto size-9 text-primary" />
           <h2 className="mt-3 text-xl font-bold uppercase">Plans coming online</h2>
           <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
-            Your billing connection is ready. Lead Engine plans will appear here as soon as pricing
+            Your Rivet Reach billing connection is ready. Plans will appear here as soon as pricing
             is published.
           </p>
         </div>
