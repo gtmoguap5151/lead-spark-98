@@ -15,3 +15,6 @@ verify_jwt = false
 
 [functions.sales-dispatcher]
 verify_jwt = false
+
+[functions.sales-approval]
+verify_jwt = false

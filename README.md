@@ -12,7 +12,7 @@ RivetReach is a mobile-first contractor growth platform operated by Southeast Ho
 - Stripe subscription checkout, customer portal, and signed webhook processing
 - Referral and referral-reward data foundation
 - Responsive installable web-app manifest
-- Automated contractor outreach queue with AI drafting and admin approval before sending
+- Automated contractor outreach with zero-cost template drafting, suppression checks, rate-limited sending, and admin controls
 
 ## Stack
 
@@ -50,6 +50,16 @@ Supabase Edge Function secrets:
 - `STRIPE_WEBHOOK_SECRET`
 - `STRIPE_PRICE_LOOKUP_KEYS`
 - `APP_URL`
+- `RESEND_API_KEY`
+- `SALES_FROM_EMAIL`
+- `SALES_BUSINESS_NAME`
+- `SALES_POSTAL_ADDRESS`
+- `RIVET_REACH_SIGNUP_URL` (optional; defaults to `https://rivetreach.com/login`)
+- `RIVET_REACH_PRIVACY_URL` (optional; defaults to `https://rivetreach.com/privacy`)
+
+The sales scheduler credential is stored in Supabase Vault under
+`lead_spark_sales_orchestrator_secret`. The current template drafting path does
+not require an OpenAI API key.
 
 The Stripe webhook endpoint is:
 
