@@ -52,6 +52,9 @@ export function SiteHeader() {
     window.alert("Open your browser menu and choose Install app or Add to Home screen. Rivet Reach is already configured as an installable web app.");
   };
 
+  const installButtonClass =
+    "group relative overflow-hidden border-emerald-300/60 bg-gradient-to-r from-emerald-600 via-emerald-500 to-green-400 font-extrabold text-white shadow-[0_0_0_1px_rgba(16,185,129,0.15),0_10px_28px_rgba(16,185,129,0.38)] transition-all duration-300 hover:-translate-y-0.5 hover:from-emerald-500 hover:to-green-300 hover:shadow-[0_0_0_1px_rgba(52,211,153,0.35),0_14px_34px_rgba(16,185,129,0.5)] focus-visible:ring-emerald-400";
+
   return (
     <header className="sticky top-0 z-40 border-b border-border/60 bg-background/90 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-3 px-4">
@@ -69,9 +72,15 @@ export function SiteHeader() {
             <Link to="/services">Services</Link>
           </Button>
           {!isInstalled && (
-            <Button type="button" variant="outline" size="sm" onClick={installApp} className="hidden sm:inline-flex">
-              <Download className="mr-1.5 size-4" />
-              Install App
+            <Button
+              type="button"
+              size="sm"
+              onClick={installApp}
+              className={`hidden sm:inline-flex ${installButtonClass}`}
+            >
+              <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/25 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
+              <Download className="relative mr-1.5 size-4 animate-pulse" />
+              <span className="relative">Install App</span>
             </Button>
           )}
           <Button asChild variant="ghost" size="sm" className="hidden lg:inline-flex">
@@ -83,11 +92,20 @@ export function SiteHeader() {
         </div>
       </div>
       {!isInstalled && (
-        <div className="border-t border-border/50 px-4 py-2 sm:hidden">
-          <Button type="button" variant="outline" size="sm" onClick={installApp} className="w-full font-bold">
-            <Download className="mr-2 size-4" />
-            Install Rivet Reach App
+        <div className="border-t border-emerald-400/20 bg-gradient-to-r from-emerald-950/5 via-emerald-500/10 to-green-400/5 px-4 py-3 sm:hidden">
+          <Button
+            type="button"
+            size="lg"
+            onClick={installApp}
+            className={`h-14 w-full rounded-xl text-base tracking-wide ${installButtonClass}`}
+          >
+            <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/25 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
+            <Download className="relative mr-2 size-5 animate-pulse" />
+            <span className="relative">Install Rivet Reach App</span>
           </Button>
+          <p className="mt-1.5 text-center text-[11px] font-semibold uppercase tracking-[0.14em] text-emerald-700 dark:text-emerald-300">
+            Fast access · Works from your home screen
+          </p>
         </div>
       )}
     </header>
