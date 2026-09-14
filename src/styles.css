@@ -5,17 +5,9 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * Design system definition.
- *
- * The @theme inline block maps CSS custom properties to Tailwind utility
- * classes (e.g. --color-primary -> bg-primary, text-primary).
- *
- * The :root and .dark blocks define the actual color values using oklch.
- * All colors MUST use oklch format.
- *
- * To add a new semantic color:
- * 1. Add the variable to :root (light value) and .dark (dark value)
- * 2. Register it in @theme inline as --color-<name>: var(--<name>)
+ * Rivet Reach design system.
+ * Emerald is the primary brand color; charcoal/green-black anchors the UI.
+ * All colors use oklch format.
  */
 
 @theme inline {
@@ -73,78 +65,85 @@
 
 :root {
   --radius: 0.5rem;
-  --background: oklch(0.985 0.005 85);
-  --foreground: oklch(0.24 0.02 250);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.24 0.02 250);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.24 0.02 250);
-  --primary: oklch(0.73 0.175 62);
-  --primary-foreground: oklch(0.19 0.02 250);
-  --secondary: oklch(0.95 0.008 80);
-  --secondary-foreground: oklch(0.28 0.02 250);
-  --muted: oklch(0.955 0.006 85);
-  --muted-foreground: oklch(0.52 0.02 250);
-  --accent: oklch(0.94 0.03 70);
-  --accent-foreground: oklch(0.28 0.03 60);
+
+  /* Warm white with a subtle green cast, matching the emerald identity. */
+  --background: oklch(0.985 0.006 155);
+  --foreground: oklch(0.2 0.025 160);
+  --card: oklch(0.998 0.002 155);
+  --card-foreground: oklch(0.2 0.025 160);
+  --popover: oklch(0.998 0.002 155);
+  --popover-foreground: oklch(0.2 0.025 160);
+
+  /* Rivet Reach emerald. */
+  --primary: oklch(0.65 0.17 160);
+  --primary-foreground: oklch(0.985 0.004 155);
+
+  --secondary: oklch(0.95 0.018 155);
+  --secondary-foreground: oklch(0.24 0.035 160);
+  --muted: oklch(0.955 0.012 155);
+  --muted-foreground: oklch(0.48 0.025 160);
+  --accent: oklch(0.92 0.05 155);
+  --accent-foreground: oklch(0.25 0.07 160);
+
   --destructive: oklch(0.577 0.21 27);
   --destructive-foreground: oklch(0.985 0.003 250);
-  --border: oklch(0.9 0.008 85);
-  --input: oklch(0.9 0.008 85);
-  --ring: oklch(0.73 0.175 62);
+  --border: oklch(0.89 0.018 155);
+  --input: oklch(0.89 0.018 155);
+  --ring: oklch(0.65 0.17 160);
 
-  --steel: oklch(0.27 0.025 250);
-  --steel-foreground: oklch(0.97 0.005 85);
-  --success: oklch(0.6 0.13 150);
+  /* Kept as the semantic 'steel' token for compatibility, now brand charcoal. */
+  --steel: oklch(0.22 0.03 160);
+  --steel-foreground: oklch(0.97 0.006 155);
+  --success: oklch(0.62 0.15 150);
   --success-foreground: oklch(0.99 0 0);
   --warning: oklch(0.78 0.15 80);
   --warning-foreground: oklch(0.25 0.03 60);
-  --info: oklch(0.58 0.11 245);
+  --info: oklch(0.58 0.1 205);
   --info-foreground: oklch(0.99 0 0);
 
-  --chart-1: oklch(0.73 0.175 62);
-  --chart-2: oklch(0.6 0.13 150);
-  --chart-3: oklch(0.58 0.11 245);
-  --chart-4: oklch(0.45 0.03 250);
-  --chart-5: oklch(0.78 0.15 80);
+  --chart-1: oklch(0.65 0.17 160);
+  --chart-2: oklch(0.56 0.13 150);
+  --chart-3: oklch(0.7 0.11 170);
+  --chart-4: oklch(0.38 0.05 160);
+  --chart-5: oklch(0.78 0.1 140);
 
-  --gradient-steel: linear-gradient(160deg, oklch(0.3 0.03 250), oklch(0.2 0.02 255));
-  --gradient-heat: linear-gradient(100deg, oklch(0.75 0.17 62), oklch(0.82 0.15 80));
-  --shadow-card: 0 1px 2px oklch(0.24 0.02 250 / 0.06), 0 8px 24px -12px oklch(0.24 0.02 250 / 0.18);
-  --shadow-lift: 0 18px 40px -18px oklch(0.24 0.02 250 / 0.35);
+  --gradient-steel: linear-gradient(160deg, oklch(0.25 0.04 160), oklch(0.16 0.025 165));
+  --gradient-heat: linear-gradient(100deg, oklch(0.7 0.18 155), oklch(0.58 0.16 165));
+  --shadow-card: 0 1px 2px oklch(0.18 0.03 160 / 0.06), 0 8px 24px -12px oklch(0.18 0.03 160 / 0.18);
+  --shadow-lift: 0 18px 40px -18px oklch(0.18 0.04 160 / 0.35);
 
-  --sidebar: oklch(0.27 0.025 250);
-  --sidebar-foreground: oklch(0.97 0.005 85);
-  --sidebar-primary: oklch(0.73 0.175 62);
-  --sidebar-primary-foreground: oklch(0.19 0.02 250);
-  --sidebar-accent: oklch(0.33 0.025 250);
-  --sidebar-accent-foreground: oklch(0.97 0.005 85);
+  --sidebar: oklch(0.22 0.03 160);
+  --sidebar-foreground: oklch(0.97 0.006 155);
+  --sidebar-primary: oklch(0.67 0.18 160);
+  --sidebar-primary-foreground: oklch(0.99 0 0);
+  --sidebar-accent: oklch(0.29 0.045 160);
+  --sidebar-accent-foreground: oklch(0.97 0.006 155);
   --sidebar-border: oklch(1 0 0 / 12%);
-  --sidebar-ring: oklch(0.73 0.175 62);
+  --sidebar-ring: oklch(0.67 0.18 160);
 }
 
 .dark {
-  --background: oklch(0.19 0.02 252);
-  --foreground: oklch(0.96 0.005 85);
-  --card: oklch(0.24 0.022 252);
-  --card-foreground: oklch(0.96 0.005 85);
-  --popover: oklch(0.24 0.022 252);
-  --popover-foreground: oklch(0.96 0.005 85);
-  --primary: oklch(0.76 0.17 62);
-  --primary-foreground: oklch(0.19 0.02 250);
-  --secondary: oklch(0.29 0.02 252);
-  --secondary-foreground: oklch(0.96 0.005 85);
-  --muted: oklch(0.29 0.02 252);
-  --muted-foreground: oklch(0.72 0.015 250);
-  --accent: oklch(0.33 0.04 60);
-  --accent-foreground: oklch(0.96 0.005 85);
+  --background: oklch(0.15 0.025 165);
+  --foreground: oklch(0.96 0.007 155);
+  --card: oklch(0.2 0.03 162);
+  --card-foreground: oklch(0.96 0.007 155);
+  --popover: oklch(0.2 0.03 162);
+  --popover-foreground: oklch(0.96 0.007 155);
+  --primary: oklch(0.72 0.18 158);
+  --primary-foreground: oklch(0.14 0.03 165);
+  --secondary: oklch(0.25 0.035 162);
+  --secondary-foreground: oklch(0.96 0.007 155);
+  --muted: oklch(0.25 0.03 162);
+  --muted-foreground: oklch(0.72 0.02 155);
+  --accent: oklch(0.3 0.065 158);
+  --accent-foreground: oklch(0.96 0.007 155);
   --destructive: oklch(0.68 0.19 25);
   --destructive-foreground: oklch(0.98 0 0);
   --border: oklch(1 0 0 / 12%);
   --input: oklch(1 0 0 / 16%);
-  --ring: oklch(0.76 0.17 62);
-  --steel: oklch(0.24 0.022 252);
-  --steel-foreground: oklch(0.96 0.005 85);
+  --ring: oklch(0.72 0.18 158);
+  --steel: oklch(0.18 0.03 164);
+  --steel-foreground: oklch(0.96 0.007 155);
 }
 
 @layer base {
@@ -189,4 +188,3 @@
   font-weight: 600;
   font-size: 0.75rem;
 }
-
