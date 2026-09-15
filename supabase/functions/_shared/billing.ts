@@ -59,14 +59,25 @@ export const userFromRequest = async (request: Request) => {
   return data.user;
 };
 
+const LOCAL_ORIGIN = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i;
+const TRUSTED_APP_ORIGINS = new Set([
+  "https://rivetreach.com",
+  "https://www.rivetreach.com",
+  "https://lead-spark-98.vercel.app",
+]);
+
 export const appOrigin = (request: Request) => {
-  const configured = Deno.env.get("APP_URL")?.replace(/\/$/, "");
-  if (configured) return configured;
-  const origin = request.headers.get("origin");
-  if (!origin || !/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(origin)) {
-    throw new Error("Missing APP_URL");
+  const requestOrigin = request.headers.get("origin")?.replace(/\/$/, "");
+  if (requestOrigin && (TRUSTED_APP_ORIGINS.has(requestOrigin) || LOCAL_ORIGIN.test(requestOrigin))) {
+    return requestOrigin;
   }
-  return origin;
+
+  const configured = Deno.env.get("APP_URL")?.replace(/\/$/, "");
+  if (configured && (TRUSTED_APP_ORIGINS.has(configured) || LOCAL_ORIGIN.test(configured))) {
+    return configured;
+  }
+
+  throw new Error("Missing or untrusted APP_URL");
 };
 
 export const leadSparkLookupKeys = () =>
