@@ -5,6 +5,11 @@ import { z } from "npm:zod@3.24.2";
 const CONSENT_VERSION = "2026-09-09-us-2";
 const ACCEPTED_CONSENT_VERSIONS = ["2026-09-09", CONSENT_VERSION] as const;
 const LOCAL_ORIGIN = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i;
+const TRUSTED_PRODUCTION_ORIGINS = new Set([
+  "https://rivetreach.com",
+  "https://www.rivetreach.com",
+  "https://lead-spark-98.vercel.app",
+]);
 
 const serviceTypes = [
   "Roofing",
@@ -60,8 +65,6 @@ const leadSchema = z
     isAdult: z.literal(true).optional(),
     contactConsent: z.literal(true),
     marketingConsent: z.boolean(),
-    // Keep the immediately previous notice version valid while cached clients
-    // roll over to the nationwide notice. The server records the current version.
     consentVersion: z.enum(ACCEPTED_CONSENT_VERSIONS),
     attribution: attributionSchema,
     website: z.string().max(0).optional(),
@@ -112,7 +115,11 @@ const serverKey = () => {
 const allowedOrigin = (request: Request) => {
   const origin = request.headers.get("origin") ?? "";
   const appOrigin = Deno.env.get("APP_URL")?.replace(/\/$/, "");
-  if (LOCAL_ORIGIN.test(origin) || (appOrigin && origin === appOrigin)) return origin;
+  if (
+    LOCAL_ORIGIN.test(origin) ||
+    TRUSTED_PRODUCTION_ORIGINS.has(origin) ||
+    (appOrigin && origin === appOrigin)
+  ) return origin;
   return null;
 };
 
@@ -163,8 +170,6 @@ Deno.serve(async (request) => {
     if (!parsed.success)
       return json(origin, { error: "Please check the submitted information." }, 400);
 
-    // Common honeypot field. Bots receive a normal-looking response without
-    // creating a lead or a privacy request.
     if (parsed.data.website) return json(origin, { ok: true }, 202);
 
     const key = serverKey();
