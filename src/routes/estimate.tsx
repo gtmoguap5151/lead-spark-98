@@ -26,14 +26,20 @@ export const Route = createFileRoute("/estimate")({
       {
         name: "description",
         content:
-          "A simple request form for homeowners who need roofing, HVAC, plumbing, remodeling or other home project help.",
+          "Share your home project and ZIP code for free. Rivet Reach checks whether an eligible contractor serves your area. No obligation to hire.",
       },
-      { property: "og:title", content: "Tell Us About Your Home Project" },
+      { property: "og:title", content: "Tell Us About Your Home Project | Rivet Reach" },
       {
         property: "og:description",
         content:
-          "Tell us what you need and we will route your request to one local contractor who serves your area.",
+          "Share your project and ZIP for free. If an eligible contractor serves your area, they may contact you. No obligation to hire.",
       },
+      { property: "og:url", content: "https://rivetreach.com/estimate" },
+      { property: "og:image", content: "https://rivetreach.com/og-homeowner-project.png" },
+      { property: "og:image:width", content: "1200" },
+      { property: "og:image:height", content: "630" },
+      { property: "og:image:alt", content: "Rivet Reach homeowner project request" },
+      { name: "twitter:image", content: "https://rivetreach.com/og-homeowner-project.png" },
     ],
   }),
   component: EstimatePage,
@@ -172,9 +178,9 @@ function EstimatePage() {
           Tell us about your home project
         </h1>
         <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
-          Fill out the simple form below. Your request will be routed to one contractor based on the
-          service you need and your ZIP code, anywhere in the United States where an eligible
-          contractor is available.
+          Homeowners across the United States can tell us about their project. We check the service
+          you need and your ZIP code. If an eligible contractor serves your area, we may share your
+          request with one contractor who can contact you.
         </p>
 
         <div className="mt-6 rounded-xl border border-border bg-muted/45 p-4 sm:p-5">
@@ -183,8 +189,8 @@ function EstimatePage() {
             <div>
               <p className="text-lg font-bold">Your information stays focused on your project</p>
               <p className="mt-1 text-base leading-relaxed text-muted-foreground">
-                Your request is routed to one matched contractor rather than sent to a long list of
-                companies.
+                If a match is available, your request goes to one contractor rather than a long list
+                of companies.
               </p>
             </div>
           </div>
