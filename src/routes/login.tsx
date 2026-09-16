@@ -14,6 +14,10 @@ import { SERVICE_TYPES, type ServiceType } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/login")({
+  validateSearch: (search: Record<string, unknown>): { mode?: "signup"; [key: string]: unknown } => {
+    const { mode, ...otherSearch } = search;
+    return mode === "signup" ? { ...otherSearch, mode: "signup" } : otherSearch;
+  },
   head: () => ({
     meta: [
       { title: "Contractor Login & Signup — Contractor Lead Engine" },
@@ -49,6 +53,8 @@ const signupSchema = z.object({
 });
 
 function LoginPage() {
+  const { mode } = Route.useSearch();
+  const isSignup = mode === "signup";
   const { login, signup, busy } = useApp();
   const navigate = useNavigate();
   const [confirmationEmail, setConfirmationEmail] = useState<string | null>(null);
@@ -79,12 +85,16 @@ function LoginPage() {
       <SiteHeader />
       <main className="mx-auto max-w-lg px-4 py-10">
         <p className="eyebrow text-muted-foreground">Contractor access</p>
-        <h1 className="mt-2 text-4xl font-bold uppercase leading-none">Get Qualified Leads</h1>
+        <h1 className="mt-2 text-4xl font-bold uppercase leading-none">
+          {isSignup ? "Create your contractor account" : "Contractor sign in"}
+        </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Sign in to your pipeline, or claim eligible ZIP territories across the U.S.
+          {isSignup
+            ? "Choose your trades and ZIP coverage so we can match eligible homeowner requests when available."
+            : "Sign in to manage your territory and matched opportunities."}
         </p>
 
-        <Tabs defaultValue="login" className="mt-6">
+        <Tabs key={isSignup ? "signup" : "login"} defaultValue={isSignup ? "signup" : "login"} className="mt-6">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="login">Log in</TabsTrigger>
             <TabsTrigger value="signup">Create account</TabsTrigger>
