@@ -12,13 +12,37 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as BillingRouteImport } from './routes/billing'
+import { Route as ConcreteLeadsRouteImport } from './routes/concrete-leads'
+import { Route as ContractorLeadsRouteImport } from './routes/contractor-leads'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as DeckLeadsRouteImport } from './routes/deck-leads'
+import { Route as ElectricalLeadsRouteImport } from './routes/electrical-leads'
 import { Route as EstimateRouteImport } from './routes/estimate'
+import { Route as FindAConcreteContractorRouteImport } from './routes/find-a-concrete-contractor'
+import { Route as FindADeckBuilderRouteImport } from './routes/find-a-deck-builder'
+import { Route as FindAFlooringContractorRouteImport } from './routes/find-a-flooring-contractor'
+import { Route as FindAPainterRouteImport } from './routes/find-a-painter'
+import { Route as FindAPlumberRouteImport } from './routes/find-a-plumber'
+import { Route as FindARemodelingContractorRouteImport } from './routes/find-a-remodeling-contractor'
+import { Route as FindARooferRouteImport } from './routes/find-a-roofer'
+import { Route as FindASidingContractorRouteImport } from './routes/find-a-siding-contractor'
+import { Route as FindAnElectricianRouteImport } from './routes/find-an-electrician'
+import { Route as FindAnHvacContractorRouteImport } from './routes/find-an-hvac-contractor'
+import { Route as FindWindowDoorContractorRouteImport } from './routes/find-window-door-contractor'
+import { Route as FlooringLeadsRouteImport } from './routes/flooring-leads'
+import { Route as HvacLeadsRouteImport } from './routes/hvac-leads'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as PaintingLeadsRouteImport } from './routes/painting-leads'
+import { Route as PlumbingLeadsRouteImport } from './routes/plumbing-leads'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as RemodelingLeadsRouteImport } from './routes/remodeling-leads'
+import { Route as RoofingLeadsRouteImport } from './routes/roofing-leads'
 import { Route as SalesApprovalRouteImport } from './routes/sales-approval'
+import { Route as ServicesRouteImport } from './routes/services'
+import { Route as SidingLeadsRouteImport } from './routes/siding-leads'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as WindowDoorLeadsRouteImport } from './routes/window-door-leads'
 import { Route as LeadsIndexRouteImport } from './routes/leads.index'
 import { Route as LeadsLeadIdRouteImport } from './routes/leads.$leadId'
 
@@ -37,9 +61,29 @@ const BillingRoute = BillingRouteImport.update({
   path: '/billing',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ConcreteLeadsRoute = ConcreteLeadsRouteImport.update({
+  id: '/concrete-leads',
+  path: '/concrete-leads',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContractorLeadsRoute = ContractorLeadsRouteImport.update({
+  id: '/contractor-leads',
+  path: '/contractor-leads',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DeckLeadsRoute = DeckLeadsRouteImport.update({
+  id: '/deck-leads',
+  path: '/deck-leads',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ElectricalLeadsRoute = ElectricalLeadsRouteImport.update({
+  id: '/electrical-leads',
+  path: '/electrical-leads',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EstimateRoute = EstimateRouteImport.update({
@@ -47,9 +91,86 @@ const EstimateRoute = EstimateRouteImport.update({
   path: '/estimate',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FindAConcreteContractorRoute = FindAConcreteContractorRouteImport.update({
+  id: '/find-a-concrete-contractor',
+  path: '/find-a-concrete-contractor',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FindADeckBuilderRoute = FindADeckBuilderRouteImport.update({
+  id: '/find-a-deck-builder',
+  path: '/find-a-deck-builder',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FindAFlooringContractorRoute = FindAFlooringContractorRouteImport.update({
+  id: '/find-a-flooring-contractor',
+  path: '/find-a-flooring-contractor',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FindAPainterRoute = FindAPainterRouteImport.update({
+  id: '/find-a-painter',
+  path: '/find-a-painter',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FindAPlumberRoute = FindAPlumberRouteImport.update({
+  id: '/find-a-plumber',
+  path: '/find-a-plumber',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FindARemodelingContractorRoute =
+  FindARemodelingContractorRouteImport.update({
+    id: '/find-a-remodeling-contractor',
+    path: '/find-a-remodeling-contractor',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const FindARooferRoute = FindARooferRouteImport.update({
+  id: '/find-a-roofer',
+  path: '/find-a-roofer',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FindASidingContractorRoute = FindASidingContractorRouteImport.update({
+  id: '/find-a-siding-contractor',
+  path: '/find-a-siding-contractor',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FindAnElectricianRoute = FindAnElectricianRouteImport.update({
+  id: '/find-an-electrician',
+  path: '/find-an-electrician',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FindAnHvacContractorRoute = FindAnHvacContractorRouteImport.update({
+  id: '/find-an-hvac-contractor',
+  path: '/find-an-hvac-contractor',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FindWindowDoorContractorRoute =
+  FindWindowDoorContractorRouteImport.update({
+    id: '/find-window-door-contractor',
+    path: '/find-window-door-contractor',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const FlooringLeadsRoute = FlooringLeadsRouteImport.update({
+  id: '/flooring-leads',
+  path: '/flooring-leads',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HvacLeadsRoute = HvacLeadsRouteImport.update({
+  id: '/hvac-leads',
+  path: '/hvac-leads',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PaintingLeadsRoute = PaintingLeadsRouteImport.update({
+  id: '/painting-leads',
+  path: '/painting-leads',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlumbingLeadsRoute = PlumbingLeadsRouteImport.update({
+  id: '/plumbing-leads',
+  path: '/plumbing-leads',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivacyRoute = PrivacyRouteImport.update({
@@ -62,14 +183,39 @@ const ProfileRoute = ProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RemodelingLeadsRoute = RemodelingLeadsRouteImport.update({
+  id: '/remodeling-leads',
+  path: '/remodeling-leads',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RoofingLeadsRoute = RoofingLeadsRouteImport.update({
+  id: '/roofing-leads',
+  path: '/roofing-leads',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SalesApprovalRoute = SalesApprovalRouteImport.update({
   id: '/sales-approval',
   path: '/sales-approval',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ServicesRoute = ServicesRouteImport.update({
+  id: '/services',
+  path: '/services',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SidingLeadsRoute = SidingLeadsRouteImport.update({
+  id: '/siding-leads',
+  path: '/siding-leads',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WindowDoorLeadsRoute = WindowDoorLeadsRouteImport.update({
+  id: '/window-door-leads',
+  path: '/window-door-leads',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LeadsIndexRoute = LeadsIndexRouteImport.update({
@@ -87,13 +233,37 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/billing': typeof BillingRoute
+  '/concrete-leads': typeof ConcreteLeadsRoute
+  '/contractor-leads': typeof ContractorLeadsRoute
   '/dashboard': typeof DashboardRoute
+  '/deck-leads': typeof DeckLeadsRoute
+  '/electrical-leads': typeof ElectricalLeadsRoute
   '/estimate': typeof EstimateRoute
+  '/find-a-concrete-contractor': typeof FindAConcreteContractorRoute
+  '/find-a-deck-builder': typeof FindADeckBuilderRoute
+  '/find-a-flooring-contractor': typeof FindAFlooringContractorRoute
+  '/find-a-painter': typeof FindAPainterRoute
+  '/find-a-plumber': typeof FindAPlumberRoute
+  '/find-a-remodeling-contractor': typeof FindARemodelingContractorRoute
+  '/find-a-roofer': typeof FindARooferRoute
+  '/find-a-siding-contractor': typeof FindASidingContractorRoute
+  '/find-an-electrician': typeof FindAnElectricianRoute
+  '/find-an-hvac-contractor': typeof FindAnHvacContractorRoute
+  '/find-window-door-contractor': typeof FindWindowDoorContractorRoute
+  '/flooring-leads': typeof FlooringLeadsRoute
+  '/hvac-leads': typeof HvacLeadsRoute
   '/login': typeof LoginRoute
+  '/painting-leads': typeof PaintingLeadsRoute
+  '/plumbing-leads': typeof PlumbingLeadsRoute
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
+  '/remodeling-leads': typeof RemodelingLeadsRoute
+  '/roofing-leads': typeof RoofingLeadsRoute
   '/sales-approval': typeof SalesApprovalRoute
+  '/services': typeof ServicesRoute
+  '/siding-leads': typeof SidingLeadsRoute
   '/terms': typeof TermsRoute
+  '/window-door-leads': typeof WindowDoorLeadsRoute
   '/leads/$leadId': typeof LeadsLeadIdRoute
   '/leads/': typeof LeadsIndexRoute
 }
@@ -101,13 +271,37 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/billing': typeof BillingRoute
+  '/concrete-leads': typeof ConcreteLeadsRoute
+  '/contractor-leads': typeof ContractorLeadsRoute
   '/dashboard': typeof DashboardRoute
+  '/deck-leads': typeof DeckLeadsRoute
+  '/electrical-leads': typeof ElectricalLeadsRoute
   '/estimate': typeof EstimateRoute
+  '/find-a-concrete-contractor': typeof FindAConcreteContractorRoute
+  '/find-a-deck-builder': typeof FindADeckBuilderRoute
+  '/find-a-flooring-contractor': typeof FindAFlooringContractorRoute
+  '/find-a-painter': typeof FindAPainterRoute
+  '/find-a-plumber': typeof FindAPlumberRoute
+  '/find-a-remodeling-contractor': typeof FindARemodelingContractorRoute
+  '/find-a-roofer': typeof FindARooferRoute
+  '/find-a-siding-contractor': typeof FindASidingContractorRoute
+  '/find-an-electrician': typeof FindAnElectricianRoute
+  '/find-an-hvac-contractor': typeof FindAnHvacContractorRoute
+  '/find-window-door-contractor': typeof FindWindowDoorContractorRoute
+  '/flooring-leads': typeof FlooringLeadsRoute
+  '/hvac-leads': typeof HvacLeadsRoute
   '/login': typeof LoginRoute
+  '/painting-leads': typeof PaintingLeadsRoute
+  '/plumbing-leads': typeof PlumbingLeadsRoute
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
+  '/remodeling-leads': typeof RemodelingLeadsRoute
+  '/roofing-leads': typeof RoofingLeadsRoute
   '/sales-approval': typeof SalesApprovalRoute
+  '/services': typeof ServicesRoute
+  '/siding-leads': typeof SidingLeadsRoute
   '/terms': typeof TermsRoute
+  '/window-door-leads': typeof WindowDoorLeadsRoute
   '/leads/$leadId': typeof LeadsLeadIdRoute
   '/leads': typeof LeadsIndexRoute
 }
@@ -116,13 +310,37 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/billing': typeof BillingRoute
+  '/concrete-leads': typeof ConcreteLeadsRoute
+  '/contractor-leads': typeof ContractorLeadsRoute
   '/dashboard': typeof DashboardRoute
+  '/deck-leads': typeof DeckLeadsRoute
+  '/electrical-leads': typeof ElectricalLeadsRoute
   '/estimate': typeof EstimateRoute
+  '/find-a-concrete-contractor': typeof FindAConcreteContractorRoute
+  '/find-a-deck-builder': typeof FindADeckBuilderRoute
+  '/find-a-flooring-contractor': typeof FindAFlooringContractorRoute
+  '/find-a-painter': typeof FindAPainterRoute
+  '/find-a-plumber': typeof FindAPlumberRoute
+  '/find-a-remodeling-contractor': typeof FindARemodelingContractorRoute
+  '/find-a-roofer': typeof FindARooferRoute
+  '/find-a-siding-contractor': typeof FindASidingContractorRoute
+  '/find-an-electrician': typeof FindAnElectricianRoute
+  '/find-an-hvac-contractor': typeof FindAnHvacContractorRoute
+  '/find-window-door-contractor': typeof FindWindowDoorContractorRoute
+  '/flooring-leads': typeof FlooringLeadsRoute
+  '/hvac-leads': typeof HvacLeadsRoute
   '/login': typeof LoginRoute
+  '/painting-leads': typeof PaintingLeadsRoute
+  '/plumbing-leads': typeof PlumbingLeadsRoute
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
+  '/remodeling-leads': typeof RemodelingLeadsRoute
+  '/roofing-leads': typeof RoofingLeadsRoute
   '/sales-approval': typeof SalesApprovalRoute
+  '/services': typeof ServicesRoute
+  '/siding-leads': typeof SidingLeadsRoute
   '/terms': typeof TermsRoute
+  '/window-door-leads': typeof WindowDoorLeadsRoute
   '/leads/$leadId': typeof LeadsLeadIdRoute
   '/leads/': typeof LeadsIndexRoute
 }
@@ -132,13 +350,37 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/billing'
+    | '/concrete-leads'
+    | '/contractor-leads'
     | '/dashboard'
+    | '/deck-leads'
+    | '/electrical-leads'
     | '/estimate'
+    | '/find-a-concrete-contractor'
+    | '/find-a-deck-builder'
+    | '/find-a-flooring-contractor'
+    | '/find-a-painter'
+    | '/find-a-plumber'
+    | '/find-a-remodeling-contractor'
+    | '/find-a-roofer'
+    | '/find-a-siding-contractor'
+    | '/find-an-electrician'
+    | '/find-an-hvac-contractor'
+    | '/find-window-door-contractor'
+    | '/flooring-leads'
+    | '/hvac-leads'
     | '/login'
+    | '/painting-leads'
+    | '/plumbing-leads'
     | '/privacy'
     | '/profile'
+    | '/remodeling-leads'
+    | '/roofing-leads'
     | '/sales-approval'
+    | '/services'
+    | '/siding-leads'
     | '/terms'
+    | '/window-door-leads'
     | '/leads/$leadId'
     | '/leads/'
   fileRoutesByTo: FileRoutesByTo
@@ -146,13 +388,37 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/billing'
+    | '/concrete-leads'
+    | '/contractor-leads'
     | '/dashboard'
+    | '/deck-leads'
+    | '/electrical-leads'
     | '/estimate'
+    | '/find-a-concrete-contractor'
+    | '/find-a-deck-builder'
+    | '/find-a-flooring-contractor'
+    | '/find-a-painter'
+    | '/find-a-plumber'
+    | '/find-a-remodeling-contractor'
+    | '/find-a-roofer'
+    | '/find-a-siding-contractor'
+    | '/find-an-electrician'
+    | '/find-an-hvac-contractor'
+    | '/find-window-door-contractor'
+    | '/flooring-leads'
+    | '/hvac-leads'
     | '/login'
+    | '/painting-leads'
+    | '/plumbing-leads'
     | '/privacy'
     | '/profile'
+    | '/remodeling-leads'
+    | '/roofing-leads'
     | '/sales-approval'
+    | '/services'
+    | '/siding-leads'
     | '/terms'
+    | '/window-door-leads'
     | '/leads/$leadId'
     | '/leads'
   id:
@@ -160,13 +426,37 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/billing'
+    | '/concrete-leads'
+    | '/contractor-leads'
     | '/dashboard'
+    | '/deck-leads'
+    | '/electrical-leads'
     | '/estimate'
+    | '/find-a-concrete-contractor'
+    | '/find-a-deck-builder'
+    | '/find-a-flooring-contractor'
+    | '/find-a-painter'
+    | '/find-a-plumber'
+    | '/find-a-remodeling-contractor'
+    | '/find-a-roofer'
+    | '/find-a-siding-contractor'
+    | '/find-an-electrician'
+    | '/find-an-hvac-contractor'
+    | '/find-window-door-contractor'
+    | '/flooring-leads'
+    | '/hvac-leads'
     | '/login'
+    | '/painting-leads'
+    | '/plumbing-leads'
     | '/privacy'
     | '/profile'
+    | '/remodeling-leads'
+    | '/roofing-leads'
     | '/sales-approval'
+    | '/services'
+    | '/siding-leads'
     | '/terms'
+    | '/window-door-leads'
     | '/leads/$leadId'
     | '/leads/'
   fileRoutesById: FileRoutesById
@@ -175,13 +465,37 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
   BillingRoute: typeof BillingRoute
+  ConcreteLeadsRoute: typeof ConcreteLeadsRoute
+  ContractorLeadsRoute: typeof ContractorLeadsRoute
   DashboardRoute: typeof DashboardRoute
+  DeckLeadsRoute: typeof DeckLeadsRoute
+  ElectricalLeadsRoute: typeof ElectricalLeadsRoute
   EstimateRoute: typeof EstimateRoute
+  FindAConcreteContractorRoute: typeof FindAConcreteContractorRoute
+  FindADeckBuilderRoute: typeof FindADeckBuilderRoute
+  FindAFlooringContractorRoute: typeof FindAFlooringContractorRoute
+  FindAPainterRoute: typeof FindAPainterRoute
+  FindAPlumberRoute: typeof FindAPlumberRoute
+  FindARemodelingContractorRoute: typeof FindARemodelingContractorRoute
+  FindARooferRoute: typeof FindARooferRoute
+  FindASidingContractorRoute: typeof FindASidingContractorRoute
+  FindAnElectricianRoute: typeof FindAnElectricianRoute
+  FindAnHvacContractorRoute: typeof FindAnHvacContractorRoute
+  FindWindowDoorContractorRoute: typeof FindWindowDoorContractorRoute
+  FlooringLeadsRoute: typeof FlooringLeadsRoute
+  HvacLeadsRoute: typeof HvacLeadsRoute
   LoginRoute: typeof LoginRoute
+  PaintingLeadsRoute: typeof PaintingLeadsRoute
+  PlumbingLeadsRoute: typeof PlumbingLeadsRoute
   PrivacyRoute: typeof PrivacyRoute
   ProfileRoute: typeof ProfileRoute
+  RemodelingLeadsRoute: typeof RemodelingLeadsRoute
+  RoofingLeadsRoute: typeof RoofingLeadsRoute
   SalesApprovalRoute: typeof SalesApprovalRoute
+  ServicesRoute: typeof ServicesRoute
+  SidingLeadsRoute: typeof SidingLeadsRoute
   TermsRoute: typeof TermsRoute
+  WindowDoorLeadsRoute: typeof WindowDoorLeadsRoute
   LeadsLeadIdRoute: typeof LeadsLeadIdRoute
   LeadsIndexRoute: typeof LeadsIndexRoute
 }
@@ -209,11 +523,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BillingRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/concrete-leads': {
+      id: '/concrete-leads'
+      path: '/concrete-leads'
+      fullPath: '/concrete-leads'
+      preLoaderRoute: typeof ConcreteLeadsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contractor-leads': {
+      id: '/contractor-leads'
+      path: '/contractor-leads'
+      fullPath: '/contractor-leads'
+      preLoaderRoute: typeof ContractorLeadsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dashboard': {
       id: '/dashboard'
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/deck-leads': {
+      id: '/deck-leads'
+      path: '/deck-leads'
+      fullPath: '/deck-leads'
+      preLoaderRoute: typeof DeckLeadsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/electrical-leads': {
+      id: '/electrical-leads'
+      path: '/electrical-leads'
+      fullPath: '/electrical-leads'
+      preLoaderRoute: typeof ElectricalLeadsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/estimate': {
@@ -223,11 +565,116 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EstimateRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/find-a-concrete-contractor': {
+      id: '/find-a-concrete-contractor'
+      path: '/find-a-concrete-contractor'
+      fullPath: '/find-a-concrete-contractor'
+      preLoaderRoute: typeof FindAConcreteContractorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/find-a-deck-builder': {
+      id: '/find-a-deck-builder'
+      path: '/find-a-deck-builder'
+      fullPath: '/find-a-deck-builder'
+      preLoaderRoute: typeof FindADeckBuilderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/find-a-flooring-contractor': {
+      id: '/find-a-flooring-contractor'
+      path: '/find-a-flooring-contractor'
+      fullPath: '/find-a-flooring-contractor'
+      preLoaderRoute: typeof FindAFlooringContractorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/find-a-painter': {
+      id: '/find-a-painter'
+      path: '/find-a-painter'
+      fullPath: '/find-a-painter'
+      preLoaderRoute: typeof FindAPainterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/find-a-plumber': {
+      id: '/find-a-plumber'
+      path: '/find-a-plumber'
+      fullPath: '/find-a-plumber'
+      preLoaderRoute: typeof FindAPlumberRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/find-a-remodeling-contractor': {
+      id: '/find-a-remodeling-contractor'
+      path: '/find-a-remodeling-contractor'
+      fullPath: '/find-a-remodeling-contractor'
+      preLoaderRoute: typeof FindARemodelingContractorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/find-a-roofer': {
+      id: '/find-a-roofer'
+      path: '/find-a-roofer'
+      fullPath: '/find-a-roofer'
+      preLoaderRoute: typeof FindARooferRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/find-a-siding-contractor': {
+      id: '/find-a-siding-contractor'
+      path: '/find-a-siding-contractor'
+      fullPath: '/find-a-siding-contractor'
+      preLoaderRoute: typeof FindASidingContractorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/find-an-electrician': {
+      id: '/find-an-electrician'
+      path: '/find-an-electrician'
+      fullPath: '/find-an-electrician'
+      preLoaderRoute: typeof FindAnElectricianRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/find-an-hvac-contractor': {
+      id: '/find-an-hvac-contractor'
+      path: '/find-an-hvac-contractor'
+      fullPath: '/find-an-hvac-contractor'
+      preLoaderRoute: typeof FindAnHvacContractorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/find-window-door-contractor': {
+      id: '/find-window-door-contractor'
+      path: '/find-window-door-contractor'
+      fullPath: '/find-window-door-contractor'
+      preLoaderRoute: typeof FindWindowDoorContractorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/flooring-leads': {
+      id: '/flooring-leads'
+      path: '/flooring-leads'
+      fullPath: '/flooring-leads'
+      preLoaderRoute: typeof FlooringLeadsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hvac-leads': {
+      id: '/hvac-leads'
+      path: '/hvac-leads'
+      fullPath: '/hvac-leads'
+      preLoaderRoute: typeof HvacLeadsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/painting-leads': {
+      id: '/painting-leads'
+      path: '/painting-leads'
+      fullPath: '/painting-leads'
+      preLoaderRoute: typeof PaintingLeadsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/plumbing-leads': {
+      id: '/plumbing-leads'
+      path: '/plumbing-leads'
+      fullPath: '/plumbing-leads'
+      preLoaderRoute: typeof PlumbingLeadsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/privacy': {
@@ -244,6 +691,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/remodeling-leads': {
+      id: '/remodeling-leads'
+      path: '/remodeling-leads'
+      fullPath: '/remodeling-leads'
+      preLoaderRoute: typeof RemodelingLeadsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/roofing-leads': {
+      id: '/roofing-leads'
+      path: '/roofing-leads'
+      fullPath: '/roofing-leads'
+      preLoaderRoute: typeof RoofingLeadsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/sales-approval': {
       id: '/sales-approval'
       path: '/sales-approval'
@@ -251,11 +712,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SalesApprovalRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/services': {
+      id: '/services'
+      path: '/services'
+      fullPath: '/services'
+      preLoaderRoute: typeof ServicesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/siding-leads': {
+      id: '/siding-leads'
+      path: '/siding-leads'
+      fullPath: '/siding-leads'
+      preLoaderRoute: typeof SidingLeadsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/terms': {
       id: '/terms'
       path: '/terms'
       fullPath: '/terms'
       preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/window-door-leads': {
+      id: '/window-door-leads'
+      path: '/window-door-leads'
+      fullPath: '/window-door-leads'
+      preLoaderRoute: typeof WindowDoorLeadsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/leads/': {
@@ -279,13 +761,37 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
   BillingRoute: BillingRoute,
+  ConcreteLeadsRoute: ConcreteLeadsRoute,
+  ContractorLeadsRoute: ContractorLeadsRoute,
   DashboardRoute: DashboardRoute,
+  DeckLeadsRoute: DeckLeadsRoute,
+  ElectricalLeadsRoute: ElectricalLeadsRoute,
   EstimateRoute: EstimateRoute,
+  FindAConcreteContractorRoute: FindAConcreteContractorRoute,
+  FindADeckBuilderRoute: FindADeckBuilderRoute,
+  FindAFlooringContractorRoute: FindAFlooringContractorRoute,
+  FindAPainterRoute: FindAPainterRoute,
+  FindAPlumberRoute: FindAPlumberRoute,
+  FindARemodelingContractorRoute: FindARemodelingContractorRoute,
+  FindARooferRoute: FindARooferRoute,
+  FindASidingContractorRoute: FindASidingContractorRoute,
+  FindAnElectricianRoute: FindAnElectricianRoute,
+  FindAnHvacContractorRoute: FindAnHvacContractorRoute,
+  FindWindowDoorContractorRoute: FindWindowDoorContractorRoute,
+  FlooringLeadsRoute: FlooringLeadsRoute,
+  HvacLeadsRoute: HvacLeadsRoute,
   LoginRoute: LoginRoute,
+  PaintingLeadsRoute: PaintingLeadsRoute,
+  PlumbingLeadsRoute: PlumbingLeadsRoute,
   PrivacyRoute: PrivacyRoute,
   ProfileRoute: ProfileRoute,
+  RemodelingLeadsRoute: RemodelingLeadsRoute,
+  RoofingLeadsRoute: RoofingLeadsRoute,
   SalesApprovalRoute: SalesApprovalRoute,
+  ServicesRoute: ServicesRoute,
+  SidingLeadsRoute: SidingLeadsRoute,
   TermsRoute: TermsRoute,
+  WindowDoorLeadsRoute: WindowDoorLeadsRoute,
   LeadsLeadIdRoute: LeadsLeadIdRoute,
   LeadsIndexRoute: LeadsIndexRoute,
 }

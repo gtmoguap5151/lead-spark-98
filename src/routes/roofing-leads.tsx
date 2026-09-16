@@ -47,7 +47,7 @@ function RoofingLeadsPage() {
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Button asChild size="lg" className="h-14 px-7 text-lg font-bold">
-                <Link to="/login">Get Roofing Leads</Link>
+                <Link to="/login" search={{ mode: "signup" }}>Get Roofing Leads</Link>
               </Button>
               <Button asChild size="lg" variant="outline" className="h-14 border-steel-foreground/40 bg-background/10 px-7 text-lg font-semibold text-steel-foreground hover:bg-steel-foreground/10 hover:text-steel-foreground">
                 <Link to="/estimate">I Need a Roofer</Link>
@@ -104,7 +104,7 @@ function RoofingLeadsPage() {
             Create a contractor account, set your roofing territory, and be ready when a matched homeowner request is available.
           </p>
           <Button asChild size="lg" className="mt-7 h-14 px-8 text-lg font-bold">
-            <Link to="/login">Create Contractor Account</Link>
+            <Link to="/login" search={{ mode: "signup" }}>Create Contractor Account</Link>
           </Button>
         </section>
       </main>

@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
-import { Download, Hammer, House } from "lucide-react";
+import { Download, Hammer, House, Share2 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 
 type BeforeInstallPromptEvent = Event & {
@@ -52,6 +53,25 @@ export function SiteHeader() {
     window.alert("Open your browser menu and choose Install app or Add to Home screen. Rivet Reach is already configured as an installable web app.");
   };
 
+  const sharePage = async () => {
+    const url = window.location.href;
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: document.title, url });
+        return;
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") return;
+      }
+    }
+
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.success("Page link copied");
+    } catch {
+      toast.error("Could not copy the link. Try your browser's Share menu.");
+    }
+  };
+
   const installButtonClass =
     "group relative overflow-hidden border-emerald-300/60 bg-gradient-to-r from-emerald-600 via-emerald-500 to-green-400 font-extrabold text-white shadow-[0_0_0_1px_rgba(16,185,129,0.15),0_10px_28px_rgba(16,185,129,0.38)] transition-all duration-300 hover:-translate-y-0.5 hover:from-emerald-500 hover:to-green-300 hover:shadow-[0_0_0_1px_rgba(52,211,153,0.35),0_14px_34px_rgba(16,185,129,0.5)] focus-visible:ring-emerald-400";
 
@@ -69,6 +89,9 @@ export function SiteHeader() {
         </Link>
 
         <div className="flex items-center gap-2">
+          <Button type="button" size="sm" variant="outline" onClick={() => void sharePage()} className="h-10 gap-2 px-3" aria-label="Share this page">
+            <Share2 className="size-4" /> Share
+          </Button>
           <Button asChild size="sm" className="hidden h-11 rounded-xl bg-gradient-to-r from-emerald-700 to-emerald-500 px-5 font-extrabold text-white shadow-lg shadow-emerald-900/20 hover:from-emerald-600 hover:to-green-400 md:inline-flex">
             <Link to="/services">
               <House className="mr-2 size-4" />
@@ -76,7 +99,7 @@ export function SiteHeader() {
             </Link>
           </Button>
           <Button asChild size="sm" className="hidden h-11 rounded-xl border border-emerald-400/30 bg-gradient-to-r from-slate-950 to-emerald-950 px-5 font-extrabold text-emerald-100 shadow-lg shadow-black/20 hover:from-emerald-950 hover:to-slate-900 md:inline-flex">
-            <Link to="/login">
+            <Link to="/contractor-leads">
               <Hammer className="mr-2 size-4" />
               Contractors
             </Link>
@@ -104,7 +127,7 @@ export function SiteHeader() {
           </Link>
         </Button>
         <Button asChild size="lg" className="h-13 rounded-xl border border-emerald-400/30 bg-gradient-to-r from-slate-950 to-emerald-950 font-extrabold text-emerald-100 shadow-md shadow-black/20 hover:from-emerald-950 hover:to-slate-900">
-          <Link to="/login">
+          <Link to="/contractor-leads">
             <Hammer className="mr-2 size-5" />
             Contractors
           </Link>
