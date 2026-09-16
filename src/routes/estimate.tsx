@@ -22,7 +22,7 @@ import { SERVICE_TYPES, TIMELINES, type ServiceType, type Timeline } from "@/lib
 export const Route = createFileRoute("/estimate")({
   head: () => ({
     meta: [
-      { title: "Tell Us About Your Home Project — Lead Engine" },
+      { title: "Tell Us About Your Home Project | Rivet Reach" },
       {
         name: "description",
         content:
@@ -70,7 +70,7 @@ const schema = z.object({
   website: z.string().max(0).optional(),
 });
 
-const CONSENT_VERSION = "2026-09-09-us-2" as const;
+const CONSENT_VERSION = "2026-09-16-us-3" as const;
 
 const BUDGETS = [
   "Under $5,000",
@@ -144,9 +144,9 @@ function EstimatePage() {
             Your request was received
           </h1>
           <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
-            We&apos;re routing your {form.serviceType.toLowerCase()} request in ZIP {form.zip} to a
-            contractor who serves that area. They can use the phone number you provided to contact
-            you.
+            We&apos;ll check for a contractor who handles {form.serviceType.toLowerCase()} projects
+            in ZIP {form.zip}. If a match is available, that contractor may contact you using the
+            details you provided.
           </p>
           <p className="mt-3 text-base leading-relaxed text-muted-foreground">
             You are not obligated to hire anyone. Ask questions, discuss the project, and decide
@@ -346,14 +346,14 @@ function EstimatePage() {
               id="contact-consent"
               checked={form.contactConsent}
               onChange={(v) => set("contactConsent", v)}
-              label="I agree that Lead Engine may share my contact and project details with one matched contractor, who may call, text, or email me about this request. I do not have to hire or buy anything."
+              label="I agree that Rivet Reach may share my contact and project details with one matched contractor, who may call, text, or email me about this request. I do not have to hire or buy anything."
               error={errors.contactConsent}
             />
             <ConfirmRow
               id="marketing-consent"
               checked={form.marketingConsent}
               onChange={(v) => set("marketingConsent", v)}
-              label="Optional: Email me occasional home-project tips and Lead Engine updates. I can unsubscribe at any time."
+              label="Optional: Email me occasional home-project tips and Rivet Reach updates. I can unsubscribe at any time."
             />
           </div>
 

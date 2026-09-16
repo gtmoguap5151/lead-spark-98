@@ -2,8 +2,8 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.116.0";
 import { z } from "npm:zod@3.24.2";
 
-const CONSENT_VERSION = "2026-09-09-us-2";
-const ACCEPTED_CONSENT_VERSIONS = ["2026-09-09", CONSENT_VERSION] as const;
+const CONSENT_VERSION = "2026-09-16-us-3";
+const ACCEPTED_CONSENT_VERSIONS = ["2026-09-09", "2026-09-09-us-2", CONSENT_VERSION] as const;
 const LOCAL_ORIGIN = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i;
 const TRUSTED_PRODUCTION_ORIGINS = new Set([
   "https://rivetreach.com",
@@ -194,7 +194,7 @@ Deno.serve(async (request) => {
 
     if (parsed.data.action === "lead") {
       const lead = parsed.data;
-      if (lead.consentVersion === CONSENT_VERSION && lead.isAdult !== true) {
+      if (lead.consentVersion !== "2026-09-09" && lead.isAdult !== true) {
         return json(origin, { error: "Please confirm that you are at least 18." }, 400);
       }
       let marketingConsent = lead.marketingConsent;
@@ -222,7 +222,7 @@ Deno.serve(async (request) => {
         is_adult: lead.isAdult === true,
         contact_consent: true,
         marketing_consent: marketingConsent,
-        consent_version: CONSENT_VERSION,
+        consent_version: lead.consentVersion,
         consent_recorded_at: new Date().toISOString(),
         attribution_source: clean(lead.attribution?.source),
         attribution_medium: clean(lead.attribution?.medium),

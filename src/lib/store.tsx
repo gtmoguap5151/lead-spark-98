@@ -41,7 +41,7 @@ type NewLeadInput = Pick<
 > & {
   contactConsent: true;
   marketingConsent: boolean;
-  consentVersion: "2026-09-09-us-2";
+  consentVersion: "2026-09-16-us-3";
   attribution?: LeadAttribution;
   website?: string;
 };
