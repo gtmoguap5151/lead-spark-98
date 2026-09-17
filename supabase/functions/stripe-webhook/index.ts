@@ -54,7 +54,7 @@ Deno.serve(async (request) => {
     event = await stripe().webhooks.constructEventAsync(
       await request.text(),
       signature,
-      env("STRIPE_WEBHOOK_SECRET"),
+      env("STRIPE_WEBHOOK_SECRET").trim(),
     );
   } catch {
     return json({ error: "Invalid signature" }, 400);
