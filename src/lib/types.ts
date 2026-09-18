@@ -90,6 +90,9 @@ export type Contractor = {
   phone: string;
   serviceTypes: ServiceType[];
   territoryZips: string[];
+  baseZip: string | null;
+  serviceRadiusMiles: number | null;
+  territorySyncedAt: string | null;
   city: string;
   active: boolean;
   licenseNumber: string;

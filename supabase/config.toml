@@ -18,3 +18,6 @@ verify_jwt = false
 
 [functions.sales-approval]
 verify_jwt = false
+
+[functions.contractor-territory]
+verify_jwt = true

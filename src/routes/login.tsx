@@ -7,6 +7,13 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SiteHeader } from "@/components/SiteHeader";
 import { useApp } from "@/lib/store";
@@ -24,7 +31,7 @@ export const Route = createFileRoute("/login")({
       {
         name: "description",
         content:
-          "Sign in or create a contractor account to claim your trade, set your ZIP territory and start receiving exclusive qualified leads.",
+          "Sign in or create a contractor account to claim your trade, set your base ZIP and service radius and start receiving exclusive qualified leads.",
       },
       { property: "og:title", content: "Contractor Login & Signup — Contractor Lead Engine" },
       {
@@ -44,7 +51,11 @@ const signupSchema = z.object({
   city: z.string().trim().min(2, "Enter your city").max(100),
   licenseNumber: z.string().trim().max(100, "Keep the license number under 100 characters"),
   password: z.string().min(8, "Use at least 8 characters").max(72),
-  territoryZips: z.array(z.string().regex(/^\d{5}$/)).min(1, "Add at least one ZIP code"),
+  baseZip: z.string().trim().regex(/^\d{5}$/, "Enter a valid 5-digit ZIP code"),
+  serviceRadiusMiles: z
+    .number()
+    .int()
+    .refine((value) => [25, 50, 75, 100, 125, 150].includes(value), "Choose a service radius"),
   serviceTypes: z.array(z.enum(SERVICE_TYPES)).min(1, "Pick at least one service"),
   complianceAttested: z.literal(true, {
     message: "Confirm that your business meets the rules where it operates",
@@ -90,7 +101,7 @@ function LoginPage() {
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
           {isSignup
-            ? "Choose your trades and ZIP coverage so we can match eligible homeowner requests when available."
+            ? "Choose your trades, base ZIP, and service radius so we can automatically build your lead territory."
             : "Sign in to manage your territory and matched opportunities."}
         </p>
 
@@ -207,7 +218,8 @@ function SignupForm({
 }) {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [services, setServices] = useState<ServiceType[]>([]);
-  const [zips, setZips] = useState("");
+  const [baseZip, setBaseZip] = useState("");
+  const [serviceRadiusMiles, setServiceRadiusMiles] = useState(50);
   const [complianceAttested, setComplianceAttested] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [form, setForm] = useState({
@@ -233,10 +245,8 @@ function SignupForm({
           complianceAttested,
           termsAccepted,
           serviceTypes: services,
-          territoryZips: zips
-            .split(/[\s,]+/)
-            .map((z) => z.trim())
-            .filter(Boolean),
+          baseZip,
+          serviceRadiusMiles,
         });
         if (!parsed.success) {
           const next: Record<string, string> = {};
@@ -309,18 +319,46 @@ function SignupForm({
         ) : null}
       </div>
 
-      <div className="space-y-1.5">
-        <Label htmlFor="su-zips">Territory ZIP codes</Label>
-        <Input
-          id="su-zips"
-          placeholder="80202, 80203, 80204"
-          value={zips}
-          onChange={(e) => setZips(e.target.value)}
-        />
-        <p className="text-xs text-muted-foreground">Comma separated. You only get leads here.</p>
-        {errors.territoryZips ? (
-          <p className="text-xs font-medium text-destructive">{errors.territoryZips}</p>
-        ) : null}
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="space-y-1.5">
+          <Label htmlFor="su-base-zip">Base ZIP code</Label>
+          <Input
+            id="su-base-zip"
+            inputMode="numeric"
+            maxLength={5}
+            placeholder="30052"
+            value={baseZip}
+            onChange={(e) => setBaseZip(e.target.value.replace(/\D/g, ""))}
+          />
+          {errors.baseZip ? (
+            <p className="text-xs font-medium text-destructive">{errors.baseZip}</p>
+          ) : null}
+        </div>
+        <div className="space-y-1.5">
+          <Label>Service radius</Label>
+          <Select
+            value={String(serviceRadiusMiles)}
+            onValueChange={(value) => setServiceRadiusMiles(Number(value))}
+          >
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {[25, 50, 75, 100, 125, 150].map((miles) => (
+                <SelectItem key={miles} value={String(miles)}>
+                  {miles} miles
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {errors.serviceRadiusMiles ? (
+            <p className="text-xs font-medium text-destructive">{errors.serviceRadiusMiles}</p>
+          ) : null}
+        </div>
+        <p className="text-xs text-muted-foreground sm:col-span-2">
+          Rivet Reach automatically includes U.S. ZIP codes whose geographic centers fall within
+          this radius of your base ZIP. You can change it later.
+        </p>
       </div>
 
       <div className="space-y-4 rounded-xl bg-muted/60 p-4">
