@@ -515,7 +515,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         run(async () => {
           const { error: assignmentError } = await supabase.rpc("admin_assign_lead", {
             p_lead_id: id,
-            p_contractor_id: contractorId,
+            // Generated PostgREST types mark UUID args as strings even though this RPC accepts SQL NULL.
+            p_contractor_id: contractorId as string,
           });
           if (assignmentError) throw assignmentError;
           await refresh();
