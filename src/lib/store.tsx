@@ -58,7 +58,13 @@ type SignupInput = Omit<
   | "complianceAttestedAt"
   | "termsVersion"
   | "termsAcceptedAt"
+  | "territoryZips"
+  | "baseZip"
+  | "serviceRadiusMiles"
+  | "territorySyncedAt"
 > & {
+  baseZip: string;
+  serviceRadiusMiles: number;
   password: string;
   complianceAttested: true;
   termsAccepted: true;
@@ -184,6 +190,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       territoryZips: territories
         .filter((item) => item.contractor_id === row.id)
         .map((item) => item.zip),
+      baseZip: row.base_zip,
+      serviceRadiusMiles: row.service_radius_miles,
+      territorySyncedAt: row.territory_synced_at,
     }));
 
     const leads: Lead[] = (leadsResult.data ?? []).map((row) => ({
@@ -386,14 +395,22 @@ export function StoreProvider({ children }: { children: ReactNode }) {
                 city: input.city,
                 license_number: input.licenseNumber,
                 service_types: input.serviceTypes,
-                territory_zips: input.territoryZips,
+                base_zip: input.baseZip,
+                service_radius_miles: input.serviceRadiusMiles,
+                territory_zips: [input.baseZip],
                 compliance_attested: input.complianceAttested,
                 terms_version: input.termsAccepted ? "2026-09-09-us-1" : null,
               },
             },
           });
           if (signupError) throw signupError;
-          if (data.session && data.user) await loadData(data.user);
+          if (data.session && data.user) {
+            const { error: territoryError } = await supabase.functions.invoke("contractor-territory", {
+              body: { action: "sync", force: true },
+            });
+            if (territoryError) console.warn("Initial territory sync failed", territoryError);
+            await loadData(data.user);
+          }
           return { ok: true, requiresEmailConfirmation: !data.session };
         } catch (signupError) {
           const detail = errorMessage(signupError);
@@ -413,7 +430,18 @@ export function StoreProvider({ children }: { children: ReactNode }) {
             password,
           });
           if (loginError) throw loginError;
-          const role = await loadData(data.user);
+          let role = await loadData(data.user);
+          if (role === "contractor") {
+            const { data: territoryData, error: territoryError } = await supabase.functions.invoke(
+              "contractor-territory",
+              { body: { action: "sync" } },
+            );
+            if (territoryError) {
+              console.warn("Territory sync failed", territoryError);
+            } else if (territoryData?.synced) {
+              role = await loadData(data.user);
+            }
+          }
           return { ok: true, role };
         } catch (loginError) {
           const detail = errorMessage(loginError);
@@ -494,17 +522,29 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         }),
       updateContractor: (id, patch) =>
         run(async () => {
-          const { error: profileError } = await supabase.rpc("update_contractor_profile", {
-            p_contractor_id: id,
-            p_company_name: patch.companyName,
-            p_contact_name: patch.contactName,
-            p_phone: patch.phone,
-            p_city: patch.city,
-            p_active: patch.active,
-            p_service_types: patch.serviceTypes,
-            p_territory_zips: patch.territoryZips,
-          });
-          if (profileError) throw profileError;
+          const current = state.contractors.find((contractor) => contractor.id === id);
+          if (!current) throw new Error("Contractor profile not found.");
+
+          const { data, error: profileError } = await supabase.functions.invoke(
+            "contractor-territory",
+            {
+              body: {
+                action: "update",
+                companyName: patch.companyName ?? current.companyName,
+                contactName: patch.contactName ?? current.contactName,
+                phone: patch.phone ?? current.phone,
+                city: patch.city ?? current.city,
+                active: patch.active ?? current.active,
+                serviceTypes: patch.serviceTypes ?? current.serviceTypes,
+                baseZip: patch.baseZip ?? current.baseZip,
+                serviceRadiusMiles:
+                  patch.serviceRadiusMiles ?? current.serviceRadiusMiles ?? 50,
+              },
+            },
+          );
+          if (profileError || !data?.ok) {
+            throw new Error(data?.error ?? "We could not update your service territory.");
+          }
           await refresh();
         }),
       refresh,
