@@ -7,6 +7,13 @@ import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { useApp, useCurrentContractor } from "@/lib/store";
 import { SERVICE_TYPES, type Contractor, type ServiceType } from "@/lib/types";
@@ -19,7 +26,7 @@ export const Route = createFileRoute("/profile")({
       {
         name: "description",
         content:
-          "Update your company info, service types, and ZIP territory to control which leads you receive.",
+          "Update your company info, service types, base ZIP, and service radius to control which leads you receive.",
       },
       { property: "og:title", content: "Contractor Profile — Contractor Lead Engine" },
       {
@@ -36,7 +43,11 @@ const profileSchema = z.object({
   contactName: z.string().trim().min(2, "Your name is required").max(100),
   phone: z.string().trim().min(7, "Enter a valid phone").max(20),
   city: z.string().trim().min(2, "Enter your city").max(100),
-  territoryZips: z.array(z.string().regex(/^\d{5}$/)).min(1, "Add at least one ZIP code"),
+  baseZip: z.string().trim().regex(/^\d{5}$/, "Enter a valid 5-digit ZIP code"),
+  serviceRadiusMiles: z
+    .number()
+    .int()
+    .refine((value) => [25, 50, 75, 100, 125, 150].includes(value), "Choose a service radius"),
   serviceTypes: z.array(z.enum(SERVICE_TYPES)).min(1, "Pick at least one service"),
 });
 
@@ -81,7 +92,10 @@ function ProfileForm({
     city: contractor.city,
   });
   const [services, setServices] = useState<ServiceType[]>(contractor.serviceTypes);
-  const [zips, setZips] = useState(contractor.territoryZips.join(", "));
+  const [baseZip, setBaseZip] = useState(contractor.baseZip ?? "");
+  const [serviceRadiusMiles, setServiceRadiusMiles] = useState(
+    contractor.serviceRadiusMiles ?? 50,
+  );
   const [active, setActive] = useState(contractor.active);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -92,10 +106,8 @@ function ProfileForm({
     const parsed = profileSchema.safeParse({
       ...form,
       serviceTypes: services,
-      territoryZips: zips
-        .split(/[\s,]+/)
-        .map((z) => z.trim())
-        .filter(Boolean),
+      baseZip,
+      serviceRadiusMiles,
     });
     if (!parsed.success) {
       const next: Record<string, string> = {};
@@ -113,7 +125,7 @@ function ProfileForm({
       toast.error(result.error);
       return;
     }
-    toast.success("Profile saved — territory updated");
+    toast.success("Profile saved — service radius updated");
   }
 
   return (
@@ -190,19 +202,57 @@ function ProfileForm({
         </section>
 
         <section className="surface-card p-5">
-          <h2 className="text-xl font-bold uppercase">Territory ZIP codes</h2>
+          <h2 className="text-xl font-bold uppercase">Service territory</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            You only receive leads for these ZIP codes. Comma separated.
+            Pick one base ZIP and how far your crew is willing to travel. Rivet Reach builds the
+            nearby ZIP coverage automatically.
           </p>
-          <Input
-            className="mt-3"
-            placeholder="43017, 43016, 43026"
-            value={zips}
-            onChange={(e) => setZips(e.target.value)}
-          />
-          {errors.territoryZips ? (
-            <p className="mt-1.5 text-xs font-medium text-destructive">{errors.territoryZips}</p>
-          ) : null}
+          <div className="mt-4 grid gap-4 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="baseZip">Base ZIP code</Label>
+              <Input
+                id="baseZip"
+                inputMode="numeric"
+                maxLength={5}
+                placeholder="30052"
+                value={baseZip}
+                onChange={(e) => setBaseZip(e.target.value.replace(/\D/g, ""))}
+              />
+              {errors.baseZip ? (
+                <p className="text-xs font-medium text-destructive">{errors.baseZip}</p>
+              ) : null}
+            </div>
+            <div className="space-y-1.5">
+              <Label>Service radius</Label>
+              <Select
+                value={String(serviceRadiusMiles)}
+                onValueChange={(value) => setServiceRadiusMiles(Number(value))}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {[25, 50, 75, 100, 125, 150].map((miles) => (
+                    <SelectItem key={miles} value={String(miles)}>
+                      {miles} miles
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.serviceRadiusMiles ? (
+                <p className="text-xs font-medium text-destructive">
+                  {errors.serviceRadiusMiles}
+                </p>
+              ) : null}
+            </div>
+          </div>
+          <p className="mt-3 text-xs text-muted-foreground">
+            Current materialized coverage: {contractor.territoryZips.length} ZIP{" "}
+            {contractor.territoryZips.length === 1 ? "code" : "codes"}.
+            {!contractor.baseZip
+              ? " Enter your base ZIP once to replace the legacy manual territory with radius coverage."
+              : ""}
+          </p>
         </section>
       </div>
 
