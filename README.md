@@ -6,7 +6,8 @@ RivetReach is a mobile-first contractor growth platform operated by Southeast Ho
 
 - Contractor signup and login with Supabase Auth
 - Public homeowner estimate requests
-- Automatic lead matching by service and ZIP territory
+- Automatic lead matching by service and nationwide ZIP-radius territory
+- Base ZIP + configurable service radius that automatically materializes nearby ZIP coverage
 - Contractor lead inbox, notes, status pipeline, appointments, and won-job values
 - Admin management for contractors, assignments, and performance metrics
 - Stripe subscription checkout, customer portal, and signed webhook processing
@@ -56,6 +57,8 @@ Supabase Edge Function secrets:
 - `SALES_POSTAL_ADDRESS`
 - `RIVET_REACH_SIGNUP_URL` (optional; defaults to `https://rivetreach.com/login`)
 - `RIVET_REACH_PRIVACY_URL` (optional; defaults to `https://rivetreach.com/privacy`)
+
+`contractor-territory` is an authenticated Edge Function that expands a contractor's base ZIP and service radius into exact ZIP coverage. It uses the pinned `zipcodes-us@1.1.3` package (GeoNames data, CC BY 4.0) and does not require a paid mapping API.
 
 The sales scheduler credential is stored in Supabase Vault under
 `lead_spark_sales_orchestrator_secret`. The current template drafting path does
