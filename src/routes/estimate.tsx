@@ -66,7 +66,7 @@ const schema = z.object({
     .trim()
     .min(10, "Tell us a little more about the project")
     .max(1000, "Keep it under 1000 characters"),
-  isHomeowner: z.literal(true, { message: "Please confirm that you own the property" }),
+  isHomeowner: z.literal(true, { message: "Please confirm that you own the property or are authorized to request the work" }),
   isDecisionMaker: z.literal(true, { message: "Please confirm that you can approve the work" }),
   isAdult: z.literal(true, { message: "Please confirm that you are at least 18" }),
   contactConsent: z.literal(true, {
@@ -338,7 +338,7 @@ function EstimatePage() {
               id="owner"
               checked={form.isHomeowner}
               onChange={(v) => set("isHomeowner", v)}
-              label="I own this property"
+              label="I own this property or am authorized to request work for it"
               error={errors.isHomeowner}
             />
             <ConfirmRow
