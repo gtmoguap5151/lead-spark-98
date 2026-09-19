@@ -41,14 +41,14 @@ function ContractorLeadsPage() {
           <div className="mx-auto max-w-6xl px-4 py-14 sm:py-20">
             <p className="text-base font-bold uppercase tracking-wide text-primary">Contractor leads for home service pros</p>
             <h1 className="mt-4 max-w-4xl font-display text-4xl font-bold leading-tight sm:text-6xl">
-              Get matched contractor leads without wasting time chasing the wrong jobs.
+              Your first matched lead is on us.
             </h1>
             <p className="mt-6 max-w-3xl text-lg leading-relaxed text-steel-foreground/85 sm:text-xl">
-              RivetReach connects contractors with homeowner project requests based on trade and service area. Set your territory, review matched opportunities, and manage your pipeline from one mobile-friendly dashboard.
+              Create your contractor account and set your trade and service area. When a genuine homeowner request matches your coverage, your first eligible lead is free. No card required for that first lead.
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Button asChild size="lg" className="h-14 px-7 text-lg font-bold">
-                <Link to="/login" search={{ mode: "signup" }}>Create Contractor Account</Link>
+                <Link to="/login" search={{ mode: "signup" }}>Claim My First Lead</Link>
               </Button>
               <Button asChild size="lg" variant="outline" className="h-14 border-steel-foreground/40 bg-background/10 px-7 text-lg font-semibold text-steel-foreground hover:bg-steel-foreground/10 hover:text-steel-foreground">
                 <Link to="/estimate">I Need a Contractor</Link>
@@ -100,12 +100,12 @@ function ContractorLeadsPage() {
         </section>
 
         <section className="mx-auto max-w-4xl px-4 py-14 text-center sm:py-16">
-          <h2 className="text-3xl font-bold sm:text-4xl">Ready to add RivetReach to your sales pipeline?</h2>
+          <h2 className="text-3xl font-bold sm:text-4xl">Start with one real opportunity before you pay.</h2>
           <p className="mx-auto mt-4 max-w-2xl text-lg leading-relaxed text-muted-foreground">
-            Create a contractor account, set your trade and territory, and be ready when a matched homeowner request is available.
+            Create your account and set your trade and territory. Your first eligible matched homeowner lead is free; continued access is available through a paid RivetReach plan.
           </p>
           <Button asChild size="lg" className="mt-7 h-14 px-8 text-lg font-bold">
-            <Link to="/login" search={{ mode: "signup" }}>Create Contractor Account</Link>
+            <Link to="/login" search={{ mode: "signup" }}>Claim My First Lead</Link>
           </Button>
         </section>
       </main>
