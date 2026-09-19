@@ -39,15 +39,11 @@ function RoofingLeadsPage() {
         <section className="bg-steel text-steel-foreground">
           <div className="mx-auto max-w-6xl px-4 py-14 sm:py-20">
             <p className="text-base font-bold uppercase tracking-wide text-primary">Roofing leads for contractors</p>
-            <h1 className="mt-4 max-w-4xl font-display text-4xl font-bold leading-tight sm:text-6xl">
-              Spend less time hunting for roofing leads. Focus on the jobs worth chasing.
-            </h1>
-            <p className="mt-6 max-w-3xl text-lg leading-relaxed text-steel-foreground/85 sm:text-xl">
-              RivetReach connects roofing contractors with homeowner project requests based on trade and service area. Set your territory, review matched opportunities, and manage the work from one dashboard.
-            </p>
+            <h1 className="mt-4 max-w-4xl font-display text-4xl font-bold leading-tight sm:text-6xl">Your first matched roofing lead is on us.</h1>
+            <p className="mt-6 max-w-3xl text-lg leading-relaxed text-steel-foreground/85 sm:text-xl">Create your account and set your roofing territory. When a genuine homeowner roofing request matches your coverage, your first eligible lead is free. No card required for that first lead.</p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Button asChild size="lg" className="h-14 px-7 text-lg font-bold">
-                <Link to="/login" search={{ mode: "signup" }}>Get Roofing Leads</Link>
+                <Link to="/login" search={{ mode: "signup" }}>Claim My First Roofing Lead</Link>
               </Button>
               <Button asChild size="lg" variant="outline" className="h-14 border-steel-foreground/40 bg-background/10 px-7 text-lg font-semibold text-steel-foreground hover:bg-steel-foreground/10 hover:text-steel-foreground">
                 <Link to="/estimate">I Need a Roofer</Link>
@@ -104,7 +100,7 @@ function RoofingLeadsPage() {
             Create a contractor account, set your roofing territory, and be ready when a matched homeowner request is available.
           </p>
           <Button asChild size="lg" className="mt-7 h-14 px-8 text-lg font-bold">
-            <Link to="/login" search={{ mode: "signup" }}>Create Contractor Account</Link>
+            <Link to="/login" search={{ mode: "signup" }}>Claim My First Roofing Lead</Link>
           </Button>
         </section>
       </main>
