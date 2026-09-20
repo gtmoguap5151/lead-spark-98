@@ -42,13 +42,17 @@ function buildTemplateEmail(prospect: Prospect, objective: string, agentRole: st
   const locationPhrase = location ? ` near ${location}` : "";
   const company = prospect.company_name?.trim() || "your company";
   const objectiveText = (objective || "").toLowerCase();
+  const isReferralPartner = trade.toLowerCase() === "referral_partner" || objectiveText.includes("referral");
 
   let subject = location
     ? `Opening ${trade} coverage in ${location}`
     : `Opening ${trade} coverage with Rivet Reach`;
   let middle = `Rivet Reach routes homeowner project requests to contractors by trade and service area. We are opening contractor coverage${locationPhrase}. Set your trade and territory, and when an eligible homeowner request matches ${company}'s coverage, the first matched lead is free. No card is required for that first lead. Continued access starts at $99/month, with no long-term contract.`;
 
-  if (objectiveText.includes("follow") || objectiveText.includes("check") || objectiveText.includes("remind")) {
+  if (isReferralPartner) {
+    subject = `A free contractor-request resource for ${company}`;
+    middle = `Rivet Reach gives homeowners and property owners a free way to submit a repair or improvement request. Requests are routed by service type and ZIP when suitable contractor coverage is available. There is no obligation to submit.\n\nIf an owner or resident asks your team where to start with a home-service project, you can simply share the request link below. No referral fee or formal partnership is required.`;
+  } else if (objectiveText.includes("follow") || objectiveText.includes("check") || objectiveText.includes("remind")) {
     subject = `Still interested in ${trade} leads${location ? ` around ${location}` : ""}?`;
     middle = `Just following up about Rivet Reach. We route homeowner project requests by trade and service area. Set your coverage, and when an eligible request matches, ${company}'s first matched lead is free. Continued access starts at $99/month after that first lead.`;
   } else if (objectiveText.includes("cost") || objectiveText.includes("quality") || objectiveText.includes("objection")) {
@@ -59,13 +63,16 @@ function buildTemplateEmail(prospect: Prospect, objective: string, agentRole: st
     middle = `Create the contractor account, set your trade and territory, and Rivet Reach will match eligible homeowner requests to your coverage. ${company}'s first matched lead is free, with no card required for that first lead. Paid access starts at $99/month after it.`;
   }
 
-  const roleLine = agentRole === "closer"
-    ? "Create the contractor account here:"
-    : "Take a look and create your contractor account here:";
+  const roleLine = isReferralPartner
+    ? "Homeowner request link:"
+    : agentRole === "closer"
+      ? "Create the contractor account here:"
+      : "Take a look and create your contractor account here:";
+  const actionUrl = isReferralPartner ? "https://rivetreach.com/estimate" : signupUrl;
 
   return {
     subject: subject.slice(0, 160),
-    body: `${greeting}\n\n${middle}\n\n${roleLine} ${signupUrl}\n\nRivet Reach\nBuilt for contractors who would rather close jobs than chase leads.\n\nIf you'd rather not hear from us, just reply stop.`,
+    body: `${greeting}\n\n${middle}\n\n${roleLine} ${actionUrl}\n\nRivet Reach\nBuilt for contractors who would rather close jobs than chase leads.\n\nIf you'd rather not hear from us, just reply stop.`,
   };
 }
 
