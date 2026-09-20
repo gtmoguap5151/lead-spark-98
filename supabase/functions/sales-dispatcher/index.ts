@@ -39,7 +39,7 @@ function buildTemplateEmail(prospect: Prospect, objective: string, agentRole: st
   const greeting = contact ? `Hi ${contact},` : "Hi there,";
   const trade = prospect.trade?.trim() || "contractor";
   const location = [prospect.city, prospect.state].filter(Boolean).join(", ");
-  const locationPhrase = location ? ` in ${location}` : "";
+  const locationPhrase = location ? ` near ${location}` : "";
   const company = prospect.company_name?.trim() || "your company";
   const objectiveText = (objective || "").toLowerCase();
 
