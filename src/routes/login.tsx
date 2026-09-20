@@ -47,8 +47,8 @@ const signupSchema = z.object({
   companyName: z.string().trim().min(2, "Company name is required").max(120),
   contactName: z.string().trim().min(2, "Your name is required").max(100),
   email: z.string().trim().email("Enter a valid email").max(255),
-  phone: z.string().trim().min(7, "Enter a valid phone").max(20),
-  city: z.string().trim().min(2, "Enter your city").max(100),
+  phone: z.string().trim().max(20),
+  city: z.string().trim().max(100),
   licenseNumber: z.string().trim().max(100, "Keep the license number under 100 characters"),
   password: z.string().min(8, "Use at least 8 characters").max(72),
   baseZip: z.string().trim().regex(/^\d{5}$/, "Enter a valid 5-digit ZIP code"),
@@ -101,7 +101,7 @@ function LoginPage() {
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
           {isSignup
-            ? "Choose your trades, base ZIP, and service radius so we can automatically build your lead territory."
+            ? "Create your free contractor account, choose your trades and territory, and get matched when an eligible homeowner request fits. No card required for your first lead."
             : "Sign in to manage your territory and matched opportunities."}
         </p>
 
@@ -264,14 +264,6 @@ function SignupForm({
           ["companyName", "Company name", "Summit Roofing & Exteriors", "text"],
           ["contactName", "Your name", "Dave Alvarez", "text"],
           ["email", "Work email", "you@company.com", "email"],
-          ["phone", "Phone", "(614) 555-0142", "tel"],
-          ["city", "City / base of operations", "Denver, CO", "text"],
-          [
-            "licenseNumber",
-            "License / registration number (optional)",
-            "State or local credential, if applicable",
-            "text",
-          ],
           ["password", "Password", "At least 8 characters", "password"],
         ] as const
       ).map(([key, label, placeholder, type]) => (
@@ -407,13 +399,17 @@ function SignupForm({
         </div>
       </div>
 
+      <div className="rounded-lg border border-border bg-muted/40 px-4 py-3 text-center text-sm font-medium text-muted-foreground">
+        No card required • First eligible matched lead free
+      </div>
+
       <Button
         type="submit"
         size="lg"
         className="h-12 w-full text-base font-semibold"
         disabled={busy}
       >
-        {busy ? "Creating account…" : "Get Qualified Leads"}
+        {busy ? "Creating account…" : "Create Free Contractor Account"}
       </Button>
     </form>
   );
