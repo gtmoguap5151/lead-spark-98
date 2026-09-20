@@ -59,6 +59,37 @@ Deno.serve(async (request) => {
 
     if (prospect.email) {
       const normalizedEmail = prospect.email.trim().toLowerCase();
+      const { data: existingContractor, error: contractorError } = await supabase
+        .from("contractors")
+        .select("id")
+        .ilike("email", normalizedEmail)
+        .maybeSingle();
+      if (contractorError) {
+        await supabase.from("sales_enrollments").update({ last_error: contractorError.message }).eq("id", enrollment.id);
+        continue;
+      }
+      if (existingContractor) {
+        await supabase.from("sales_prospects").update({
+          stage: "trial",
+          converted_contractor_id: existingContractor.id,
+        }).eq("id", prospect.id);
+        await supabase.from("sales_enrollments").update({
+          status: "converted",
+          completed_at: now,
+          last_error: null,
+        }).eq("id", enrollment.id);
+        await supabase.from("sales_agent_events").insert({
+          prospect_id: prospect.id,
+          agent_role: "onboarding",
+          event_type: "signup_detected_sequence_stopped",
+          decision: { enrollment_id: enrollment.id, contractor_id: existingContractor.id },
+        });
+        skipped++;
+        continue;
+      }
+
+      
+      const normalizedEmail = prospect.email.trim().toLowerCase();
       const { data: suppressions, error: suppressionError } = await supabase
         .from("privacy_suppressions").select("suppression_type").eq("email", normalizedEmail).limit(1);
       if (suppressionError) {
