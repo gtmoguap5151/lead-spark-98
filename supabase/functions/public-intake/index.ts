@@ -3,7 +3,6 @@ import { createClient } from "npm:@supabase/supabase-js@2.116.0";
 import { z } from "npm:zod@3.24.2";
 
 const CONSENT_VERSION = "2026-09-16-us-3";
-const ACCEPTED_CONSENT_VERSIONS = ["2026-09-09", "2026-09-09-us-2", CONSENT_VERSION] as const;
 const LOCAL_ORIGIN = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i;
 const TRUSTED_PRODUCTION_ORIGINS = new Set([
   "https://rivetreach.com",
@@ -62,10 +61,10 @@ const leadSchema = z
     projectDetails: z.string().trim().min(10).max(1000),
     isHomeowner: z.literal(true),
     isDecisionMaker: z.literal(true),
-    isAdult: z.literal(true).optional(),
+    isAdult: z.literal(true),
     contactConsent: z.literal(true),
     marketingConsent: z.boolean(),
-    consentVersion: z.enum(ACCEPTED_CONSENT_VERSIONS),
+    consentVersion: z.literal(CONSENT_VERSION),
     attribution: attributionSchema,
     website: z.string().max(0).optional(),
   })
@@ -194,9 +193,6 @@ Deno.serve(async (request) => {
 
     if (parsed.data.action === "lead") {
       const lead = parsed.data;
-      if (lead.consentVersion !== "2026-09-09" && lead.isAdult !== true) {
-        return json(origin, { error: "Please confirm that you are at least 18." }, 400);
-      }
       let marketingConsent = lead.marketingConsent;
       if (marketingConsent) {
         const { data: suppression, error: suppressionError } = await admin
