@@ -30,9 +30,11 @@ function firstName(contactName: string | null) {
 }
 
 function buildTemplateEmail(prospect: Prospect, objective: string, agentRole: string) {
-  const signupUrl = Deno.env.get("RIVET_REACH_SIGNUP_URL") ||
-    Deno.env.get("LEAD_SPARK_SIGNUP_URL") ||
-    "https://rivetreach.com/login";
+  const configuredSignupUrl = Deno.env.get("RIVET_REACH_SIGNUP_URL") ||
+    Deno.env.get("LEAD_SPARK_SIGNUP_URL");
+  const signupUrl = configuredSignupUrl && !/\/login\/?$/i.test(configuredSignupUrl)
+    ? configuredSignupUrl
+    : "https://rivetreach.com/contractor-leads";
   const contact = firstName(prospect.contact_name);
   const greeting = contact ? `Hi ${contact},` : "Hi there,";
   const trade = prospect.trade?.trim() || "contractor";
@@ -41,18 +43,20 @@ function buildTemplateEmail(prospect: Prospect, objective: string, agentRole: st
   const company = prospect.company_name?.trim() || "your company";
   const objectiveText = (objective || "").toLowerCase();
 
-  let subject = "Want more local jobs without paying for junk leads?";
-  let middle = `Rivet Reach helps contractors get more jobs without wasting time chasing dead leads. We connect contractors with homeowners who are actively looking for work${locationPhrase}, then help keep the follow-up organized so good opportunities do not fall through the cracks.\n\nWe are opening Rivet Reach to a small group of contractors right now. Your first real lead is free so ${company} can judge the quality from an actual opportunity before deciding whether to continue. After that, plans start at $99/month. No long-term contract.`;
+  let subject = location
+    ? `Opening ${trade} coverage in ${location}`
+    : `Opening ${trade} coverage with Rivet Reach`;
+  let middle = `Rivet Reach routes homeowner project requests to contractors by trade and service area. We are opening contractor coverage${locationPhrase}. Set your trade and territory, and when an eligible homeowner request matches ${company}'s coverage, the first matched lead is free. No card is required for that first lead. Continued access starts at $99/month, with no long-term contract.`;
 
   if (objectiveText.includes("follow") || objectiveText.includes("check") || objectiveText.includes("remind")) {
-    subject = `Still want more ${trade} jobs${location ? ` in ${location}` : ""}?`;
-    middle = `Just following up about Rivet Reach. We connect contractors with homeowners who are actively looking for work${locationPhrase}. Your first real lead is free, so ${company} can judge the quality before paying for continued access. Plans start at $99/month after the first lead.`;
+    subject = `Still interested in ${trade} leads${location ? ` around ${location}` : ""}?`;
+    middle = `Just following up about Rivet Reach. We route homeowner project requests by trade and service area. Set your coverage, and when an eligible request matches, ${company}'s first matched lead is free. Continued access starts at $99/month after that first lead.`;
   } else if (objectiveText.includes("cost") || objectiveText.includes("quality") || objectiveText.includes("objection")) {
-    subject = `${company}: judge the lead before paying`;
-    middle = `The point of Rivet Reach is simple: do not ask a contractor to pay first and hope the leads are worth it. ${company} gets one real lead free. If the opportunity is useful, continued access starts at $99/month. If it is not useful, you have learned that without buying a long contract.`;
+    subject = `${company}: see a matched lead before paying`;
+    middle = `You should not have to pay first and hope a lead is worth it. ${company}'s first eligible matched lead is free. If the opportunity is useful, continued access starts at $99/month. If it is not a fit, you have not paid for that first lead or entered a long-term contract.`;
   } else if (objectiveText.includes("close") || objectiveText.includes("signup") || objectiveText.includes("sign up")) {
-    subject = "Your first Rivet Reach lead is still free";
-    middle = `Rivet Reach is ready for ${company}. Create the contractor account, receive the first real lead free, and decide from the actual opportunity whether continued access makes sense. Paid plans start at $99/month after the first lead, with no long-term contract.`;
+    subject = "Your first eligible Rivet Reach lead is still free";
+    middle = `Create the contractor account, set your trade and territory, and Rivet Reach will match eligible homeowner requests to your coverage. ${company}'s first matched lead is free, with no card required for that first lead. Paid access starts at $99/month after it.`;
   }
 
   const roleLine = agentRole === "closer"
