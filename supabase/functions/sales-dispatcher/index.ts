@@ -68,7 +68,9 @@ function buildTemplateEmail(prospect: Prospect, objective: string, agentRole: st
     : agentRole === "closer"
       ? "Create the contractor account here:"
       : "Take a look and create your contractor account here:";
-  const actionUrl = isReferralPartner ? "https://rivetreach.com/estimate" : signupUrl;
+  const actionUrl = isReferralPartner
+    ? "https://rivetreach.com/estimate?utm_source=referral_partner&utm_medium=email&utm_campaign=homeowner_referral"
+    : signupUrl;
 
   return {
     subject: subject.slice(0, 160),
