@@ -89,7 +89,6 @@ Deno.serve(async (request) => {
       }
 
       
-      const normalizedEmail = prospect.email.trim().toLowerCase();
       const { data: suppressions, error: suppressionError } = await supabase
         .from("privacy_suppressions").select("suppression_type").eq("email", normalizedEmail).limit(1);
       if (suppressionError) {
