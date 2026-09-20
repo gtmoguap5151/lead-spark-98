@@ -97,6 +97,10 @@ Deno.serve(async (request) => {
   const privacyUrl = Deno.env.get("RIVET_REACH_PRIVACY_URL") ||
     Deno.env.get("LEAD_SPARK_PRIVACY_URL") ||
     "https://rivetreach.com/privacy";
+  const { data: configuredReplyTo } = await admin.rpc("get_resend_reply_to_email");
+  const replyTo = typeof configuredReplyTo === "string" && configuredReplyTo.includes("@")
+    ? configuredReplyTo
+    : null;
 
   let sent = 0;
   let skipped = 0;
@@ -122,6 +126,44 @@ Deno.serve(async (request) => {
     }
 
     const normalizedEmail = prospect.email.trim().toLowerCase();
+
+    const { data: existingContractor, error: contractorError } = await admin
+      .from("contractors")
+      .select("id")
+      .ilike("email", normalizedEmail)
+      .maybeSingle();
+    if (contractorError) {
+      await admin.from("sales_activities").update({
+        error_message: contractorError.message,
+        scheduled_for: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
+      }).eq("id", activity.id);
+      failed++;
+      continue;
+    }
+    if (existingContractor) {
+      await admin.from("sales_prospects").update({
+        stage: "trial",
+        converted_contractor_id: existingContractor.id,
+      }).eq("id", activity.prospect_id);
+      await admin.from("sales_enrollments").update({
+        status: "converted",
+        completed_at: new Date().toISOString(),
+        last_error: null,
+      }).eq("prospect_id", activity.prospect_id).eq("status", "active");
+      await admin.from("sales_activities").update({
+        status: "skipped",
+        error_message: "Prospect already created contractor account",
+      }).eq("id", activity.id);
+      await admin.from("sales_agent_events").insert({
+        prospect_id: activity.prospect_id,
+        agent_role: "onboarding",
+        event_type: "signup_detected_send_stopped",
+        decision: { activity_id: activity.id, contractor_id: existingContractor.id },
+      });
+      skipped++;
+      continue;
+    }
+
     const { data: suppressions, error: suppressionError } = await admin
       .from("privacy_suppressions")
       .select("suppression_type")
@@ -150,7 +192,13 @@ Deno.serve(async (request) => {
         "Content-Type": "application/json",
         "Idempotency-Key": `rivet-reach-sales/${activity.id}`,
       },
-      body: JSON.stringify({ from, to: [prospect.email], subject: activity.subject, text: finalBody }),
+      body: JSON.stringify({
+        from,
+        to: [prospect.email],
+        subject: activity.subject,
+        text: finalBody,
+        ...(replyTo ? { reply_to: replyTo } : {}),
+      }),
     });
 
     const result: unknown = await response.json().catch(() => ({}));
