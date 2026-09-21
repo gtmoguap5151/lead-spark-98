@@ -27,16 +27,16 @@ export const Route = createFileRoute("/login")({
   },
   head: () => ({
     meta: [
-      { title: "Contractor Login & Signup — Contractor Lead Engine" },
+      { title: "Contractor Login & Signup — Rivet Reach" },
       {
         name: "description",
         content:
-          "Sign in or create a contractor account to claim your trade, set your base ZIP and service radius and start receiving exclusive qualified leads.",
+          "Sign in or create a contractor account to set your trades and service territory and receive eligible matched homeowner project opportunities.",
       },
-      { property: "og:title", content: "Contractor Login & Signup — Contractor Lead Engine" },
+      { property: "og:title", content: "Contractor Login & Signup — Rivet Reach" },
       {
         property: "og:description",
-        content: "Claim your territory and start working exclusive qualified home-services leads.",
+        content: "Set your trades and service territory and start receiving eligible matched homeowner project opportunities.",
       },
     ],
   }),

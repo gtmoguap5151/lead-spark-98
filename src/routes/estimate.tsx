@@ -20,6 +20,13 @@ import { useApp } from "@/lib/store";
 import { SERVICE_TYPES, TIMELINES, type ServiceType, type Timeline } from "@/lib/types";
 
 export const Route = createFileRoute("/estimate")({
+  validateSearch: (search: Record<string, unknown>): { service?: ServiceType; [key: string]: unknown } => {
+    const requestedService = typeof search.service === "string" ? search.service : "";
+    const service = SERVICE_TYPES.includes(requestedService as ServiceType)
+      ? (requestedService as ServiceType)
+      : undefined;
+    return service ? { ...search, service } : search;
+  },
   head: () => ({
     meta: [
       { title: "Tell Us About Your Home Project | Rivet Reach" },
@@ -90,6 +97,7 @@ const BUDGETS = [
 type Errors = Partial<Record<string, string>>;
 
 function EstimatePage() {
+  const { service } = Route.useSearch();
   const { submitLead, busy } = useApp();
   const [errors, setErrors] = useState<Errors>({});
   const [submitted, setSubmitted] = useState(false);
@@ -98,7 +106,7 @@ function EstimatePage() {
     phone: "",
     email: "",
     zip: "",
-    serviceType: "" as ServiceType | "",
+    serviceType: service ?? ("" as ServiceType | ""),
     timeline: "" as Timeline | "",
     budget: "",
     projectDetails: "",
