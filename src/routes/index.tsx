@@ -3,6 +3,7 @@ import { ArrowRight, BadgeCheck, Building2, CheckCircle2, Home, MapPin, Search, 
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { SiteFooter, SiteHeader } from "@/components/SiteHeader";
+import { type ServiceType } from "@/lib/types";
 
 export const Route = createFileRoute("/")({
   head: () => ({ meta: [
@@ -27,7 +28,19 @@ const proofPages = [
   ],
 ];
 
-const services = ["Roofing","Heating & cooling","Plumbing","Electrical","Remodeling","Concrete","Painting","Flooring","Decks","Windows & doors"];
+const services = ["Roofing","Heating & cooling","Plumbing","Electrical","Remodeling","Concrete","Painting","Flooring","Decks","Windows & doors"] as const;
+const serviceTypeByLabel: Record<(typeof services)[number], ServiceType> = {
+  "Roofing": "Roofing",
+  "Heating & cooling": "HVAC",
+  "Plumbing": "Plumbing",
+  "Electrical": "Electrical",
+  "Remodeling": "Remodeling",
+  "Concrete": "Concrete",
+  "Painting": "Painting",
+  "Flooring": "Flooring",
+  "Decks": "Decks",
+  "Windows & doors": "Windows & Doors",
+};
 const steps = [
   ["01", "Tell us what needs done", "Choose the service, enter your ZIP code, and give us the project basics."],
   ["02", "Rivet Reach routes it", "The request is matched by trade and service area instead of being blasted everywhere."],
@@ -42,21 +55,41 @@ function Landing() {
   return <div className="min-h-screen bg-background">
     <SiteHeader />
 
-    <section className="relative isolate min-h-[720px] overflow-hidden bg-[#021b16] text-white sm:min-h-[780px]">
-      <img src="/file_00000000614881f5b57658dfaa06f34a.png" alt="Rivet Reach connecting homeowners with contractors" className="absolute inset-0 -z-30 size-full object-cover object-center" />
-      <div className="absolute inset-0 -z-20 bg-gradient-to-r from-[#001d17]/95 via-[#001d17]/70 to-black/35" />
-      <div className="absolute inset-0 -z-10 bg-gradient-to-t from-[#001812]/95 via-transparent to-[#001812]/20" />
-      <div className="relative mx-auto flex min-h-[720px] max-w-6xl items-end px-4 pb-12 pt-20 sm:min-h-[780px] sm:items-center sm:py-24">
-        <div className="max-w-2xl rounded-[2rem] border border-emerald-300/20 bg-black/40 p-6 shadow-2xl shadow-emerald-950/40 backdrop-blur-md sm:p-9">
-          <div className="inline-flex items-center gap-2 rounded-full border border-emerald-300/30 bg-emerald-400/10 px-4 py-2 text-sm font-bold text-emerald-300"><Sparkles className="size-4" /> People. Homes. Possibilities.</div>
-          <h1 className="mt-5 font-display text-4xl font-black leading-[.98] tracking-tight sm:text-6xl">Find the <span className="text-emerald-400">right people</span><span className="block">for the <span className="text-emerald-400">right projects.</span></span></h1>
-          <p className="mt-5 max-w-xl text-lg leading-relaxed text-white/85 sm:text-xl">Tell us what you need done. Rivet Reach routes your project by trade and ZIP code so an appropriate contractor can connect with you.</p>
-          <div className="mt-7 grid gap-3 sm:grid-cols-2">
-            <Button asChild size="lg" className="h-16 bg-emerald-500 px-7 text-lg font-black text-[#001812] shadow-lg shadow-emerald-500/20 hover:bg-emerald-400 sm:col-span-2"><Link to="/estimate"><Home className="mr-2 size-5" /> Start My Project <ArrowRight className="ml-2 size-5" /></Link></Button>
-            <Button asChild size="lg" variant="outline" className="h-14 border-emerald-300/35 bg-black/35 px-7 text-lg font-bold text-white hover:bg-emerald-400/15 hover:text-white"><a href="#services">Browse Services</a></Button>
-            <Button asChild size="lg" variant="outline" className="h-14 border-emerald-300/35 bg-black/35 px-7 text-lg font-bold text-white hover:bg-emerald-400/15 hover:text-white"><Link to="/contractor-leads">I&apos;m a Contractor</Link></Button>
+    <section className="relative isolate min-h-[680px] overflow-hidden bg-[#021b16] text-white sm:min-h-[740px]">
+      <img
+        src="/hero-homeowner-contractor.webp"
+        alt="A homeowner reviewing a residential project with a contractor"
+        className="absolute inset-0 -z-30 size-full object-cover object-[62%_center] sm:object-center"
+        fetchPriority="high"
+        decoding="async"
+      />
+      <div className="absolute inset-0 -z-20 bg-gradient-to-r from-[#001812]/95 via-[#001812]/78 to-[#001812]/15" />
+      <div className="absolute inset-0 -z-10 bg-gradient-to-t from-[#001812]/85 via-transparent to-black/15" />
+      <div className="relative mx-auto flex min-h-[680px] max-w-6xl items-center px-4 py-20 sm:min-h-[740px] sm:py-24">
+        <div className="max-w-[42rem]">
+          <div className="inline-flex items-center gap-2 rounded-full border border-emerald-300/30 bg-[#002b22]/75 px-4 py-2 text-sm font-bold text-emerald-300 backdrop-blur-sm">
+            <Sparkles className="size-4" /> Home projects, routed locally
           </div>
-          <div className="mt-7 flex flex-wrap gap-x-5 gap-y-3 text-sm font-semibold text-white/80">{["No obligation to hire","Nationwide intake","Trade + ZIP routing","Mobile friendly"].map(x=><span key={x} className="flex items-center gap-2"><CheckCircle2 className="size-4 text-emerald-400" />{x}</span>)}</div>
+          <h1 className="mt-6 font-display text-4xl font-black leading-[.98] tracking-tight sm:text-6xl">
+            Your home project deserves the <span className="text-emerald-400">right contractor.</span>
+          </h1>
+          <p className="mt-5 max-w-xl text-lg leading-relaxed text-white/85 sm:text-xl">
+            Choose the service and share your ZIP code. Rivet Reach checks for an appropriate contractor who serves your area.
+          </p>
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <Button asChild size="lg" className="h-16 bg-emerald-500 px-8 text-lg font-black text-[#001812] shadow-xl shadow-black/25 hover:bg-emerald-400">
+              <Link to="/estimate"><Home className="mr-2 size-5" /> Start My Project <ArrowRight className="ml-2 size-5" /></Link>
+            </Button>
+            <Button asChild size="lg" variant="outline" className="h-16 border-white/30 bg-black/25 px-7 text-lg font-bold text-white backdrop-blur-sm hover:bg-white/10 hover:text-white">
+              <a href="#services">Browse Services</a>
+            </Button>
+          </div>
+          <p className="mt-5 text-sm font-semibold text-white/75">
+            Are you a contractor? <Link to="/contractor-leads" className="text-emerald-300 underline decoration-emerald-400/40 underline-offset-4 hover:text-emerald-200">Explore matched project opportunities</Link>
+          </p>
+          <div className="mt-7 flex flex-wrap gap-x-5 gap-y-3 text-sm font-semibold text-white/80">
+            {["Free to submit","No obligation to hire","Trade + ZIP routing"].map(x=><span key={x} className="flex items-center gap-2"><CheckCircle2 className="size-4 text-emerald-400" />{x}</span>)}
+          </div>
         </div>
       </div>
     </section>
@@ -64,7 +97,7 @@ function Landing() {
     <section id="services" className="scroll-mt-20 border-b border-emerald-950/15 bg-card">
       <div className="mx-auto max-w-6xl px-4 py-14 sm:py-16">
         <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between"><div className="max-w-3xl"><p className="text-sm font-bold uppercase tracking-[.18em] text-primary">Browse services</p><h2 className="mt-3 text-3xl font-bold sm:text-5xl">What do you need help with?</h2><p className="mt-4 text-lg text-muted-foreground">Choose the type of project first. Rivet Reach will walk you through the details and route the request by service and ZIP code.</p></div></div>
-        <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">{services.map(service => <Link key={service} to="/estimate" className="group flex min-h-24 items-center justify-between rounded-2xl border border-border bg-background p-5 text-lg font-bold shadow-sm transition hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-md"><span>{service}</span><ArrowRight className="size-5 text-primary transition group-hover:translate-x-1" /></Link>)}</div>
+        <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">{services.map(service => <Link key={service} to="/estimate" search={{ service: serviceTypeByLabel[service] }} className="group flex min-h-24 items-center justify-between rounded-2xl border border-border bg-background p-5 text-lg font-bold shadow-sm transition hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-md"><span>{service}</span><ArrowRight className="size-5 text-primary transition group-hover:translate-x-1" /></Link>)}</div>
       </div>
     </section>
 
