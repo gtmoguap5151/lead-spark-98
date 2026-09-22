@@ -6,13 +6,13 @@ import { SiteFooter, SiteHeader } from "@/components/SiteHeader";
 export const Route = createFileRoute("/contractor-leads")({
   head: () => ({
     meta: [
-      { title: "Contractor Leads for Home Service Pros | RivetReach" },
+      { title: "Contractor Leads for Home Service Pros | Rivet Reach" },
       {
         name: "description",
         content:
-          "Find contractor leads matched by trade and service area with RivetReach. Get one first real lead free, then continue through a paid plan.",
+          "Find contractor leads matched by trade and service area with Rivet Reach. Get one first real lead free, then continue through a paid plan.",
       },
-      { property: "og:title", content: "Contractor Leads for Home Service Pros | RivetReach" },
+      { property: "og:title", content: "Contractor Leads for Home Service Pros | Rivet Reach" },
       {
         property: "og:description",
         content:
@@ -28,7 +28,7 @@ const benefits = [
   "Homeowner requests matched to your trade and service area",
   "Mobile-friendly lead inbox and pipeline management",
   "One-time first real lead free for a new contractor account",
-  "Continued lead access through a paid RivetReach plan",
+  "Continued lead access through a paid Rivet Reach plan",
 ];
 
 function ContractorLeadsPage() {
@@ -60,10 +60,10 @@ function ContractorLeadsPage() {
         <section className="mx-auto max-w-6xl px-4 py-14 sm:py-16">
           <div className="grid gap-8 md:grid-cols-[1.05fr_0.95fr] md:items-start">
             <div>
-              <p className="text-sm font-bold uppercase tracking-wide text-muted-foreground">How RivetReach works</p>
+              <p className="text-sm font-bold uppercase tracking-wide text-muted-foreground">How Rivet Reach works</p>
               <h2 className="mt-2 text-3xl font-bold leading-tight sm:text-4xl">A simpler path from homeowner request to contractor opportunity</h2>
               <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
-                Homeowners tell RivetReach what work they need and where the project is located. Requests are routed using trade and ZIP-code coverage so contractors can focus on opportunities that fit the work they actually perform.
+                Homeowners tell Rivet Reach what work they need and where the project is located. Requests are routed using trade and ZIP-code coverage so contractors can focus on opportunities that fit the work they actually perform.
               </p>
             </div>
             <div className="surface-card p-6 sm:p-7">
@@ -102,7 +102,7 @@ function ContractorLeadsPage() {
         <section className="mx-auto max-w-4xl px-4 py-14 text-center sm:py-16">
           <h2 className="text-3xl font-bold sm:text-4xl">Start with one real opportunity before you pay.</h2>
           <p className="mx-auto mt-4 max-w-2xl text-lg leading-relaxed text-muted-foreground">
-            Create your account and set your trade and territory. Your first eligible matched homeowner lead is free; continued access is available through a paid RivetReach plan.
+            Create your account and set your trade and territory. Your first eligible matched homeowner lead is free; continued access is available through a paid Rivet Reach plan.
           </p>
           <Button asChild size="lg" className="mt-7 h-14 px-8 text-lg font-bold">
             <Link to="/login" search={{ mode: "signup" }}>Claim My First Lead</Link>
