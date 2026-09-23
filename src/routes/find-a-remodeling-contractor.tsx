@@ -38,7 +38,7 @@ function FindRemodelingContractorPage() {
               Tell Rivet Reach what you want to improve and where the property is located. Your request can be routed to a remodeling contractor who serves your area when a match is available.
             </p>
             <Button asChild size="lg" className="mt-8 h-14 px-7 text-lg font-bold">
-              <Link to="/estimate">Start My Remodeling Request</Link>
+              <Link to="/estimate" search={{ service: "Remodeling" }}>Start My Remodeling Request</Link>
             </Button>
           </div>
         </section>
@@ -91,7 +91,7 @@ function FindRemodelingContractorPage() {
             Submit your project details once. Rivet Reach handles the routing based on the service requested and your location.
           </p>
           <Button asChild size="lg" className="mt-7 h-14 px-8 text-lg font-bold">
-            <Link to="/estimate">Request Remodeling Help</Link>
+            <Link to="/estimate" search={{ service: "Remodeling" }}>Request Remodeling Help</Link>
           </Button>
           <p className="mt-5 text-sm text-muted-foreground">
             Are you a remodeling contractor? <Link to="/remodeling-leads" className="font-semibold text-primary hover:underline">See remodeling lead opportunities.</Link>

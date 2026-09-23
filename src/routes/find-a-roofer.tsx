@@ -61,7 +61,7 @@ function FindARooferPage() {
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Button asChild size="lg" className="h-14 px-7 text-lg font-bold">
-                <Link to="/estimate">Request a Roofing Estimate</Link>
+                <Link to="/estimate" search={{ service: "Roofing" }}>Request a Roofing Estimate</Link>
               </Button>
               <Button asChild size="lg" variant="outline" className="h-14 border-steel-foreground/40 bg-background/10 px-7 text-lg font-semibold text-steel-foreground hover:bg-steel-foreground/10 hover:text-steel-foreground">
                 <Link to="/roofing-leads">I&apos;m a Roofing Contractor</Link>
@@ -114,7 +114,7 @@ function FindARooferPage() {
             Start the project request, enter your ZIP code, and tell us what kind of roofing work you need.
           </p>
           <Button asChild size="lg" className="mt-7 h-14 px-8 text-lg font-bold">
-            <Link to="/estimate">Start My Roofing Request</Link>
+            <Link to="/estimate" search={{ service: "Roofing" }}>Start My Roofing Request</Link>
           </Button>
         </section>
       </main>
