@@ -21,9 +21,20 @@ import { SERVICE_TYPES, type ServiceType } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/login")({
-  validateSearch: (search: Record<string, unknown>): { mode?: "signup"; [key: string]: unknown } => {
-    const { mode, ...otherSearch } = search;
-    return mode === "signup" ? { ...otherSearch, mode: "signup" } : otherSearch;
+  validateSearch: (
+    search: Record<string, unknown>,
+  ): { mode?: "signup"; service?: ServiceType; [key: string]: unknown } => {
+    const { mode, service, ...otherSearch } = search;
+    const validService =
+      typeof service === "string" && SERVICE_TYPES.includes(service as ServiceType)
+        ? (service as ServiceType)
+        : undefined;
+
+    return {
+      ...otherSearch,
+      ...(mode === "signup" ? { mode: "signup" as const } : {}),
+      ...(validService ? { service: validService } : {}),
+    };
   },
   head: () => ({
     meta: [
@@ -64,7 +75,7 @@ const signupSchema = z.object({
 });
 
 function LoginPage() {
-  const { mode } = Route.useSearch();
+  const { mode, service } = Route.useSearch();
   const isSignup = mode === "signup";
   const { login, signup, busy } = useApp();
   const navigate = useNavigate();
@@ -105,7 +116,11 @@ function LoginPage() {
             : "Sign in to manage your territory and matched opportunities."}
         </p>
 
-        <Tabs key={isSignup ? "signup" : "login"} defaultValue={isSignup ? "signup" : "login"} className="mt-6">
+        <Tabs
+          key={`${isSignup ? "signup" : "login"}-${service ?? "all"}`}
+          defaultValue={isSignup ? "signup" : "login"}
+          className="mt-6"
+        >
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="login">Log in</TabsTrigger>
             <TabsTrigger value="signup">Create account</TabsTrigger>
@@ -129,6 +144,7 @@ function LoginPage() {
           <TabsContent value="signup">
             <SignupForm
               busy={busy}
+              initialService={service}
               onSubmit={async (values) => {
                 const res = await signup(values);
                 if (!res.ok) {
@@ -212,12 +228,16 @@ type SignupValues = z.infer<typeof signupSchema>;
 function SignupForm({
   onSubmit,
   busy,
+  initialService,
 }: {
   onSubmit: (values: SignupValues) => Promise<void>;
   busy: boolean;
+  initialService?: ServiceType;
 }) {
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [services, setServices] = useState<ServiceType[]>([]);
+  const [services, setServices] = useState<ServiceType[]>(
+    initialService ? [initialService] : [],
+  );
   const [baseZip, setBaseZip] = useState("");
   const [serviceRadiusMiles, setServiceRadiusMiles] = useState(50);
   const [complianceAttested, setComplianceAttested] = useState(false);

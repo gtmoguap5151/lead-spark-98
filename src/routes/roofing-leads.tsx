@@ -43,10 +43,10 @@ function RoofingLeadsPage() {
             <p className="mt-6 max-w-3xl text-lg leading-relaxed text-steel-foreground/85 sm:text-xl">Create your account and set your roofing territory. When a genuine homeowner roofing request matches your coverage, your first eligible lead is free. No card required for that first lead.</p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Button asChild size="lg" className="h-14 px-7 text-lg font-bold">
-                <Link to="/login" search={{ mode: "signup" }}>Claim My First Roofing Lead</Link>
+                <Link to="/login" search={{ mode: "signup", service: "Roofing" }}>Claim My First Roofing Lead</Link>
               </Button>
               <Button asChild size="lg" variant="outline" className="h-14 border-steel-foreground/40 bg-background/10 px-7 text-lg font-semibold text-steel-foreground hover:bg-steel-foreground/10 hover:text-steel-foreground">
-                <Link to="/estimate">I Need a Roofer</Link>
+                <Link to="/estimate" search={{ service: "Roofing" }}>I Need a Roofer</Link>
               </Button>
             </div>
           </div>
@@ -100,7 +100,7 @@ function RoofingLeadsPage() {
             Create a contractor account, set your roofing territory, and be ready when a matched homeowner request is available.
           </p>
           <Button asChild size="lg" className="mt-7 h-14 px-8 text-lg font-bold">
-            <Link to="/login" search={{ mode: "signup" }}>Claim My First Roofing Lead</Link>
+            <Link to="/login" search={{ mode: "signup", service: "Roofing" }}>Claim My First Roofing Lead</Link>
           </Button>
         </section>
       </main>
