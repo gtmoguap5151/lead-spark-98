@@ -266,9 +266,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       privacyRequests = (privacyRequestsResult.data ?? []).map((row) => ({
         id: row.id,
         email: row.email,
-        requestType: row.request_type,
+        requestType: row.request_type as PrivacyRequest["requestType"],
         details: row.details,
-        status: row.status,
+        status: row.status as PrivacyRequest["status"],
         createdAt: row.created_at,
         updatedAt: row.updated_at,
         dueAt: row.due_at,
@@ -442,7 +442,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
               role = await loadData(data.user);
             }
           }
-          return { ok: true, role };
+          return { ok: true, role: role as "admin" | "contractor" };
         } catch (loginError) {
           const detail = errorMessage(loginError);
           setError(detail);
@@ -564,9 +564,11 @@ export function useApp() {
 
 export function useCurrentContractor(): Contractor | null {
   const { state } = useApp();
-  if (state.session?.role !== "contractor") return null;
+  const session = state.session;
+  if (session?.role !== "contractor") return null;
+  // narrowed above
   return (
-    state.contractors.find((contractor) => contractor.id === state.session?.contractorId) ?? null
+    state.contractors.find((contractor) => contractor.id === session.contractorId) ?? null
   );
 }
 

@@ -40,6 +40,7 @@ import { Route as RemodelingLeadsRouteImport } from './routes/remodeling-leads'
 import { Route as RoofingLeadsRouteImport } from './routes/roofing-leads'
 import { Route as SalesApprovalRouteImport } from './routes/sales-approval'
 import { Route as ServicesRouteImport } from './routes/services'
+import { Route as ShareRouteImport } from './routes/share'
 import { Route as SidingLeadsRouteImport } from './routes/siding-leads'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as WindowDoorLeadsRouteImport } from './routes/window-door-leads'
@@ -203,6 +204,11 @@ const ServicesRoute = ServicesRouteImport.update({
   path: '/services',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ShareRoute = ShareRouteImport.update({
+  id: '/share',
+  path: '/share',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SidingLeadsRoute = SidingLeadsRouteImport.update({
   id: '/siding-leads',
   path: '/siding-leads',
@@ -261,6 +267,7 @@ export interface FileRoutesByFullPath {
   '/roofing-leads': typeof RoofingLeadsRoute
   '/sales-approval': typeof SalesApprovalRoute
   '/services': typeof ServicesRoute
+  '/share': typeof ShareRoute
   '/siding-leads': typeof SidingLeadsRoute
   '/terms': typeof TermsRoute
   '/window-door-leads': typeof WindowDoorLeadsRoute
@@ -299,6 +306,7 @@ export interface FileRoutesByTo {
   '/roofing-leads': typeof RoofingLeadsRoute
   '/sales-approval': typeof SalesApprovalRoute
   '/services': typeof ServicesRoute
+  '/share': typeof ShareRoute
   '/siding-leads': typeof SidingLeadsRoute
   '/terms': typeof TermsRoute
   '/window-door-leads': typeof WindowDoorLeadsRoute
@@ -338,6 +346,7 @@ export interface FileRoutesById {
   '/roofing-leads': typeof RoofingLeadsRoute
   '/sales-approval': typeof SalesApprovalRoute
   '/services': typeof ServicesRoute
+  '/share': typeof ShareRoute
   '/siding-leads': typeof SidingLeadsRoute
   '/terms': typeof TermsRoute
   '/window-door-leads': typeof WindowDoorLeadsRoute
@@ -378,6 +387,7 @@ export interface FileRouteTypes {
     | '/roofing-leads'
     | '/sales-approval'
     | '/services'
+    | '/share'
     | '/siding-leads'
     | '/terms'
     | '/window-door-leads'
@@ -416,6 +426,7 @@ export interface FileRouteTypes {
     | '/roofing-leads'
     | '/sales-approval'
     | '/services'
+    | '/share'
     | '/siding-leads'
     | '/terms'
     | '/window-door-leads'
@@ -454,6 +465,7 @@ export interface FileRouteTypes {
     | '/roofing-leads'
     | '/sales-approval'
     | '/services'
+    | '/share'
     | '/siding-leads'
     | '/terms'
     | '/window-door-leads'
@@ -493,6 +505,7 @@ export interface RootRouteChildren {
   RoofingLeadsRoute: typeof RoofingLeadsRoute
   SalesApprovalRoute: typeof SalesApprovalRoute
   ServicesRoute: typeof ServicesRoute
+  ShareRoute: typeof ShareRoute
   SidingLeadsRoute: typeof SidingLeadsRoute
   TermsRoute: typeof TermsRoute
   WindowDoorLeadsRoute: typeof WindowDoorLeadsRoute
@@ -719,6 +732,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ServicesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/share': {
+      id: '/share'
+      path: '/share'
+      fullPath: '/share'
+      preLoaderRoute: typeof ShareRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/siding-leads': {
       id: '/siding-leads'
       path: '/siding-leads'
@@ -789,6 +809,7 @@ const rootRouteChildren: RootRouteChildren = {
   RoofingLeadsRoute: RoofingLeadsRoute,
   SalesApprovalRoute: SalesApprovalRoute,
   ServicesRoute: ServicesRoute,
+  ShareRoute: ShareRoute,
   SidingLeadsRoute: SidingLeadsRoute,
   TermsRoute: TermsRoute,
   WindowDoorLeadsRoute: WindowDoorLeadsRoute,
