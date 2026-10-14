@@ -268,7 +268,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         email: row.email,
         requestType: row.request_type as PrivacyRequest["requestType"],
         details: row.details,
-        status: row.status,
+        status: row.status as PrivacyRequest["status"],
         createdAt: row.created_at,
         updatedAt: row.updated_at,
         dueAt: row.due_at,
@@ -563,9 +563,10 @@ export function useApp() {
 }
 
 export function useCurrentContractor(): Contractor | null {
+  const { state } = useApp();
   const session = state.session;
   if (session?.role !== "contractor") return null;
-  if (state.session?.role !== "contractor") return null;
+  // narrowed above
   return (
     state.contractors.find((contractor) => contractor.id === session.contractorId) ?? null
   );
