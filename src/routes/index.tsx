@@ -84,6 +84,7 @@ function Landing() {
               <a href="#services">Browse Services</a>
             </Button>
           </div>
+          <p className="mt-5 text-sm font-semibold text-white/80">Know a neighborhood group or business community? <Link to="/share" className="text-emerald-300 underline underline-offset-4 hover:text-emerald-200">Get free share-ready outreach links</Link>.</p>
           <p className="mt-5 text-sm font-semibold text-white/75">
             Are you a contractor? <Link to="/contractor-leads" className="text-emerald-300 underline decoration-emerald-400/40 underline-offset-4 hover:text-emerald-200">Explore matched project opportunities</Link>
           </p>
