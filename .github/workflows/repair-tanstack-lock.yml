@@ -1,0 +1,40 @@
+name: Repair TanStack lockfile and validate
+on:
+  push:
+    paths:
+      - '.github/workflows/repair-tanstack-lock.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout current branch
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: true
+      - name: Configure Node 24
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24'
+      - name: Regenerate npm lockfile
+        run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+      - name: Verify patched Start package chain
+        run: |
+          node -e "const p=require('./package-lock.json'); const a=p.packages['node_modules/@tanstack/react-start'].version; const b=p.packages['node_modules/@tanstack/start-server-core'].version; console.log({reactStart:a,startServerCore:b}); if(Number(a.split('.')[2])<60 && a.startsWith('1.168.'))process.exit(1); if(Number(b.split('.')[2])<39 && b.startsWith('1.169.'))process.exit(1)"
+      - name: Install exact resolved dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Validate production build
+        run: npm run build
+      - name: Commit repaired package-lock
+        run: |
+          if git diff --quiet -- package-lock.json; then
+            echo "package-lock already up to date"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package-lock.json
+          git commit -m "Regenerate patched TanStack dependency lockfile"
+          git push origin HEAD:main
