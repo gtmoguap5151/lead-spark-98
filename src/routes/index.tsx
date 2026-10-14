@@ -50,7 +50,7 @@ const steps = [
 function Landing() {
   const [proofPage, setProofPage] = useState(0);
   useEffect(() => { const timer = window.setInterval(() => setProofPage(current => (current + 1) % proofPages.length), 30000); return () => window.clearInterval(timer); }, []);
-  const proof = proofPages[proofPage];
+  const proof = proofPages[proofPage] ?? proofPages[0]!;
 
   return <div className="min-h-screen bg-background">
     <SiteHeader />
