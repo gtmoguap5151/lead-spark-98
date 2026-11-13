@@ -154,6 +154,33 @@ function ContractorLeadsPage() {
         </section>
 
         <section className="mx-auto max-w-6xl px-4 py-14 sm:py-16">
+          <p className="text-sm font-bold uppercase tracking-wide text-muted-foreground">Where Rivet Reach is launching</p>
+          <h2 className="mt-2 max-w-3xl text-3xl font-bold leading-tight sm:text-4xl">Three launch clusters, matched by ZIP code</h2>
+          <p className="mt-4 max-w-3xl text-lg leading-relaxed text-muted-foreground">
+            Outreach started in three clusters across Kentucky and Tennessee. These are the places where the roster is being built first — but matching follows the territory you set, so your service area is what decides which requests reach you.
+          </p>
+          <div className="mt-10 grid gap-5 md:grid-cols-3">
+            {[
+              [MapPin, "Central Kentucky", "The home cluster — Lexington, Richmond, Berea, Winchester, and the towns around them. Handyman and small jobs first, with roofing, HVAC, plumbing, and the rest of the trades on the same roster."],
+              [MapPin, "Nashville exurbs", "The fast-growing ring around Nashville — Columbia, Murfreesboro, and the surrounding suburbs — where new homes and older ones alike keep local contractors busy."],
+              [MapPin, "Knoxville", "Knoxville and the towns around it — Maryville, Lenoir City, and Farragut — where homeowners need the same local pros for repairs, remodels, and everyday upkeep."],
+            ].map(([Icon, title, body]) => {
+              const ItemIcon = Icon as typeof MapPin;
+              return (
+                <div key={String(title)} className="surface-card p-6">
+                  <ItemIcon className="size-7 text-primary" />
+                  <h3 className="mt-4 text-xl font-bold">{String(title)}</h3>
+                  <p className="mt-2 leading-relaxed text-muted-foreground">{String(body)}</p>
+                </div>
+              );
+            })}
+          </div>
+          <p className="mt-6 max-w-3xl text-base leading-relaxed text-muted-foreground">
+            If your service area sits outside these clusters, you can still create an account and set your base ZIP code and radius. Rivet Reach matches any ZIP it can match, and the roster grows as homeowners submit projects in your area.
+          </p>
+        </section>
+
+        <section className="mx-auto max-w-6xl px-4 py-14 sm:py-16">
           <div className="grid gap-8 md:grid-cols-[1.05fr_0.95fr] md:items-start">
             <div>
               <p className="text-sm font-bold uppercase tracking-wide text-muted-foreground">The founding offer</p>
