@@ -92,7 +92,7 @@ export function SiteHeader() {
           <Button type="button" size="sm" variant="outline" onClick={() => void sharePage()} className="h-10 gap-2 px-3" aria-label="Share this page">
             <Share2 className="size-4" /> Share
           </Button>
-          <Button asChild size="sm" className="hidden h-11 rounded-xl bg-gradient-to-r from-emerald-700 to-emerald-500 px-5 font-extrabold text-white shadow-lg shadow-emerald-900/20 hover:from-emerald-600 hover:to-green-400 md:inline-flex">
+          <Button asChild size="sm" className="hidden h-11 rounded-xl px-5 font-extrabold shadow-lg shadow-emerald-900/20 md:inline-flex">
             <Link to="/services">
               <House className="mr-2 size-4" />
               Homeowners
@@ -120,7 +120,7 @@ export function SiteHeader() {
       </div>
 
       <div className="grid grid-cols-2 gap-2 border-t border-emerald-950/15 bg-emerald-950/[0.03] px-3 py-2 md:hidden">
-        <Button asChild size="lg" className="h-13 rounded-xl bg-gradient-to-r from-emerald-700 to-emerald-500 font-extrabold text-white shadow-md shadow-emerald-900/20 hover:from-emerald-600 hover:to-green-400">
+        <Button asChild size="lg" className="h-13 rounded-xl font-extrabold shadow-md shadow-emerald-900/20">
           <Link to="/services">
             <House className="mr-2 size-5" />
             Homeowners
