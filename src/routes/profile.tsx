@@ -22,13 +22,13 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/profile")({
   head: () => ({
     meta: [
-      { title: "Contractor Profile — Contractor Lead Engine" },
+      { title: "Contractor Profile — Rivet Reach" },
       {
         name: "description",
         content:
           "Update your company info, service types, base ZIP, and service radius to control which leads you receive.",
       },
-      { property: "og:title", content: "Contractor Profile — Contractor Lead Engine" },
+      { property: "og:title", content: "Contractor Profile — Rivet Reach" },
       {
         property: "og:description",
         content: "Manage your trade, territory and account settings.",

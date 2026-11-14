@@ -29,6 +29,16 @@ export const Route = createFileRoute("/billing")({
 const money = (amount: number, currency: string) =>
   new Intl.NumberFormat("en-US", { style: "currency", currency }).format(amount / 100);
 
+// Live Stripe price IDs for the two Rivet Reach plans (verified against the
+// Stripe account). The subscription row stores only a price_id, so this map is
+// how the billing page names the current plan. If a plan price ever changes in
+// Stripe, update the matching entry here. Unknown price IDs fall back to the
+// most recent payment amount, then to showing the date only.
+const KNOWN_PLANS: Record<string, { name: string; amountCents: number; currency: string }> = {
+  price_1UEm6QCZRLLet9af5RW5moSK: { name: "Growth", amountCents: 9900, currency: "usd" },
+  price_1UEm6XCZRLLet9afyIAAJAwK: { name: "Pro", amountCents: 19900, currency: "usd" },
+};
+
 function BillingPage() {
   const { state, refresh } = useApp();
   const [plans, setPlans] = useState<Plan[]>([]);
@@ -36,6 +46,22 @@ function BillingPage() {
   const [pending, setPending] = useState<string | null>(null);
   const active =
     state.subscription && ["active", "trialing", "past_due"].includes(state.subscription.status);
+  const payments = state.myPayments;
+  const paidPayments = payments.filter(
+    (payment) => payment.status === "paid" && payment.currency.toLowerCase() === "usd",
+  );
+  const totalPaidCents = paidPayments.reduce((sum, payment) => sum + payment.amountCents, 0);
+  const currentPlan = state.subscription?.priceId
+    ? (KNOWN_PLANS[state.subscription.priceId] ?? null)
+    : null;
+  // Next charge: the plan amount when known, otherwise the most recent paid
+  // amount (a monthly plan re-bills the same amount), otherwise date only.
+  const lastPaid = paidPayments[0];
+  const nextCharge = currentPlan
+    ? { amountCents: currentPlan.amountCents, currency: currentPlan.currency }
+    : lastPaid
+      ? { amountCents: lastPaid.amountCents, currency: lastPaid.currency }
+      : null;
 
   useEffect(() => {
     void supabase.functions
@@ -78,17 +104,38 @@ function BillingPage() {
         <section className="surface-card mb-5 flex flex-wrap items-center justify-between gap-4 p-5">
           <div>
             <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-              Current status
+              Current plan
             </p>
             <p className="mt-1 text-xl font-bold capitalize">
-              {state.subscription.status.replace(/_/g, " ")}
+              {currentPlan
+                ? `${currentPlan.name} — ${money(currentPlan.amountCents, currentPlan.currency)}/month`
+                : state.subscription.status.replace(/_/g, " ")}
+            </p>
+            <p className="mt-1 text-sm text-muted-foreground capitalize">
+              Status: {state.subscription.status.replace(/_/g, " ")}
             </p>
             {state.subscription.currentPeriodEnd ? (
               <p className="mt-1 text-sm text-muted-foreground">
-                {state.subscription.cancelAtPeriodEnd ? "Access ends" : "Renews"}{" "}
-                {new Date(state.subscription.currentPeriodEnd).toLocaleDateString()}
+                {state.subscription.cancelAtPeriodEnd ? (
+                  <>
+                    Access ends{" "}
+                    {new Date(state.subscription.currentPeriodEnd).toLocaleDateString()} — no
+                    further charges.
+                  </>
+                ) : (
+                  <>
+                    What&apos;s next:{" "}
+                    {nextCharge
+                      ? `${money(nextCharge.amountCents, nextCharge.currency)} on `
+                      : "Renews "}
+                    {new Date(state.subscription.currentPeriodEnd).toLocaleDateString()}
+                  </>
+                )}
               </p>
             ) : null}
+            <p className="mt-1 text-sm text-muted-foreground">
+              Total paid to date: {money(totalPaidCents, "usd")}
+            </p>
           </div>
           <Button
             variant="outline"
@@ -153,6 +200,46 @@ function BillingPage() {
           </p>
         </div>
       )}
+
+      <section className="surface-card mt-5 p-5">
+        <h2 className="text-xl font-bold uppercase">Payment history</h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Every subscription charge on this account, newest first.
+        </p>
+        {payments.length === 0 ? (
+          <p className="py-6 text-center text-sm text-muted-foreground">
+            No payments yet — your charges will show here once you subscribe.
+          </p>
+        ) : (
+          <ul className="mt-3 divide-y divide-border">
+            {payments.map((payment) => (
+              <li key={payment.id} className="flex items-center justify-between gap-3 py-3">
+                <div>
+                  <p className="font-semibold">
+                    {new Date(payment.createdAt).toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
+                    })}
+                  </p>
+                  <p
+                    className={
+                      payment.status === "paid"
+                        ? "text-xs font-semibold text-success"
+                        : "text-xs font-semibold text-destructive"
+                    }
+                  >
+                    {payment.status === "paid" ? "Paid" : "Failed"}
+                  </p>
+                </div>
+                <p className="text-lg font-bold">
+                  {money(payment.amountCents, payment.currency)}
+                </p>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
     </AppShell>
   );
 }

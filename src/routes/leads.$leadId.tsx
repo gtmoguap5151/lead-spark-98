@@ -15,13 +15,13 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/leads/$leadId")({
   head: () => ({
     meta: [
-      { title: "Lead Detail — Contractor Lead Engine" },
+      { title: "Lead Detail — Rivet Reach" },
       {
         name: "description",
         content:
           "Full lead detail with homeowner contact info, project scope, timeline, notes and status workflow.",
       },
-      { property: "og:title", content: "Lead Detail — Contractor Lead Engine" },
+      { property: "og:title", content: "Lead Detail — Rivet Reach" },
       {
         property: "og:description",
         content: "Work a lead from new to won with notes, appointments and job value.",

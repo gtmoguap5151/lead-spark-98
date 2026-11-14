@@ -124,6 +124,15 @@ export type AdminPayment = {
   createdAt: string;
 };
 
+/** A subscription payment belonging to the signed-in contractor. */
+export type ContractorPayment = {
+  id: string;
+  amountCents: number;
+  currency: string;
+  status: string;
+  createdAt: string;
+};
+
 export type AdminSubscription = {
   userId: string;
   status: string;
@@ -167,6 +176,7 @@ export type AppState = {
   leads: Lead[];
   session: Session;
   subscription: BillingSubscription | null;
+  myPayments: ContractorPayment[];
   adminFinancials: AdminFinancials | null;
   privacyRequests: PrivacyRequest[];
 };

@@ -33,13 +33,13 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/admin")({
   head: () => ({
     meta: [
-      { title: "Owner Revenue Dashboard — Contractor Lead Engine" },
+      { title: "Owner Revenue Dashboard — Rivet Reach" },
       {
         name: "description",
         content:
           "Platform overview: contractors, leads, revenue, assignment and account status controls.",
       },
-      { property: "og:title", content: "Owner Revenue Dashboard — Contractor Lead Engine" },
+      { property: "og:title", content: "Owner Revenue Dashboard — Rivet Reach" },
       {
         property: "og:description",
         content: "Manage contractors, assign leads and track platform metrics.",

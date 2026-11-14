@@ -16,13 +16,13 @@ import { useApp, useContractorLeads } from "@/lib/store";
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
     meta: [
-      { title: "Contractor Dashboard — Contractor Lead Engine" },
+      { title: "Contractor Dashboard — Rivet Reach" },
       {
         name: "description",
         content:
           "Track new leads, qualified leads, booked appointments and closed revenue in one mobile-first contractor dashboard.",
       },
-      { property: "og:title", content: "Contractor Dashboard — Contractor Lead Engine" },
+      { property: "og:title", content: "Contractor Dashboard — Rivet Reach" },
       {
         property: "og:description",
         content: "New leads, qualified leads, appointments and revenue at a glance.",

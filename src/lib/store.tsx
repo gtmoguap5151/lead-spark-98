@@ -18,6 +18,7 @@ import {
   type AppState,
   type AdminFinancials,
   type Contractor,
+  type ContractorPayment,
   type Lead,
   type LeadAttribution,
   type LeadStatus,
@@ -104,6 +105,7 @@ const EMPTY_STATE: AppState = {
   leads: [],
   session: null,
   subscription: null,
+  myPayments: [],
   adminFinancials: null,
   privacyRequests: [],
 };
@@ -142,6 +144,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       leadsResult,
       assignmentsResult,
       subscriptionResult,
+      myPaymentsResult,
     ] = await Promise.all([
       supabase.from("contractors").select("*").order("created_at"),
       supabase.from("contractor_services").select("*"),
@@ -153,6 +156,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         .select("status, price_id, current_period_end, cancel_at_period_end")
         .eq("user_id", user.id)
         .maybeSingle(),
+      // RLS (payments_self) limits this to the signed-in user's own payments.
+      supabase
+        .from("payments")
+        .select("id, amount_cents, currency, status, created_at")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false }),
     ]);
 
     const firstError = [
@@ -162,6 +171,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       leadsResult.error,
       assignmentsResult.error,
       subscriptionResult.error,
+      myPaymentsResult.error,
     ].find(Boolean);
     if (firstError) throw firstError;
 
@@ -278,12 +288,20 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
 
     const ownRow = contractorRows.find((row) => row.user_id === user.id);
+    const myPayments: ContractorPayment[] = (myPaymentsResult.data ?? []).map((row) => ({
+      id: row.id,
+      amountCents: row.amount_cents,
+      currency: row.currency,
+      status: row.status,
+      createdAt: row.created_at,
+    }));
     if (sequence !== loadSequence.current) return role;
     setState({
       contractors,
       leads,
       adminFinancials,
       privacyRequests,
+      myPayments,
       subscription: subscriptionResult.data
         ? {
             status: subscriptionResult.data.status ?? "inactive",

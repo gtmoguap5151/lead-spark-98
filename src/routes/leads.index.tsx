@@ -12,13 +12,13 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/leads/")({
   head: () => ({
     meta: [
-      { title: "Lead Inbox — Contractor Lead Engine" },
+      { title: "Lead Inbox — Rivet Reach" },
       {
         name: "description",
         content:
           "Every qualified lead in your territory with contact details, service type, timeline and pipeline status.",
       },
-      { property: "og:title", content: "Lead Inbox — Contractor Lead Engine" },
+      { property: "og:title", content: "Lead Inbox — Rivet Reach" },
       {
         property: "og:description",
         content: "Filter and work your exclusive home-services leads by status.",
@@ -69,7 +69,7 @@ function LeadsPage() {
                   <Link to="/billing">View Growth & Pro plans</Link>
                 </Button>
                 <span className="text-xs font-semibold text-muted-foreground">
-                  Growth $99/mo · Pro $249/mo
+                  Growth $99/mo · Pro $199/mo
                 </span>
               </div>
             </div>
