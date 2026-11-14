@@ -136,7 +136,14 @@ function LoginPage() {
                   return;
                 }
                 toast.success("Welcome back");
-                navigate({ to: res.role === "admin" ? "/admin" : "/dashboard" });
+                navigate({
+                  to:
+                    res.role === "admin"
+                      ? "/admin"
+                      : res.role === "homeowner"
+                        ? "/my-projects"
+                        : "/dashboard",
+                });
               }}
             />
           </TabsContent>
@@ -166,7 +173,12 @@ function LoginPage() {
           Homeowner instead?{" "}
           <Link to="/estimate" className="font-semibold text-accent-foreground underline">
             Request an Estimate
+          </Link>{" "}
+          or{" "}
+          <Link to="/homeowner-login" className="font-semibold text-accent-foreground underline">
+            track your projects
           </Link>
+          .
         </p>
       </main>
     </div>

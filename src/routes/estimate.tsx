@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import { CheckCircle2, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { SiteFooter, SiteHeader } from "@/components/SiteHeader";
-import { useApp } from "@/lib/store";
+import { useApp, useMyProfile } from "@/lib/store";
 import { SERVICE_TYPES, TIMELINES, type ServiceType, type Timeline } from "@/lib/types";
 
 export const Route = createFileRoute("/estimate")({
@@ -98,9 +98,11 @@ type Errors = Partial<Record<string, string>>;
 
 function EstimatePage() {
   const { service } = Route.useSearch();
-  const { submitLead, busy } = useApp();
+  const { submitLead, busy, state, hydrated } = useApp();
+  const myProfile = useMyProfile();
   const [errors, setErrors] = useState<Errors>({});
   const [submitted, setSubmitted] = useState(false);
+  const prefilled = useRef(false);
   const [form, setForm] = useState({
     name: "",
     phone: "",
@@ -120,6 +122,24 @@ function EstimatePage() {
 
   const set = <K extends keyof typeof form>(key: K, value: (typeof form)[K]) =>
     setForm((f) => ({ ...f, [key]: value }));
+
+  // Signed-in homeowners get their contact details prefilled; the project is
+  // then matched to their account by email and shows up in My Projects.
+  useEffect(() => {
+    if (!hydrated || prefilled.current) return;
+    prefilled.current = true;
+    const session = state.session;
+    if (session?.role !== "homeowner") return;
+    const email = session.email;
+    const name = myProfile?.fullName ?? "";
+    const phone = myProfile?.phone ?? "";
+    setForm((f) => ({
+      ...f,
+      name: f.name || name,
+      email: f.email || email,
+      phone: f.phone || phone,
+    }));
+  }, [hydrated, state.session, myProfile]);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -169,6 +189,17 @@ function EstimatePage() {
           <Button asChild size="lg" className="mt-8 h-14 px-7 text-lg font-bold">
             <Link to="/">Back to Home</Link>
           </Button>
+          {state.session?.role === "homeowner" ? (
+            <Button asChild size="lg" variant="secondary" className="mt-3 h-14 px-7 text-lg font-bold">
+              <Link to="/my-projects">View my projects</Link>
+            </Button>
+          ) : (
+            <Button asChild size="lg" variant="secondary" className="mt-3 h-14 px-7 text-lg font-bold">
+              <Link to="/homeowner-login" search={{ mode: "signup" }}>
+                Create a free account to track this project
+              </Link>
+            </Button>
+          )}
         </main>
         <SiteFooter />
       </div>
@@ -190,6 +221,25 @@ function EstimatePage() {
           you need and your ZIP code. If an eligible contractor serves your area, we may share your
           request with one contractor who can contact you.
         </p>
+
+        {state.session?.role === "homeowner" ? (
+          <p className="mt-4 rounded-xl border border-border bg-muted/45 p-4 text-base text-muted-foreground">
+            Signed in as <strong className="text-foreground">{state.session.email}</strong> —
+            this project will appear in{" "}
+            <Link to="/my-projects" className="font-semibold text-accent-foreground underline">
+              My Projects
+            </Link>
+            .
+          </p>
+        ) : (
+          <p className="mt-4 text-base text-muted-foreground">
+            Have a homeowner account?{" "}
+            <Link to="/homeowner-login" className="font-semibold text-accent-foreground underline">
+              Sign in to track your projects
+            </Link>
+            .
+          </p>
+        )}
 
         <div className="mt-6 rounded-xl border border-border bg-muted/45 p-4 sm:p-5">
           <div className="flex items-start gap-3">

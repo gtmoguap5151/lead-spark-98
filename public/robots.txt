@@ -5,5 +5,8 @@ Disallow: /dashboard
 Disallow: /leads
 Disallow: /profile
 Disallow: /estimate
+Disallow: /my-projects
+Disallow: /homeowner-login
+Disallow: /homeowner-profile
 
 Sitemap: https://rivetreach.com/sitemap.xml

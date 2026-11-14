@@ -181,6 +181,9 @@ export function SiteFooter() {
           <Link to="/login" className="hover:text-primary">
             Contractor Login
           </Link>
+          <Link to="/homeowner-login" className="hover:text-primary">
+            Homeowner Login
+          </Link>
           <Link to="/privacy" className="hover:text-primary">
             Privacy &amp; Data Choices
           </Link>

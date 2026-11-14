@@ -30,8 +30,11 @@ import { Route as FindAnElectricianRouteImport } from './routes/find-an-electric
 import { Route as FindAnHvacContractorRouteImport } from './routes/find-an-hvac-contractor'
 import { Route as FindWindowDoorContractorRouteImport } from './routes/find-window-door-contractor'
 import { Route as FlooringLeadsRouteImport } from './routes/flooring-leads'
+import { Route as HomeownerLoginRouteImport } from './routes/homeowner-login'
+import { Route as HomeownerProfileRouteImport } from './routes/homeowner-profile'
 import { Route as HvacLeadsRouteImport } from './routes/hvac-leads'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as MyProjectsRouteImport } from './routes/my-projects'
 import { Route as PaintingLeadsRouteImport } from './routes/painting-leads'
 import { Route as PlumbingLeadsRouteImport } from './routes/plumbing-leads'
 import { Route as PrivacyRouteImport } from './routes/privacy'
@@ -46,6 +49,7 @@ import { Route as TermsRouteImport } from './routes/terms'
 import { Route as WindowDoorLeadsRouteImport } from './routes/window-door-leads'
 import { Route as LeadsIndexRouteImport } from './routes/leads.index'
 import { Route as LeadsLeadIdRouteImport } from './routes/leads.$leadId'
+import { Route as MyProjectsProjectIdRouteImport } from './routes/my-projects.$projectId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -154,6 +158,16 @@ const FlooringLeadsRoute = FlooringLeadsRouteImport.update({
   path: '/flooring-leads',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HomeownerLoginRoute = HomeownerLoginRouteImport.update({
+  id: '/homeowner-login',
+  path: '/homeowner-login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HomeownerProfileRoute = HomeownerProfileRouteImport.update({
+  id: '/homeowner-profile',
+  path: '/homeowner-profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HvacLeadsRoute = HvacLeadsRouteImport.update({
   id: '/hvac-leads',
   path: '/hvac-leads',
@@ -162,6 +176,11 @@ const HvacLeadsRoute = HvacLeadsRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MyProjectsRoute = MyProjectsRouteImport.update({
+  id: '/my-projects',
+  path: '/my-projects',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PaintingLeadsRoute = PaintingLeadsRouteImport.update({
@@ -234,6 +253,11 @@ const LeadsLeadIdRoute = LeadsLeadIdRouteImport.update({
   path: '/leads/$leadId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MyProjectsProjectIdRoute = MyProjectsProjectIdRouteImport.update({
+  id: '/$projectId',
+  path: '/$projectId',
+  getParentRoute: () => MyProjectsRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -257,8 +281,11 @@ export interface FileRoutesByFullPath {
   '/find-an-hvac-contractor': typeof FindAnHvacContractorRoute
   '/find-window-door-contractor': typeof FindWindowDoorContractorRoute
   '/flooring-leads': typeof FlooringLeadsRoute
+  '/homeowner-login': typeof HomeownerLoginRoute
+  '/homeowner-profile': typeof HomeownerProfileRoute
   '/hvac-leads': typeof HvacLeadsRoute
   '/login': typeof LoginRoute
+  '/my-projects': typeof MyProjectsRouteWithChildren
   '/painting-leads': typeof PaintingLeadsRoute
   '/plumbing-leads': typeof PlumbingLeadsRoute
   '/privacy': typeof PrivacyRoute
@@ -272,6 +299,7 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/window-door-leads': typeof WindowDoorLeadsRoute
   '/leads/$leadId': typeof LeadsLeadIdRoute
+  '/my-projects/$projectId': typeof MyProjectsProjectIdRoute
   '/leads/': typeof LeadsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -296,8 +324,11 @@ export interface FileRoutesByTo {
   '/find-an-hvac-contractor': typeof FindAnHvacContractorRoute
   '/find-window-door-contractor': typeof FindWindowDoorContractorRoute
   '/flooring-leads': typeof FlooringLeadsRoute
+  '/homeowner-login': typeof HomeownerLoginRoute
+  '/homeowner-profile': typeof HomeownerProfileRoute
   '/hvac-leads': typeof HvacLeadsRoute
   '/login': typeof LoginRoute
+  '/my-projects': typeof MyProjectsRouteWithChildren
   '/painting-leads': typeof PaintingLeadsRoute
   '/plumbing-leads': typeof PlumbingLeadsRoute
   '/privacy': typeof PrivacyRoute
@@ -311,6 +342,7 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/window-door-leads': typeof WindowDoorLeadsRoute
   '/leads/$leadId': typeof LeadsLeadIdRoute
+  '/my-projects/$projectId': typeof MyProjectsProjectIdRoute
   '/leads': typeof LeadsIndexRoute
 }
 export interface FileRoutesById {
@@ -336,8 +368,11 @@ export interface FileRoutesById {
   '/find-an-hvac-contractor': typeof FindAnHvacContractorRoute
   '/find-window-door-contractor': typeof FindWindowDoorContractorRoute
   '/flooring-leads': typeof FlooringLeadsRoute
+  '/homeowner-login': typeof HomeownerLoginRoute
+  '/homeowner-profile': typeof HomeownerProfileRoute
   '/hvac-leads': typeof HvacLeadsRoute
   '/login': typeof LoginRoute
+  '/my-projects': typeof MyProjectsRouteWithChildren
   '/painting-leads': typeof PaintingLeadsRoute
   '/plumbing-leads': typeof PlumbingLeadsRoute
   '/privacy': typeof PrivacyRoute
@@ -351,6 +386,7 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/window-door-leads': typeof WindowDoorLeadsRoute
   '/leads/$leadId': typeof LeadsLeadIdRoute
+  '/my-projects/$projectId': typeof MyProjectsProjectIdRoute
   '/leads/': typeof LeadsIndexRoute
 }
 export interface FileRouteTypes {
@@ -377,8 +413,11 @@ export interface FileRouteTypes {
     | '/find-an-hvac-contractor'
     | '/find-window-door-contractor'
     | '/flooring-leads'
+    | '/homeowner-login'
+    | '/homeowner-profile'
     | '/hvac-leads'
     | '/login'
+    | '/my-projects'
     | '/painting-leads'
     | '/plumbing-leads'
     | '/privacy'
@@ -392,6 +431,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/window-door-leads'
     | '/leads/$leadId'
+    | '/my-projects/$projectId'
     | '/leads/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -416,8 +456,11 @@ export interface FileRouteTypes {
     | '/find-an-hvac-contractor'
     | '/find-window-door-contractor'
     | '/flooring-leads'
+    | '/homeowner-login'
+    | '/homeowner-profile'
     | '/hvac-leads'
     | '/login'
+    | '/my-projects'
     | '/painting-leads'
     | '/plumbing-leads'
     | '/privacy'
@@ -431,6 +474,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/window-door-leads'
     | '/leads/$leadId'
+    | '/my-projects/$projectId'
     | '/leads'
   id:
     | '__root__'
@@ -455,8 +499,11 @@ export interface FileRouteTypes {
     | '/find-an-hvac-contractor'
     | '/find-window-door-contractor'
     | '/flooring-leads'
+    | '/homeowner-login'
+    | '/homeowner-profile'
     | '/hvac-leads'
     | '/login'
+    | '/my-projects'
     | '/painting-leads'
     | '/plumbing-leads'
     | '/privacy'
@@ -470,6 +517,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/window-door-leads'
     | '/leads/$leadId'
+    | '/my-projects/$projectId'
     | '/leads/'
   fileRoutesById: FileRoutesById
 }
@@ -495,8 +543,11 @@ export interface RootRouteChildren {
   FindAnHvacContractorRoute: typeof FindAnHvacContractorRoute
   FindWindowDoorContractorRoute: typeof FindWindowDoorContractorRoute
   FlooringLeadsRoute: typeof FlooringLeadsRoute
+  HomeownerLoginRoute: typeof HomeownerLoginRoute
+  HomeownerProfileRoute: typeof HomeownerProfileRoute
   HvacLeadsRoute: typeof HvacLeadsRoute
   LoginRoute: typeof LoginRoute
+  MyProjectsRoute: typeof MyProjectsRouteWithChildren
   PaintingLeadsRoute: typeof PaintingLeadsRoute
   PlumbingLeadsRoute: typeof PlumbingLeadsRoute
   PrivacyRoute: typeof PrivacyRoute
@@ -662,6 +713,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FlooringLeadsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/homeowner-login': {
+      id: '/homeowner-login'
+      path: '/homeowner-login'
+      fullPath: '/homeowner-login'
+      preLoaderRoute: typeof HomeownerLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/homeowner-profile': {
+      id: '/homeowner-profile'
+      path: '/homeowner-profile'
+      fullPath: '/homeowner-profile'
+      preLoaderRoute: typeof HomeownerProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/hvac-leads': {
       id: '/hvac-leads'
       path: '/hvac-leads'
@@ -674,6 +739,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/my-projects': {
+      id: '/my-projects'
+      path: '/my-projects'
+      fullPath: '/my-projects'
+      preLoaderRoute: typeof MyProjectsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/painting-leads': {
@@ -774,8 +846,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LeadsLeadIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/my-projects/$projectId': {
+      id: '/my-projects/$projectId'
+      path: '/$projectId'
+      fullPath: '/my-projects/$projectId'
+      preLoaderRoute: typeof MyProjectsProjectIdRouteImport
+      parentRoute: typeof MyProjectsRoute
+    }
   }
 }
+
+interface MyProjectsRouteChildren {
+  MyProjectsProjectIdRoute: typeof MyProjectsProjectIdRoute
+}
+
+const MyProjectsRouteChildren: MyProjectsRouteChildren = {
+  MyProjectsProjectIdRoute: MyProjectsProjectIdRoute,
+}
+
+const MyProjectsRouteWithChildren = MyProjectsRoute._addFileChildren(
+  MyProjectsRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -799,8 +890,11 @@ const rootRouteChildren: RootRouteChildren = {
   FindAnHvacContractorRoute: FindAnHvacContractorRoute,
   FindWindowDoorContractorRoute: FindWindowDoorContractorRoute,
   FlooringLeadsRoute: FlooringLeadsRoute,
+  HomeownerLoginRoute: HomeownerLoginRoute,
+  HomeownerProfileRoute: HomeownerProfileRoute,
   HvacLeadsRoute: HvacLeadsRoute,
   LoginRoute: LoginRoute,
+  MyProjectsRoute: MyProjectsRouteWithChildren,
   PaintingLeadsRoute: PaintingLeadsRoute,
   PlumbingLeadsRoute: PlumbingLeadsRoute,
   PrivacyRoute: PrivacyRoute,

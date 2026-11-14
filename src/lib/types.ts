@@ -46,6 +46,26 @@ export const STATUS_LABELS: Record<LeadStatus, string> = {
   lost: "Lost",
 };
 
+/** Plain-language project status shown to homeowners (no pipeline jargon). */
+export const HOMEOWNER_STATUS_LABELS: Record<LeadStatus, string> = {
+  new: "In line for matching",
+  contacted: "Contractor in touch",
+  qualified: "Matched — details confirmed",
+  appointment: "Visit scheduled",
+  won: "Job booked",
+  lost: "Closed",
+};
+
+/** Honest one-line explanation of each homeowner status. No timing promises. */
+export const HOMEOWNER_STATUS_HELP: Record<LeadStatus, string> = {
+  new: "Your project is in line. We hand-match every project to one verified local contractor — your request is never sold to a crowd.",
+  contacted: "Your matched contractor has your project details and will contact you.",
+  qualified: "Your matched contractor has confirmed the project details with you.",
+  appointment: "A visit is scheduled with your matched contractor.",
+  won: "This job was booked with your matched contractor.",
+  lost: "This project was closed without a booking.",
+};
+
 export type LeadNote = {
   id: string;
   body: string;
@@ -169,7 +189,20 @@ export type PrivacyRequest = {
   decisionReason: string | null;
 };
 
-export type Session = { role: "contractor"; contractorId: string } | { role: "admin" } | null;
+export type Session =
+  | { role: "contractor"; contractorId: string }
+  | { role: "admin" }
+  | { role: "homeowner"; email: string }
+  | null;
+
+/** The signed-in user's own profile row (any role). */
+export type MyProfile = {
+  id: string;
+  fullName: string | null;
+  phone: string | null;
+  email: string;
+  createdAt: string | null;
+};
 
 export type AppState = {
   contractors: Contractor[];
@@ -179,4 +212,5 @@ export type AppState = {
   myPayments: ContractorPayment[];
   adminFinancials: AdminFinancials | null;
   privacyRequests: PrivacyRequest[];
+  myProfile: MyProfile | null;
 };

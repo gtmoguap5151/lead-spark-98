@@ -22,6 +22,7 @@ import {
   type Lead,
   type LeadAttribution,
   type LeadStatus,
+  type MyProfile,
   type PrivacyRequest,
   type ServiceType,
 } from "./types";
@@ -70,8 +71,20 @@ type SignupInput = Omit<
   complianceAttested: true;
   termsAccepted: true;
 };
+type HomeownerSignupInput = {
+  fullName: string;
+  email: string;
+  phone: string;
+  password: string;
+  termsAccepted: true;
+};
+type HomeownerProjectPatch = Partial<
+  Pick<Lead, "name" | "phone" | "zip" | "projectDetails" | "timeline" | "budget">
+>;
 type ActionResult = { ok: true } | { ok: false; error: string };
-type LoginResult = { ok: true; role: "contractor" | "admin" } | { ok: false; error: string };
+type LoginResult =
+  | { ok: true; role: "contractor" | "admin" | "homeowner" }
+  | { ok: false; error: string };
 type SignupResult = { ok: true; requiresEmailConfirmation: boolean } | { ok: false; error: string };
 
 type Store = {
@@ -80,9 +93,12 @@ type Store = {
   busy: boolean;
   error: string | null;
   signup: (input: SignupInput) => Promise<SignupResult>;
+  signupHomeowner: (input: HomeownerSignupInput) => Promise<SignupResult>;
   login: (email: string, password: string) => Promise<LoginResult>;
   logout: () => Promise<void>;
   submitLead: (input: NewLeadInput) => Promise<ActionResult>;
+  updateMyProject: (id: string, patch: HomeownerProjectPatch) => Promise<ActionResult>;
+  updateMyProfile: (patch: { fullName?: string; phone?: string }) => Promise<ActionResult>;
   submitPrivacyRequest: (input: PrivacyRequestInput) => Promise<ActionResult>;
   updatePrivacyRequestStatus: (
     id: string,
@@ -108,6 +124,7 @@ const EMPTY_STATE: AppState = {
   myPayments: [],
   adminFinancials: null,
   privacyRequests: [],
+  myProfile: null,
 };
 const StoreContext = createContext<Store | null>(null);
 
@@ -131,12 +148,15 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
     const profileResult = await supabase
       .from("profiles")
-      .select("role")
+      .select("role, full_name, phone, created_at")
       .eq("id", user.id)
       .maybeSingle();
     if (profileResult.error) throw profileResult.error;
 
-    const role = profileResult.data?.role === "admin" ? "admin" : "contractor";
+    // Admins are flagged on the profile. Everyone else is a contractor only if
+    // they have a contractor row; a signed-in user without one is a homeowner
+    // (homeowner signups create a profile but no contractor row).
+    const isAdmin = profileResult.data?.role === "admin";
     const [
       contractorsResult,
       servicesResult,
@@ -241,7 +261,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
     let adminFinancials: AdminFinancials | null = null;
     let privacyRequests: PrivacyRequest[] = [];
-    if (role === "admin") {
+    if (isAdmin) {
       const [paymentsResult, subscriptionsResult, privacyRequestsResult] = await Promise.all([
         supabase
           .from("payments")
@@ -288,6 +308,18 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
 
     const ownRow = contractorRows.find((row) => row.user_id === user.id);
+    const role: "admin" | "contractor" | "homeowner" = isAdmin
+      ? "admin"
+      : ownRow
+        ? "contractor"
+        : "homeowner";
+    const myProfile: MyProfile = {
+      id: user.id,
+      fullName: profileResult.data?.full_name ?? null,
+      phone: profileResult.data?.phone ?? null,
+      email: user.email ?? "",
+      createdAt: profileResult.data?.created_at ?? null,
+    };
     const myPayments: ContractorPayment[] = (myPaymentsResult.data ?? []).map((row) => ({
       id: row.id,
       amountCents: row.amount_cents,
@@ -302,6 +334,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       adminFinancials,
       privacyRequests,
       myPayments,
+      myProfile,
       subscription: subscriptionResult.data
         ? {
             status: subscriptionResult.data.status ?? "inactive",
@@ -313,9 +346,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       session:
         role === "admin"
           ? { role: "admin" }
-          : ownRow
+          : role === "contractor" && ownRow
             ? { role: "contractor", contractorId: ownRow.id }
-            : null,
+            : { role: "homeowner", email: user.email ?? "" },
     });
     return role;
   }, []);
@@ -438,6 +471,35 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           setBusy(false);
         }
       },
+      signupHomeowner: async (input) => {
+        if (!isSupabaseConfigured) return { ok: false, error: "Supabase is not configured." };
+        setBusy(true);
+        setError(null);
+        try {
+          // No company_name in the metadata: the signup trigger creates only a
+          // profile row (role 'homeowner'), never a contractor row.
+          const { data, error: signupError } = await supabase.auth.signUp({
+            email: input.email.trim(),
+            password: input.password,
+            options: {
+              data: {
+                full_name: input.fullName,
+                account_type: "homeowner",
+                phone: input.phone || null,
+              },
+            },
+          });
+          if (signupError) throw signupError;
+          if (data.session && data.user) await loadData(data.user);
+          return { ok: true, requiresEmailConfirmation: !data.session };
+        } catch (signupError) {
+          const detail = errorMessage(signupError);
+          setError(detail);
+          return { ok: false, error: detail };
+        } finally {
+          setBusy(false);
+        }
+      },
       login: async (email, password) => {
         if (!isSupabaseConfigured) return { ok: false, error: "Supabase is not configured." };
         setBusy(true);
@@ -460,7 +522,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
               role = await loadData(data.user);
             }
           }
-          return { ok: true, role: role as "admin" | "contractor" };
+          return { ok: true, role };
         } catch (loginError) {
           const detail = errorMessage(loginError);
           setError(detail);
@@ -484,6 +546,48 @@ export function StoreProvider({ children }: { children: ReactNode }) {
               data?.error ?? "Your request could not be submitted. Please try again.",
             );
           }
+        }),
+      updateMyProject: (id, patch) =>
+        run(async () => {
+          const session = state.session;
+          if (session?.role !== "homeowner") {
+            throw new Error("Sign in to your homeowner account to update a project.");
+          }
+          // Row-level security (leads_homeowner_update_own) limits this to the
+          // homeowner's own projects, matched by email; the database trigger
+          // blocks changes to protected fields (status, money, consent).
+          const update = {
+            updated_at: new Date().toISOString(),
+            ...(patch.name !== undefined ? { name: patch.name } : {}),
+            ...(patch.phone !== undefined ? { phone: patch.phone } : {}),
+            ...(patch.zip !== undefined ? { zip: patch.zip } : {}),
+            ...(patch.projectDetails !== undefined
+              ? { project_details: patch.projectDetails }
+              : {}),
+            ...(patch.timeline !== undefined ? { timeline: patch.timeline } : {}),
+            ...(patch.budget !== undefined
+              ? { budget: patch.budget === "" ? null : patch.budget }
+              : {}),
+          };
+          const { error: updateError } = await supabase
+            .from("leads")
+            .update(update)
+            .eq("id", id);
+          if (updateError) throw updateError;
+          await refresh();
+        }),
+      updateMyProfile: (patch) =>
+        run(async () => {
+          if (!state.myProfile) throw new Error("Sign in to update your account.");
+          const { error: updateError } = await supabase
+            .from("profiles")
+            .update({
+              ...(patch.fullName !== undefined ? { full_name: patch.fullName } : {}),
+              ...(patch.phone !== undefined ? { phone: patch.phone } : {}),
+            })
+            .eq("id", state.myProfile.id);
+          if (updateError) throw updateError;
+          await refresh();
         }),
       submitPrivacyRequest: (input) =>
         run(async () => {
@@ -597,4 +701,19 @@ export function useContractorLeads(): Lead[] {
   return state.leads
     .filter((lead) => lead.contractorId === contractor.id)
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+}
+
+export function useHomeownerLeads(): Lead[] {
+  const { state } = useApp();
+  const session = state.session;
+  if (session?.role !== "homeowner") return [];
+  const email = session.email.toLowerCase();
+  return state.leads
+    .filter((lead) => lead.email.toLowerCase() === email)
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+}
+
+export function useMyProfile(): MyProfile | null {
+  const { state } = useApp();
+  return state.myProfile;
 }

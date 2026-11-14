@@ -1,6 +1,7 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 import {
+  ClipboardList,
   CreditCard,
   HardHat,
   Inbox,
@@ -11,7 +12,7 @@ import {
   UserRound,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useApp, useCurrentContractor } from "@/lib/store";
+import { useApp, useCurrentContractor, useMyProfile } from "@/lib/store";
 import { cn } from "@/lib/utils";
 
 const NAV = [
@@ -19,6 +20,11 @@ const NAV = [
   { to: "/leads", label: "Leads", icon: Inbox },
   { to: "/profile", label: "Profile", icon: UserRound },
   { to: "/billing", label: "Billing", icon: CreditCard },
+] as const;
+
+const HOMEOWNER_NAV = [
+  { to: "/my-projects", label: "My Projects", icon: ClipboardList },
+  { to: "/homeowner-profile", label: "Profile", icon: UserRound },
 ] as const;
 
 export function AppShell({
@@ -31,19 +37,21 @@ export function AppShell({
   title: string;
   subtitle?: string;
   children: ReactNode;
-  requireRole?: "contractor" | "admin";
+  requireRole?: "contractor" | "admin" | "homeowner";
   actions?: ReactNode;
 }) {
   const { state, hydrated, logout } = useApp();
   const contractor = useCurrentContractor();
+  const myProfile = useMyProfile();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   const allowed = hydrated && state.session?.role === requireRole;
+  const loginPath = requireRole === "homeowner" ? "/homeowner-login" : "/login";
 
   useEffect(() => {
-    if (hydrated && !allowed) navigate({ to: "/login" });
-  }, [hydrated, allowed, navigate]);
+    if (hydrated && !allowed) navigate({ to: loginPath });
+  }, [hydrated, allowed, navigate, loginPath]);
 
   if (!allowed) {
     return (
@@ -69,6 +77,19 @@ export function AppShell({
           <nav className="hidden items-center gap-1 md:flex">
             {requireRole === "contractor" ? (
               NAV.map((item) => (
+                <Link
+                  key={item.to}
+                  to={item.to}
+                  className={cn(
+                    "rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
+                    pathname.startsWith(item.to) && "bg-muted text-foreground",
+                  )}
+                >
+                  {item.label}
+                </Link>
+              ))
+            ) : requireRole === "homeowner" ? (
+              HOMEOWNER_NAV.map((item) => (
                 <Link
                   key={item.to}
                   to={item.to}
@@ -114,6 +135,11 @@ export function AppShell({
                 </span>
                 {contractor.city}
               </span>
+            ) : requireRole === "homeowner" && myProfile?.fullName ? (
+              <span className="hidden text-right text-xs leading-tight text-muted-foreground sm:block">
+                <span className="block font-semibold text-foreground">{myProfile.fullName}</span>
+                Homeowner
+              </span>
             ) : null}
             <Button
               variant="ghost"
@@ -140,10 +166,10 @@ export function AppShell({
         {children}
       </main>
 
-      {requireRole === "contractor" ? (
+      {requireRole === "contractor" || requireRole === "homeowner" ? (
         <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card/95 backdrop-blur md:hidden">
           <div className="flex">
-            {NAV.map((item) => {
+            {(requireRole === "homeowner" ? HOMEOWNER_NAV : NAV).map((item) => {
               const active = pathname.startsWith(item.to);
               return (
                 <Link
