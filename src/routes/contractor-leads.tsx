@@ -44,7 +44,7 @@ function ContractorLeadsPage() {
               Your first matched lead is on us.
             </h1>
             <p className="mt-6 max-w-3xl text-lg leading-relaxed text-steel-foreground/85 sm:text-xl">
-              Create your contractor account and set your trade and service area. When a genuine homeowner request matches your coverage, your first eligible lead is free. No card required for that first lead.
+              To get matched with homeowner projects, create your contractor account and set your trade and service area. When a genuine homeowner request matches your coverage, your first eligible lead is free. No card required for that first lead.
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Button asChild size="lg" className="h-14 px-7 text-lg font-bold">
