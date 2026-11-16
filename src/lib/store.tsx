@@ -438,6 +438,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
             email: input.email.trim(),
             password: input.password,
             options: {
+              // Send contractor confirmation links straight to the contractor dashboard.
+              // Homeowner signup intentionally keeps its own existing redirect behavior.
+              emailRedirectTo: `${window.location.origin}/dashboard`,
               data: {
                 full_name: input.contactName,
                 company_name: input.companyName,
