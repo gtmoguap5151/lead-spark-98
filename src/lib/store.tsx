@@ -353,6 +353,21 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     return role;
   }, []);
 
+  const loadAuthenticatedUser = useCallback(async (user: User) => {
+    const role = await loadData(user);
+    if (role !== "contractor") return;
+
+    const { data, error: territoryError } = await supabase.functions.invoke(
+      "contractor-territory",
+      { body: { action: "sync" } },
+    );
+    if (territoryError) {
+      console.warn("Territory sync after authentication failed", territoryError);
+      return;
+    }
+    if (data?.synced) await loadData(user);
+  }, [loadData]);
+
   const refresh = useCallback(async () => {
     if (!isSupabaseConfigured) {
       setError("Supabase is not configured for this deployment.");
@@ -360,8 +375,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
     const { data, error: userError } = await supabase.auth.getUser();
     if (userError) throw userError;
-    if (data.user) await loadData(data.user);
-  }, [loadData]);
+    if (data.user) await loadAuthenticatedUser(data.user);
+  }, [loadAuthenticatedUser]);
 
   useEffect(() => {
     let active = true;
@@ -375,7 +390,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       try {
         const { data, error: userError } = await supabase.auth.getUser();
         if (userError && userError.name !== "AuthSessionMissingError") throw userError;
-        if (data.user) await loadData(data.user);
+        if (data.user) await loadAuthenticatedUser(data.user);
       } catch (loadError) {
         if (active) setError(errorMessage(loadError));
       } finally {
@@ -395,7 +410,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         return;
       }
       window.setTimeout(() => {
-        void loadData(session.user)
+        void loadAuthenticatedUser(session.user)
           .catch((loadError) => setError(errorMessage(loadError)))
           .finally(() => setBusy(false));
       }, 0);
@@ -405,7 +420,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       active = false;
       listener.subscription.unsubscribe();
     };
-  }, [loadData]);
+  }, [loadAuthenticatedUser]);
 
   const run = useCallback(async (operation: () => Promise<void>): Promise<ActionResult> => {
     if (!isSupabaseConfigured) return { ok: false, error: "Supabase is not configured." };
@@ -438,6 +453,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
             email: input.email.trim(),
             password: input.password,
             options: {
+              // Send contractor confirmation links straight to the contractor dashboard.
+              // Homeowner signup intentionally keeps its own existing redirect behavior.
+              emailRedirectTo: `${window.location.origin}/dashboard`,
               data: {
                 full_name: input.contactName,
                 company_name: input.companyName,

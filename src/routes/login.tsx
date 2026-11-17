@@ -91,8 +91,8 @@ function LoginPage() {
           </span>
           <h1 className="mt-4 text-3xl font-bold uppercase">Check your email</h1>
           <p className="mt-2 text-muted-foreground">
-            We created your account and territory. Open the confirmation link sent to{" "}
-            <strong>{confirmationEmail}</strong>, then return here to sign in.
+            We created your contractor account and territory. Open the confirmation link sent to{" "}
+            <strong>{confirmationEmail}</strong>. The link should bring you directly to your contractor dashboard. If it asks you to sign in, use this contractor login page.
           </p>
           <Button className="mt-8" onClick={() => setConfirmationEmail(null)}>
             Return to login
