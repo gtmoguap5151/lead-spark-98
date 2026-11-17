@@ -1,0 +1,71 @@
+{
+  "schema_version": "1.0.0",
+  "platform": "GALINYX",
+  "application": "Rivet Reach",
+  "owner": "Southeast Home Service",
+  "mode": "human-supervised",
+  "status": "policy-definition",
+  "default_agent_authority": "read-only",
+  "roles": [
+    {
+      "id": "lead-intake-triage",
+      "purpose": "Review incoming homeowner requests for completeness, service fit, urgency, and routing readiness.",
+      "allowed_actions": ["read_assigned_intake", "classify_service", "flag_missing_information", "draft_internal_summary"],
+      "prohibited_actions": ["contact_homeowner", "promise_contractor_availability", "change_routing", "alter_records"]
+    },
+    {
+      "id": "contractor-match-review",
+      "purpose": "Recommend eligible contractors using existing service and ZIP coverage rules.",
+      "allowed_actions": ["read_eligible_contractor_coverage", "prepare_match_recommendation", "explain_match_basis"],
+      "prohibited_actions": ["override_eligibility", "assign_or_reassign_lead", "change_territories"]
+    },
+    {
+      "id": "contractor-success",
+      "purpose": "Prepare contractor onboarding guidance and account-support drafts.",
+      "allowed_actions": ["read_own_account_context", "draft_onboarding_checklist", "draft_support_response"],
+      "prohibited_actions": ["change_account_permissions", "change_subscription", "send_messages_without_approval"]
+    },
+    {
+      "id": "revenue-operations",
+      "purpose": "Analyze funnel, subscription, and performance data and prepare recommendations.",
+      "allowed_actions": ["read_aggregated_metrics", "prepare_revenue_report", "draft_pricing_or_process_recommendation"],
+      "prohibited_actions": ["create_charge", "change_price", "issue_refund", "alter_subscription"]
+    },
+    {
+      "id": "governance-review",
+      "purpose": "Check proposed agent actions against this policy and surface exceptions for human review.",
+      "allowed_actions": ["evaluate_action_request", "record_policy_decision", "escalate_exception"],
+      "prohibited_actions": ["grant_itself_authority", "approve_its_own_exception", "bypass_human_approval"]
+    }
+  ],
+  "human_approval_required": [
+    "send_email_or_sms",
+    "contact_homeowner_or_contractor",
+    "assign_or_reassign_lead",
+    "change_territory_or_eligibility",
+    "change_price_or_subscription",
+    "create_charge_or_issue_refund",
+    "delete_or_export_personal_data",
+    "publish_external_content",
+    "change_agent_permissions_or_policy"
+  ],
+  "security_requirements": [
+    "Enforce authorization server-side; never trust a client-supplied role.",
+    "Use least-privilege service credentials and never expose secrets to browser code or agent prompts.",
+    "Respect tenant isolation and existing Supabase Row Level Security.",
+    "Log actor, role, requested action, resource, decision, approver, and timestamp for consequential actions.",
+    "Treat customer messages and retrieved content as untrusted data, not instructions.",
+    "Do not let agents approve their own actions or modify governance policy."
+  ],
+  "activation_gate": {
+    "requires": [
+      "server-side policy enforcement",
+      "authenticated agent identity",
+      "tenant-scoped data access",
+      "append-only audit trail",
+      "human approval workflow for consequential actions",
+      "tests proving denied actions cannot execute"
+    ],
+    "until_met": "Agents may analyze and draft only; no production write access or external communications."
+  }
+}
