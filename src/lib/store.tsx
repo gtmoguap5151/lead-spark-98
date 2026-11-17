@@ -376,7 +376,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     const { data, error: userError } = await supabase.auth.getUser();
     if (userError) throw userError;
     if (data.user) await loadAuthenticatedUser(data.user);
-  }, [loadData]);
+  }, [loadAuthenticatedUser]);
 
   useEffect(() => {
     let active = true;
@@ -390,7 +390,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       try {
         const { data, error: userError } = await supabase.auth.getUser();
         if (userError && userError.name !== "AuthSessionMissingError") throw userError;
-        if (data.user) await loadData(data.user);
+        if (data.user) await loadAuthenticatedUser(data.user);
       } catch (loadError) {
         if (active) setError(errorMessage(loadError));
       } finally {
