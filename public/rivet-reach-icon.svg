@@ -1,34 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Rivet Reach logo">
-  <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#061412"/>
-      <stop offset="1" stop-color="#03231c"/>
-    </linearGradient>
-    <linearGradient id="emerald" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#16f2a3"/>
-      <stop offset="0.55" stop-color="#00b96e"/>
-      <stop offset="1" stop-color="#047857"/>
-    </linearGradient>
-    <linearGradient id="road" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0" stop-color="#b7ffdd"/>
-      <stop offset="0.45" stop-color="#ffffff"/>
-      <stop offset="1" stop-color="#98a2a8"/>
-    </linearGradient>
-    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
-      <feGaussianBlur stdDeviation="8" result="b"/>
-      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-    </filter>
-  </defs>
-  <rect width="512" height="512" rx="108" fill="url(#bg)"/>
-  <g filter="url(#glow)">
-    <path d="M116 92h182c89 0 142 43 142 112 0 50-29 86-81 104l-53 18 107 101H304L204 330v97H116V92zm88 74v104h80c43 0 68-17 68-52 0-34-25-52-68-52h-80z" fill="url(#emerald)"/>
-    <path d="M104 339c86-83 184-120 304-125-83 27-154 75-221 161z" fill="#88c83e" opacity="0.82"/>
-    <path d="M151 362c73-73 155-113 249-135-68 38-129 88-184 158z" fill="#00b96e"/>
-    <path d="M206 381c55-63 117-106 190-135-48 43-93 92-132 147z" fill="url(#road)"/>
-    <path d="M136 361l58-56 58 56v67h-45v-44h-27v44h-44v-67z" fill="#7df7c3"/>
-    <rect x="183" y="351" width="16" height="16" fill="#06211b"/>
-    <rect x="203" y="351" width="16" height="16" fill="#06211b"/>
-    <rect x="183" y="371" width="16" height="16" fill="#06211b"/>
-    <rect x="203" y="371" width="16" height="16" fill="#06211b"/>
-  </g>
+  <rect width="512" height="512" rx="115" fill="#0b3d2e"/>
+  <polygon points="256,65 85,240 85,300 256,125" fill="#f2ede3"/>
+  <polygon points="256,65 427,240 427,300 256,125" fill="#f2ede3"/>
+  <rect x="115" y="235" width="65" height="205" fill="#f2ede3"/>
+  <polygon points="180,280 250,280 430,440 360,440" fill="#d8b666"/>
+  <circle cx="230" cy="205" r="45" fill="#f2ede3"/>
+  <circle cx="230" cy="205" r="38" fill="#0e6b4f"/>
+  <circle cx="230" cy="205" r="26" fill="#0b3d2e"/>
 </svg>

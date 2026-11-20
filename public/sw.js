@@ -1,4 +1,4 @@
-const CACHE_NAME = "rivet-reach-shell-v1";
+const CACHE_NAME = "rivet-reach-shell-v2";
 const APP_SHELL = ["/", "/site.webmanifest", "/favicon.ico"];
 
 self.addEventListener("install", (event) => {
